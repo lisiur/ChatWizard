@@ -26,11 +26,11 @@ jobs:
         id: release-note
         run: |
           release_note=$(cat ${{ github.workspace }}/RELEASE_NOTE.md)
+          echo "RELEASE_NOTE=$release_note" >> $GITHUB_ENV
           release_note="${release_note//'%'/'%25'}"
           release_note="${release_note//$'\n'/'%0A'}"
           release_note="${release_note//$'\r'/'%0D'}"
           echo "release_note=$release_note" >> $GITHUB_OUTPUT
-          echo "RELEASE_NOTE=$release_note" >> $GITHUB_ENV
       - name: create release
         id: create-release
         uses: actions/github-script@v6
