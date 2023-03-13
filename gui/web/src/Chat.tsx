@@ -1,4 +1,4 @@
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import mdRender from "./utils/mdRender";
 import assistantAvatar from "./assets/assistant_avatar.png";
 import userAvatar from "./assets/user_avatar.png";
@@ -13,15 +13,20 @@ import {
   useTopic,
 } from "./hooks/message";
 import { useConfig } from "./hooks/config";
-import { NButton, NScrollbar, NTooltip } from "naive-ui";
+import { NButton, NIcon, NScrollbar, NSpace, NTooltip } from "naive-ui";
 import { writeToClipboard } from "./utils/clipboard";
 import { useComposition } from "./hooks/composition";
+import { useVersion } from "./hooks/version";
+import { AngleDoubleUp } from "@vicons/fa";
+import { dialog, message } from "./utils/prompt";
 
 export default defineComponent({
   setup() {
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
 
+    const { version, hasNewVersion, installNewVersion, newVersion, relaunch } =
+      useVersion();
     const { checkApiKey: check_api_key, setProxy, setApiKey } = useConfig();
 
     check_api_key();
@@ -37,8 +42,59 @@ export default defineComponent({
 
     function newTopicHandler() {
       reset();
-      console.log(inputRef.value);
       inputRef.value?.focus();
+    }
+
+    function showUpdateHandler() {
+      const releaseContent = (newVersion.value?.body ?? "").replaceAll(
+        /%0A/g,
+        "\n"
+      );
+      const renderContent = mdRender(releaseContent);
+      const loading = ref(false);
+      const dl = dialog.create({
+        showIcon: false,
+        title: "New version is available!",
+        content: () => {
+          return <div class="markdown-root" v-html={renderContent}></div>;
+        },
+        action: () => {
+          const positiveText = ref("Upgrade");
+          return (
+            <NSpace>
+              <NButton onClick={() => dl.destroy()}>Cancel</NButton>
+              <NButton
+                type="primary"
+                loading={loading.value}
+                onClick={() => {
+                  positiveText.value = "Downloading...";
+                  loading.value = true;
+                  installNewVersion()
+                    .then(() => {
+                      dl.destroy();
+                      dialog.success({
+                        title: "Download Success",
+                        content: "Please restart the app to apply the update.",
+                        positiveText: "Restart",
+                        negativeText: "Later",
+                        onPositiveClick: relaunch,
+                      });
+                    })
+                    .catch((err) => {
+                      message.error(err);
+                    })
+                    .finally(() => {
+                      positiveText.value = "Upgrade";
+                      loading.value = false;
+                    });
+                }}
+              >
+                {positiveText.value}
+              </NButton>
+            </NSpace>
+          );
+        },
+      });
     }
 
     return () => (
@@ -58,22 +114,34 @@ export default defineComponent({
           </NScrollbar>
         </div>
         <div class="border-t border-gray-700">
-          <div class="flex justify-end p-1">
-            {renderButton({
-              handler: setApiKey,
-              icon: keyIcon,
-              tooltip: "Set Api Key",
-            })}
-            {renderButton({
-              handler: setProxy,
-              icon: networkIcon,
-              tooltip: "Set proxy",
-            })}
-            {renderButton({
-              handler: newTopicHandler,
-              icon: newIcon,
-              tooltip: "New Topic",
-            })}
+          <div class="flex items-center">
+            <div class="text-gray-600 p-2">
+              <span> v{version.value} </span>
+              {hasNewVersion.value ? (
+                <span onClick={showUpdateHandler} class="cursor-pointer">
+                  <NIcon>
+                    <AngleDoubleUp />
+                  </NIcon>
+                </span>
+              ) : null}
+            </div>
+            <div class="flex-1 flex justify-end p-1">
+              {renderButton({
+                handler: setApiKey,
+                icon: keyIcon,
+                tooltip: "Set Api Key",
+              })}
+              {renderButton({
+                handler: setProxy,
+                icon: networkIcon,
+                tooltip: "Set proxy",
+              })}
+              {renderButton({
+                handler: newTopicHandler,
+                icon: newIcon,
+                tooltip: "New Topic",
+              })}
+            </div>
           </div>
           <textarea
             ref={inputRef}
