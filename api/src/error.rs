@@ -7,6 +7,9 @@ pub enum Error {
     #[error("api error: {}", .0.message)]
     Api(ApiError),
 
+    #[error("Invalid API key")]
+    InvalidApiKey,
+
     #[error("not found: {}", .0)]
     NotFound(String),
 }
@@ -26,6 +29,7 @@ pub struct ApiErrorResponse {
 pub struct ApiError {
     pub message: String,
     pub r#type: String,
+    pub code: Option<String>,
 }
 
 impl From<reqwest::Error> for Error {
@@ -46,6 +50,9 @@ impl From<reqwest::Error> for Error {
 
 impl From<ApiErrorResponse> for Error {
     fn from(err: ApiErrorResponse) -> Self {
-        Error::Api(err.error)
+        match err.error.code.as_deref() {
+            Some("invalid_api_key") => Error::InvalidApiKey,
+            _ => Error::Api(err.error),
+        }
     }
 }

@@ -19,8 +19,12 @@ async function prompt(
   config?: {
     defaultValue?: string;
     showCancel?: boolean;
+    okHandler?: (
+      value: string
+    ) => void | undefined | boolean | Promise<void | undefined | boolean>;
   }
 ): Promise<string> {
+  const loading = ref(false);
   const showCancel = config?.showCancel ?? true;
   return new Promise((resolve, reject) => {
     const value = ref(config?.defaultValue || "");
@@ -37,7 +41,7 @@ async function prompt(
           {showCancel ? (
             <NButton onClick={cancelHandler}>Cancel</NButton>
           ) : null}
-          <NButton type="primary" onClick={okHandler}>
+          <NButton type="primary" onClick={okHandler} loading={loading.value}>
             Ok
           </NButton>
         </NSpace>
@@ -48,8 +52,25 @@ async function prompt(
       reject();
     }
     function okHandler() {
-      destroy();
-      resolve(value.value);
+      const result = config?.okHandler?.(value.value);
+      if (result instanceof Promise) {
+        loading.value = true;
+        result
+          .then((close) => {
+            if (close !== false) {
+              destroy();
+              resolve(value.value);
+            }
+          })
+          .finally(() => {
+            loading.value = false;
+          });
+      } else {
+        if (result !== false) {
+          destroy();
+          resolve(value.value);
+        }
+      }
     }
   });
 }

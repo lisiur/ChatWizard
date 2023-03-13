@@ -1,46 +1,60 @@
 import { invoke } from "@tauri-apps/api";
 import { ref } from "vue";
-import { prompt } from "../utils/prompt"
+import { prompt, message } from "../utils/prompt";
 
-async function has_api_key(): Promise<boolean> {
-    return invoke('has_api_key')
+async function _hasApiKey(): Promise<boolean> {
+  return invoke("has_api_key");
 }
 
-async function set_api_key(apiKey: string): Promise<void> {
-    return invoke('set_api_key', { apiKey })
+async function _setApiKey(apiKey: string): Promise<string> {
+  return invoke<any>("set_api_key", { apiKey })
+    .then(() => "")
+    .catch((err) => {
+      return err;
+    });
 }
 
 export function useConfig() {
-    const _has_api_key = ref(false)
+  const _has_api_key = ref(false);
 
-    async function check_api_key() {
-        if (_has_api_key.value) {
-            return
+  async function checkApiKey() {
+    if (_has_api_key.value) {
+      return;
+    }
+    _has_api_key.value = await _hasApiKey();
+
+    if (!_has_api_key.value) {
+      await setApiKey();
+    }
+  }
+
+  async function setApiKey() {
+    await prompt("Please input api key:", {
+      async okHandler(apiKey) {
+        if (apiKey === "") {
+          message.error("api key can not be empty");
+          return false;
         }
-        _has_api_key.value = await has_api_key()
-
-        if (!_has_api_key.value) {
-            let api_key = null as string | null
-            while (!api_key) {
-                api_key = await prompt('Please input api key:', {
-                    showCancel: false
-                });
-            }
-            await set_api_key(api_key)
+        const errMsg = await _setApiKey(apiKey);
+        if (errMsg) {
+          message.error(errMsg);
+          return false;
         }
-    }
+      },
+    });
+  }
 
-    async function set_proxy() {
-        let currentProxy = (await invoke('get_proxy')) as string ?? ""
-        const proxy = await prompt('Please input proxy:', {
-            defaultValue: currentProxy,
-        });
-        await invoke('set_proxy', { proxy })
-    }
+  async function setProxy() {
+    let currentProxy = ((await invoke("get_proxy")) as string) ?? "";
+    const proxy = await prompt("Please input proxy:", {
+      defaultValue: currentProxy,
+    });
+    await invoke("set_proxy", { proxy });
+  }
 
-    return {
-        check_api_key,
-        set_proxy,
-    }
-
+  return {
+    checkApiKey,
+    setProxy,
+    setApiKey,
+  };
 }

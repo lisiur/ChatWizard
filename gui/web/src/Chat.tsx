@@ -1,9 +1,10 @@
-import { defineComponent, isRef, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import mdRender from "./utils/mdRender";
 import assistantAvatar from "./assets/assistant_avatar.png";
 import userAvatar from "./assets/user_avatar.png";
 import newIcon from "./assets/new.svg";
 import networkIcon from "./assets/networks.svg";
+import keyIcon from "./assets/key.svg";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -21,7 +22,7 @@ export default defineComponent({
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
 
-    const { check_api_key, set_proxy } = useConfig();
+    const { checkApiKey: check_api_key, setProxy, setApiKey } = useConfig();
 
     check_api_key();
 
@@ -58,32 +59,21 @@ export default defineComponent({
         </div>
         <div class="border-t border-gray-700">
           <div class="flex justify-end p-1">
-            <NTooltip trigger="hover" delay={500}>
-              {{
-                trigger: () => (
-                  <button
-                    class="bg-transparent rounded px-2 py-1"
-                    onClick={() => set_proxy()}
-                  >
-                    <img src={networkIcon} class="w-6 fill-blue-400"></img>
-                  </button>
-                ),
-                default: () => "Set proxy",
-              }}
-            </NTooltip>
-            <NTooltip trigger="hover" delay={500}>
-              {{
-                trigger: () => (
-                  <button
-                    class="bg-transparent rounded px-2 py-1"
-                    onClick={newTopicHandler}
-                  >
-                    <img src={newIcon} class="w-6"></img>
-                  </button>
-                ),
-                default: () => "New topic",
-              }}
-            </NTooltip>
+            {renderButton({
+              handler: setApiKey,
+              icon: keyIcon,
+              tooltip: "Set Api Key",
+            })}
+            {renderButton({
+              handler: setProxy,
+              icon: networkIcon,
+              tooltip: "Set proxy",
+            })}
+            {renderButton({
+              handler: newTopicHandler,
+              icon: newIcon,
+              tooltip: "New Topic",
+            })}
           </div>
           <textarea
             ref={inputRef}
@@ -98,6 +88,28 @@ export default defineComponent({
     );
   },
 });
+
+function renderButton(props: {
+  icon: string;
+  tooltip: string;
+  handler: () => void;
+}) {
+  return (
+    <NTooltip trigger="hover" delay={500}>
+      {{
+        trigger: () => (
+          <button
+            class="bg-transparent rounded px-2 py-1"
+            onClick={props.handler}
+          >
+            <img src={props.icon} class="w-6"></img>
+          </button>
+        ),
+        default: () => props.tooltip,
+      }}
+    </NTooltip>
+  );
+}
 
 function renderAvatar(avatar: string) {
   return <img src={avatar} class="w-8 h-8 "></img>;

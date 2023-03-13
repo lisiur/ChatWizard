@@ -54,6 +54,16 @@ impl Client {
         *self.client.lock().await = client;
     }
 
+    pub async fn get(
+        &self,
+        url: &str,
+        _params: Option<serde_json::Value>,
+    ) -> Result<reqwest::Response> {
+        let request = self.client.lock().await.get(url);
+
+        request.send().await.map_err(Into::into)
+    }
+
     pub async fn post(&self, url: &str, data: serde_json::Value) -> Result<reqwest::Response> {
         let request = self.client.lock().await.post(url).json(&data);
 

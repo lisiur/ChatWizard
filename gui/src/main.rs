@@ -22,6 +22,7 @@ async fn main() {
             commands::resend_message,
             commands::reset_topic,
             commands::set_api_key,
+            commands::check_api_key,
             commands::set_proxy,
             commands::get_proxy,
             commands::has_api_key,

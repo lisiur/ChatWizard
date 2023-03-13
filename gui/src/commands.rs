@@ -1,4 +1,4 @@
-use askai_api::StreamContent;
+use askai_api::{OpenAIApi, StreamContent};
 use futures::StreamExt;
 use tauri::{Manager, State, Window};
 use uuid::Uuid;
@@ -72,6 +72,15 @@ pub async fn set_api_key(api_key: String, state: State<'_, AppState>) -> Result<
     let mut setting = state.setting.lock().await;
     setting.set_api_key(&api_key).unwrap();
     *state.topic.lock().await = create_topic(&setting).await;
+
+    OpenAIApi::check_api_key(&api_key).await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn check_api_key(api_key: String) -> Result<()> {
+    OpenAIApi::check_api_key(&api_key).await?;
     Ok(())
 }
 
