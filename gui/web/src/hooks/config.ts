@@ -1,13 +1,17 @@
 import { invoke } from "@tauri-apps/api";
 import { ref } from "vue";
-import { prompt } from "../utils/prompt";
+import { prompt, message } from "../utils/prompt";
 
-async function has_api_key(): Promise<boolean> {
+async function _hasApiKey(): Promise<boolean> {
   return invoke("has_api_key");
 }
 
-async function set_api_key(apiKey: string): Promise<void> {
-  return invoke("set_api_key", { apiKey });
+async function _setApiKey(apiKey: string): Promise<string> {
+  return invoke<any>("set_api_key", { apiKey })
+    .then(() => "")
+    .catch((err) => {
+      return err;
+    });
 }
 
 export function useConfig() {
@@ -17,25 +21,27 @@ export function useConfig() {
     if (_has_api_key.value) {
       return;
     }
-    _has_api_key.value = await has_api_key();
+    _has_api_key.value = await _hasApiKey();
 
     if (!_has_api_key.value) {
-      let api_key = null as string | null;
-      while (!api_key) {
-        api_key = await prompt("Please input api key:", {
-          showCancel: false,
-        });
-      }
-      await set_api_key(api_key);
+      await setApiKey();
     }
   }
 
   async function setApiKey() {
-    let api_key = null as string | null;
-    while (!api_key) {
-      api_key = await prompt("Please input api key:");
-    }
-    await set_api_key(api_key);
+    await prompt("Please input api key:", {
+      async okHandler(apiKey) {
+        if (apiKey === "") {
+          message.error("api key can not be empty");
+          return false;
+        }
+        const errMsg = await _setApiKey(apiKey);
+        if (errMsg) {
+          message.error(errMsg);
+          return false;
+        }
+      },
+    });
   }
 
   async function setProxy() {
