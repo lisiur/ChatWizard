@@ -1,3 +1,5 @@
+use askai_api::StreamContent;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
@@ -5,6 +7,9 @@ pub enum Error {
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Send(#[from] tokio::sync::mpsc::error::SendError<StreamContent>),
 }
 
 impl serde::Serialize for Error {

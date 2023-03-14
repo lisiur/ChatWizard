@@ -8,7 +8,6 @@ mod error;
 mod result;
 mod setting;
 mod state;
-mod utils;
 
 use state::AppState;
 
@@ -18,9 +17,10 @@ async fn main() {
     tauri::Builder::default()
         .manage(AppState::init().await.unwrap())
         .invoke_handler(tauri::generate_handler![
+            commands::new_chat,
             commands::send_message,
             commands::resend_message,
-            commands::reset_topic,
+            commands::reset_chat,
             commands::set_api_key,
             commands::check_api_key,
             commands::set_proxy,

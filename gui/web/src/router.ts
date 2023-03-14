@@ -9,7 +9,7 @@ export default createRouter({
             children: [
                 {
                     path: '',
-                    component: () => import("./Chat")
+                    component: () => import("./pages/Main")
                 }
             ],
         }

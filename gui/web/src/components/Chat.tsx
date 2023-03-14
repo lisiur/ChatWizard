@@ -1,27 +1,34 @@
-import { defineComponent, ref, watch } from "vue";
-import mdRender from "./utils/mdRender";
-import assistantAvatar from "./assets/assistant_avatar.png";
-import userAvatar from "./assets/user_avatar.png";
-import newIcon from "./assets/new.svg";
-import networkIcon from "./assets/networks.svg";
-import keyIcon from "./assets/key.svg";
+import { computed, defineComponent, PropType, reactive, ref } from "vue";
+import mdRender from "../utils/mdRender";
+import assistantAvatar from "../assets/assistant_avatar.png";
+import userAvatar from "../assets/user_avatar.png";
+import newIcon from "../assets/new.svg";
+import networkIcon from "../assets/networks.svg";
+import keyIcon from "../assets/key.svg";
 import {
   AssistantMessage,
   ErrorMessage,
   Message,
   UserMessage,
-  useTopic,
-} from "./hooks/message";
-import { useConfig } from "./hooks/config";
+} from "../models/message";
+import { useConfig } from "../hooks/config";
 import { NButton, NIcon, NScrollbar, NSpace, NTooltip } from "naive-ui";
-import { writeToClipboard } from "./utils/clipboard";
-import { useComposition } from "./hooks/composition";
-import { useVersion } from "./hooks/version";
+import { writeToClipboard } from "../utils/clipboard";
+import { useComposition } from "../hooks/composition";
+import { useVersion } from "../hooks/version";
 import { AngleDoubleUp } from "@vicons/fa";
-import { dialog, message } from "./utils/prompt";
+import { dialog, message } from "../utils/prompt";
+import { Chat } from "../models/chat";
+import * as api from "../api";
 
 export default defineComponent({
-  setup() {
+  props: {
+    chat: {
+      type: Object as PropType<Chat>,
+      required: true,
+    },
+  },
+  setup(props) {
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
 
@@ -31,17 +38,18 @@ export default defineComponent({
 
     check_api_key();
 
-    const { prompt, sendMessage, resendMessage, reset, topic } = useTopic();
+    const prompt = ref("");
 
     function keydownHandler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
-        sendMessage();
+        const message = prompt.value;
+        prompt.value = "";
+        props.chat.sendMessage(message);
         e.preventDefault();
       }
     }
 
     function newTopicHandler() {
-      reset();
       inputRef.value?.focus();
     }
 
@@ -102,13 +110,8 @@ export default defineComponent({
         <div class="flex-1 overflow-hidden py-4">
           <NScrollbar>
             <div class="grid gap-6">
-              {topic.messages.map((message, index) => (
-                <div key={index}>
-                  {renderMessage(message, {
-                    resendHandler: () =>
-                      resendMessage((message as UserMessage).id),
-                  })}
-                </div>
+              {props.chat.messages.map((message, index) => (
+                <div key={index}>{renderMessage(message, props.chat)}</div>
               ))}
             </div>
           </NScrollbar>
@@ -217,20 +220,13 @@ function renderTriangle(
   }
 }
 
-function renderMessage(
-  message: Message,
-  handlers: {
-    resendHandler: () => void;
-  }
-) {
-  if (message.role === "assistant") {
-    return renderAssistantMessage(message as AssistantMessage);
-  } else if (message.role === "user") {
-    return renderUserMessage(message as UserMessage, {
-      resendHandler: handlers.resendHandler,
-    });
-  } else if (message.role === "error") {
-    return renderErrorMessage(message as ErrorMessage);
+function renderMessage(message: Message, chat: Chat) {
+  if (message instanceof AssistantMessage) {
+    return renderAssistantMessage(message);
+  } else if (message instanceof UserMessage) {
+    return renderUserMessage(message, chat);
+  } else if (message instanceof ErrorMessage) {
+    return renderErrorMessage(message);
   }
 }
 
@@ -274,12 +270,7 @@ function renderAssistantMessage(message: AssistantMessage) {
   );
 }
 
-function renderUserMessage(
-  message: UserMessage,
-  handlers: {
-    resendHandler: () => void;
-  }
-) {
+function renderUserMessage(message: UserMessage, chat: Chat) {
   return (
     <div class="flex justify-end items-start pr-4 pl-16">
       <div class="relative mr-2">
@@ -308,7 +299,7 @@ function renderUserMessage(
                     text
                     size="tiny"
                     class="mr-2"
-                    onClick={handlers.resendHandler}
+                    onClick={() => chat.resendMessage(message.id)}
                   >
                     resend
                   </NButton>

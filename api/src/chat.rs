@@ -106,11 +106,10 @@ impl OpenAIApi {
 }
 pub struct Topic {
     logs: Vec<ChatLog>,
-    api: OpenAIApi,
 }
 
 impl Topic {
-    pub fn new(api: OpenAIApi, topic: Option<String>) -> Self {
+    pub fn new(topic: Option<String>) -> Self {
         let mut logs = vec![];
 
         if let Some(topic) = topic {
@@ -123,19 +122,30 @@ impl Topic {
             });
         }
 
-        Self { logs, api }
+        Self { logs }
     }
 
-    fn messages(&self) -> Vec<Message> {
+    pub fn from_logs(logs: Vec<ChatLog>) -> Self {
+        Self { logs }
+    }
+
+    pub fn messages(&self) -> Vec<Message> {
         self.logs.iter().map(|log| log.message.clone()).collect()
     }
 
-    pub async fn send_message(
-        &mut self,
-        message: &str,
-        message_id: Option<Uuid>,
-    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send>>> {
-        let message_id = message_id.unwrap_or_else(Uuid::new_v4);
+    fn limited_messages(&self, limit: usize) -> Vec<Message> {
+        self.logs
+            .iter()
+            .rev()
+            .take(limit)
+            .rev()
+            .map(|log| log.message.clone())
+            .collect()
+    }
+
+    // Add user message
+    pub fn add_user_message(&mut self, message: &str) -> Uuid {
+        let message_id = Uuid::new_v4();
         let log = ChatLog {
             id: message_id,
             message: Message {
@@ -143,21 +153,40 @@ impl Topic {
                 content: message.to_string(),
             },
         };
-
         self.logs.push(log);
+        message_id
+    }
 
-        let res = self
-            .api
+    // Add assistant message
+    fn add_assistant_message(&mut self, message: String) -> Uuid {
+        let message_id = Uuid::new_v4();
+        let log = ChatLog {
+            id: message_id,
+            message: Message {
+                role: Role::Assistant,
+                content: message,
+            },
+        };
+        self.logs.push(log);
+        message_id
+    }
+
+    pub async fn send(
+        &mut self,
+        api: &OpenAIApi,
+    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
+        let res = api
             .create_chat(CreateChatRequestParams {
-                messages: self.messages(),
+                messages: self.limited_messages(4),
                 ..CreateChatRequestParams::default()
             })
             .await?;
 
         let stream = res.bytes_stream();
 
+        let mut reply = String::new();
         let stream = stream
-            .flat_map(|chunk| {
+            .flat_map(move |chunk| {
                 if let Err(err) = chunk {
                     return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
@@ -177,20 +206,20 @@ impl Topic {
                         if line.is_empty() {
                             None
                         } else if line.starts_with("data: [DONE]") {
+                            self.add_assistant_message(reply.clone());
                             Some(StreamContent::Done)
                         } else {
                             let json_data = &line[6..];
                             let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
                             json.choices.get(0).and_then(|choice| {
-                                choice
-                                    .delta
-                                    .content
-                                    .as_ref()
-                                    .map(|content| StreamContent::Data(content.to_string()))
+                                choice.delta.content.as_ref().map(|content| {
+                                    reply.push_str(content);
+                                    StreamContent::Data(content.to_string())
+                                })
                             })
                         }
                     })
-                    .collect::<Vec<_>>();
+                    .collect::<Vec<StreamContent>>();
 
                 stream::iter(chunks)
             })
@@ -199,26 +228,18 @@ impl Topic {
         Ok(stream)
     }
 
-    pub async fn resend_message(
+    pub async fn resend(
         &mut self,
-        id: Uuid,
-    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send>>> {
-        // find the message index
-        let Some(index) = self.logs.iter().position(|log| log.id == id) else {
-            return Err(Error::NotFound("message not found".to_string()))
-        };
-
-        // find the message need to resend
-        let message = self.logs[index].message.content.clone();
-
-        // remove all messages after the message need to resend
-        self.logs.truncate(index);
+        api: &OpenAIApi,
+        message_id: Uuid,
+    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
+        self.truncate_message_from(message_id)?;
 
         // send the message again
-        self.send_message(&message, Some(id)).await
+        self.send(api).await
     }
 
-    pub fn truncate_message_from(&mut self, id: Uuid) -> Result<()> {
+    fn truncate_message_from(&mut self, id: Uuid) -> Result<()> {
         // find the message index
         let Some(index) = self.logs.iter().position(|log| log.id == id) else {
             return Err(Error::NotFound("message not found".to_string()))
@@ -242,10 +263,6 @@ impl Topic {
         Ok(())
     }
 
-    pub async fn set_proxy(&self, proxy: &str) {
-        self.api.set_proxy(proxy).await;
-    }
-
     pub fn reset(&mut self) {
         self.logs.clear();
     }
@@ -259,14 +276,15 @@ mod tests {
     async fn test_chat_topic() {
         dotenv::dotenv().unwrap();
 
-        let api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
-        api.set_proxy(&std::env::var("PROXY").unwrap()).await;
+        let mut api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
+        api.set_proxy(&std::env::var("PROXY").unwrap());
 
-        let mut topic = Topic::new(
-            api,
-            Some("Repeat what user says, no more other words".to_string()),
-        );
+        let mut topic = Topic::new(Some(
+            "Repeat what user says, no more other words".to_string(),
+        ));
 
-        assert!(topic.send_message("Hello!", None).await.is_ok());
+        topic.add_user_message("Hello!");
+
+        assert!(topic.send(&api).await.is_ok());
     }
 }
