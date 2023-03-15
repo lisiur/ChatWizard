@@ -24,8 +24,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "@types/lodash-es": "^4.17.7"
   }
 }
