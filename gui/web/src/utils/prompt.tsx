@@ -1,16 +1,38 @@
 import { configProviderProps } from "../config";
 import { createDiscreteApi, NInput, NButton, NSpace } from "naive-ui";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { MessageApiInjection } from "naive-ui/es/message/src/MessageProvider";
+import { NotificationApiInjection } from "naive-ui/es/notification/src/NotificationProvider";
+import { DialogApiInjection } from "naive-ui/es/dialog/src/DialogProvider";
+import { LoadingBarApiInjection } from "naive-ui/es/loading-bar/src/LoadingBarProvider";
 
-const { message, notification, dialog, loadingBar } = createDiscreteApi(
-  ["message", "dialog", "notification", "loadingBar"],
+let message!: MessageApiInjection;
+let notification!: NotificationApiInjection;
+let dialog!: DialogApiInjection;
+let loadingBar!: LoadingBarApiInjection;
+
+watch(
+  configProviderProps,
+  () => {
+    let api = createDiscreteApi(
+      ["message", "dialog", "notification", "loadingBar"],
+      {
+        configProviderProps: configProviderProps.value,
+        loadingBarProviderProps: {
+          loadingBarStyle: {
+            loading: "background-color: var(--loading-bar-bg-color)",
+          },
+        },
+      }
+    );
+
+    message = api.message;
+    notification = api.notification;
+    dialog = api.dialog;
+    loadingBar = api.loadingBar;
+  },
   {
-    configProviderProps,
-    loadingBarProviderProps: {
-      loadingBarStyle: {
-        loading: "background-color: var(--loading-bar-bg-color)",
-      },
-    },
+    immediate: true,
   }
 );
 
