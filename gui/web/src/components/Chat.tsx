@@ -1,4 +1,12 @@
-import { defineComponent, PropType, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  nextTick,
+  PropType,
+  ref,
+  onMounted,
+} from "vue";
 import mdRender from "../utils/mdRender";
 import assistantAvatar from "../assets/assistant_avatar.png";
 import userAvatar from "../assets/user_avatar.png";
@@ -18,6 +26,7 @@ import { useVersion } from "../hooks/version";
 import { AngleDoubleUp } from "@vicons/fa";
 import { dialog, message } from "../utils/prompt";
 import { Chat } from "../models/chat";
+import { useAutoScroll } from "../hooks/scroll";
 
 export default defineComponent({
   props: {
@@ -27,8 +36,28 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
+
+    const scrollEle = computed(() => {
+      return scrollRef.value?.$el.nextSibling.children[0] as HTMLElement;
+    });
+
+    const {
+      start: startAutoScroll,
+      stop: stopAutoScroll,
+      destroy: destroyAutoScroll,
+      scrollToBottom,
+    } = useAutoScroll(scrollEle);
+
+    onMounted(() => {
+      nextTick(scrollToBottom);
+    });
+
+    onBeforeUnmount(() => {
+      destroyAutoScroll();
+    });
 
     const { version, hasNewVersion, installNewVersion, newVersion, relaunch } =
       useVersion();
@@ -42,7 +71,12 @@ export default defineComponent({
       if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
         const message = prompt.value;
         prompt.value = "";
-        props.chat.sendMessage(message);
+        props.chat.sendMessage(message, {
+          onFinish: stopAutoScroll,
+        });
+        setTimeout(() => {
+          startAutoScroll();
+        }, 20);
         e.preventDefault();
       }
     }
@@ -105,10 +139,14 @@ export default defineComponent({
         style="background-color: var(--body-color)"
       >
         <div class="flex-1 overflow-hidden py-4">
-          <NScrollbar>
+          <NScrollbar ref={scrollRef}>
             <div class="grid gap-6">
               {props.chat.messages.map((message, index) => (
-                <div key={index}>{renderMessage(message, props.chat)}</div>
+                <div key={index}>
+                  {renderMessage(message, props.chat, {
+                    onFinish: stopAutoScroll,
+                  })}
+                </div>
               ))}
             </div>
           </NScrollbar>
@@ -212,11 +250,15 @@ function renderTriangle(
   }
 }
 
-function renderMessage(message: Message, chat: Chat) {
+function renderMessage(
+  message: Message,
+  chat: Chat,
+  params?: { onFinish?: () => void }
+) {
   if (message instanceof AssistantMessage) {
     return renderAssistantMessage(message);
   } else if (message instanceof UserMessage) {
-    return renderUserMessage(message, chat);
+    return renderUserMessage(message, chat, params);
   } else if (message instanceof ErrorMessage) {
     return renderErrorMessage(message);
   }
@@ -257,7 +299,11 @@ function renderAssistantMessage(message: AssistantMessage) {
   );
 }
 
-function renderUserMessage(message: UserMessage, chat: Chat) {
+function renderUserMessage(
+  message: UserMessage,
+  chat: Chat,
+  params?: { onFinish?: () => void }
+) {
   return (
     <div class="flex justify-end items-start pr-4 pl-16">
       <div class="relative mr-2">
@@ -289,7 +335,7 @@ function renderUserMessage(message: UserMessage, chat: Chat) {
                     text
                     size="tiny"
                     class="mr-2"
-                    onClick={() => chat.resendMessage(message.id)}
+                    onClick={() => chat.resendMessage(message.id, params)}
                   >
                     resend
                   </NButton>

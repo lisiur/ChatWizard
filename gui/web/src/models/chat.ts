@@ -17,19 +17,19 @@ export class Chat {
     this.messages = reactive(messages);
   }
 
-  async sendMessage(message: string) {
+  async sendMessage(message: string, params?: { onFinish?: () => void }) {
     const userMessage = reactive(new UserMessage(message));
     this.messages.push(userMessage);
 
     const messageId = await sendMessage(this.id, message);
     userMessage.setId(messageId);
 
-    this.__receiveAssistantMessage(userMessage);
+    this.__receiveAssistantMessage(userMessage, params);
 
     return messageId;
   }
 
-  async resendMessage(messageId: string) {
+  async resendMessage(messageId: string, params?: { onFinish?: () => void }) {
     const index = this.messages.findIndex((item) => {
       return item instanceof UserMessage && item.id === messageId;
     });
@@ -41,10 +41,15 @@ export class Chat {
 
     await resendMessage(this.id, userMessage.id);
 
-    this.__receiveAssistantMessage(userMessage);
+    this.__receiveAssistantMessage(userMessage, params);
   }
 
-  async __receiveAssistantMessage(userMessage: UserMessage) {
+  async __receiveAssistantMessage(
+    userMessage: UserMessage,
+    params?: {
+      onFinish?: () => void;
+    }
+  ) {
     const userMessageId = userMessage.id;
     const {
       message: assistantMessage,
@@ -66,6 +71,7 @@ export class Chat {
           this.messages.push(new ErrorMessage(chunk.data));
           userMessage.delivered = false;
           this.busy = false;
+          params?.onFinish?.();
           break;
         }
         case "data": {
@@ -76,6 +82,7 @@ export class Chat {
         case "done": {
           assistantMessage.markHistory();
           this.busy = false;
+          params?.onFinish?.();
           unListen();
           break;
         }
