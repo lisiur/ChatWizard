@@ -1,6 +1,6 @@
 {
   "version": "0.0.6",
-  "notes": "## [0.0.6](https://github.com/lisiur/askai/compare/v0.0.5...v0.0.6) (2023-03-15)",
+  "notes": "## [0.0.6](https://github.com/lisiur/askai/compare/v0.0.5...v0.0.6) (2023-03-15)\n\n\n### Features\n\n * support store history ([3d747ab](https://github.com/lisiur/askai/commit/3d747abf310c7f1bc81f75b1d2dfb6f1e6b5d9d3)), closes [#4](https://github.com/lisiur/askai/issues/4)\n * support theme auto change ([950081d](https://github.com/lisiur/askai/commit/950081dbf0d3c37bc98af16b0999d00b760afa8d)), closes [#15](https://github.com/lisiur/askai/issues/15)",
   "pub_date": "2023-03-15T03:54:00.469Z",
   "platforms": {
     "linux-x86_64": {
