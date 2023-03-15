@@ -1,36 +1,9 @@
+use crate::project::Project;
 use askai_api::OpenAIApi;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
-
-use directories::ProjectDirs;
 
 use crate::result::Result;
-
-struct Project {
-    config_dir: PathBuf,
-    setting_path: PathBuf,
-}
-
-impl Default for Project {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Project {
-    pub fn new() -> Self {
-        let config_dir = ProjectDirs::from("com", "lisiur", "askai").unwrap();
-
-        let config_dir = config_dir.config_dir().to_path_buf();
-        let setting_path = config_dir.join("setting.toml");
-
-        Self {
-            config_dir,
-            setting_path,
-        }
-    }
-}
 
 pub struct Setting {
     project: Project,
@@ -56,8 +29,8 @@ pub enum Theme {
 impl Setting {
     pub fn init() -> Result<Self> {
         let project = Project::default();
-        if !project.config_dir.exists() {
-            fs::create_dir_all(project.config_dir.as_path())?;
+        if !project.setting_dir.exists() {
+            fs::create_dir_all(project.setting_dir.as_path())?;
         }
         if !project.setting_path.exists() {
             fs::File::create(project.setting_path.as_path())?;

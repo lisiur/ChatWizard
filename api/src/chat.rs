@@ -104,8 +104,10 @@ impl OpenAIApi {
             .await
     }
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Topic {
-    logs: Vec<ChatLog>,
+    pub logs: Vec<ChatLog>,
 }
 
 impl Topic {
@@ -265,6 +267,10 @@ impl Topic {
 
     pub fn reset(&mut self) {
         self.logs.clear();
+    }
+
+    pub fn to_json_string(&self) -> String {
+        serde_json::to_string(self).unwrap()
     }
 }
 

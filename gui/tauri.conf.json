@@ -79,7 +79,7 @@
         "height": 600,
         "resizable": true,
         "title": "AskAI",
-        "width": 800,
+        "width": 1000,
         "visible": false
       }
     ]

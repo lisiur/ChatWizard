@@ -5,19 +5,22 @@
 
 mod commands;
 mod error;
+mod project;
 mod result;
 mod setting;
 mod state;
-
-use state::AppState;
+mod store;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     tauri::Builder::default()
-        .manage(AppState::init().await.unwrap())
+        .manage(state::AppState::init().await.unwrap())
         .invoke_handler(tauri::generate_handler![
+            commands::all_chats,
+            commands::read_chat,
             commands::new_chat,
+            commands::delete_chat,
             commands::send_message,
             commands::resend_message,
             commands::reset_chat,
