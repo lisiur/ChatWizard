@@ -1,77 +1,112 @@
-use askai_api::{OpenAIApi, StreamContent};
-use futures::StreamExt;
+use askai_api::{ChatLog, OpenAIApi, StreamContent};
 use tauri::{Manager, State, Window};
+use tokio::sync::mpsc;
 use uuid::Uuid;
 
 use crate::result::Result;
-use crate::{state::AppState, utils::create_topic};
+use crate::state::AppState;
+use crate::store::ChatMetadata;
+
+#[tauri::command]
+pub async fn new_chat(
+    topic: Option<String>,
+    title: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<Uuid> {
+    let title = title.as_deref().unwrap_or("New Chat");
+    let chat_id = state.create_chat(topic, title).await?;
+
+    Ok(chat_id)
+}
+
+#[tauri::command]
+pub async fn all_chats(state: State<'_, AppState>) -> Result<Vec<ChatMetadata>> {
+    let store = state.store.lock().await;
+    let chat_metadata_list = store.all_chats().await?;
+
+    Ok(chat_metadata_list)
+}
+
+#[tauri::command]
+pub async fn read_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<Vec<ChatLog>> {
+    let chat = state.read_chat(chat_id).await?;
+
+    let chat_log = chat.lock().await.topic.lock().await.logs.clone();
+
+    Ok(chat_log)
+}
+
+#[tauri::command]
+pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
+    state.delete_chat(chat_id).await?;
+
+    Ok(())
+}
 
 #[tauri::command]
 pub async fn send_message(
+    chat_id: Uuid,
     message: String,
     window: Window,
     state: State<'_, AppState>,
 ) -> Result<Uuid> {
-    let event_id = Uuid::new_v4();
+    let api = state.create_api().await?;
+    let chat = state.get_chat(chat_id).await;
+    let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
+    let message_id = chat.lock().await.send_message(sender, &message, api).await;
 
-    let topic = state.topic.clone();
+    let store = state.store.clone();
+    let chat = state.get_chat(chat_id).await;
     tokio::spawn(async move {
-        let message_id = event_id;
-        let event_id = event_id.to_string();
-        match topic
-            .lock()
-            .await
-            .send_message(&message, Some(message_id))
-            .await
-        {
-            Ok(mut stream) => {
-                while let Some(content) = stream.next().await {
-                    window.emit(&event_id, content).unwrap();
-                }
-            }
-            Err(err) => {
-                window.emit(&event_id, StreamContent::Error(err)).unwrap();
-            }
+        let event_id = message_id.to_string();
+        while let Some(content) = receiver.recv().await {
+            window.emit(&event_id, content).unwrap();
         }
+        let chat = chat.lock().await;
+        store.lock().await.save_chat(&chat).await.unwrap();
     });
 
-    Ok(event_id)
+    Ok(message_id)
 }
 
 #[tauri::command]
-pub async fn resend_message(id: Uuid, window: Window, state: State<'_, AppState>) -> Result<Uuid> {
-    let event_id = id;
+pub async fn resend_message(
+    chat_id: Uuid,
+    message_id: Uuid,
+    window: Window,
+    state: State<'_, AppState>,
+) -> Result<()> {
+    let api = state.create_api().await?;
+    let chat = state.get_chat(chat_id).await;
+    let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
+    chat.lock()
+        .await
+        .resend_message(sender, message_id, api)
+        .await?;
 
-    let topic = state.topic.clone();
+    let store = state.store.clone();
+    let chat = state.get_chat(chat_id).await;
     tokio::spawn(async move {
-        let event_id = event_id.to_string();
-        match topic.lock().await.resend_message(id).await {
-            Ok(mut stream) => {
-                while let Some(content) = stream.next().await {
-                    window.emit(&event_id, content).unwrap();
-                }
-            }
-            Err(err) => {
-                window.emit(&event_id, StreamContent::Error(err)).unwrap();
-            }
+        let event_id = message_id.to_string();
+        while let Some(content) = receiver.recv().await {
+            window.emit(&event_id, content).unwrap();
         }
+        let chat = chat.lock().await;
+        store.lock().await.save_chat(&chat).await.unwrap();
     });
 
-    Ok(event_id)
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn reset_topic(state: State<'_, AppState>) -> Result<()> {
-    let setting = state.setting.lock().await;
-    *state.topic.lock().await = create_topic(&setting).await;
+pub async fn reset_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
+    state.get_chat(chat_id).await.lock().await.reset().await;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn set_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-    setting.set_api_key(&api_key).unwrap();
-    *state.topic.lock().await = create_topic(&setting).await;
+    state.set_api_key(&api_key).await?;
 
     OpenAIApi::check_api_key(&api_key).await?;
 
@@ -86,24 +121,19 @@ pub async fn check_api_key(api_key: String) -> Result<()> {
 
 #[tauri::command]
 pub async fn set_proxy(proxy: String, state: State<'_, AppState>) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-    setting.set_proxy(&proxy).unwrap();
+    state.set_proxy(&proxy).await?;
 
-    let topic = state.topic.lock().await;
-    topic.set_proxy(&proxy).await;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn get_proxy(state: State<'_, AppState>) -> Result<Option<String>> {
-    let setting = state.setting.lock().await;
-    Ok(setting.opts.proxy.clone())
+    state.get_proxy().await
 }
 
 #[tauri::command]
 pub async fn has_api_key(state: State<'_, AppState>) -> Result<bool> {
-    let setting = state.setting.lock().await;
-    Ok(setting.opts.api_key.is_some())
+    state.has_api_key().await
 }
 
 #[tauri::command]

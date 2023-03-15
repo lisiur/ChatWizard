@@ -10,6 +10,7 @@ specifiers:
   '@vitejs/plugin-vue-jsx': ^3.0.0
   autoprefixer: ^10.4.13
   highlight.js: ^11.7.0
+  lodash-es: ^4.17.21
   marked: ^4.2.12
   naive-ui: ^2.34.3
   postcss: ^8.4.21
@@ -27,6 +28,7 @@ dependencies:
   '@vitejs/plugin-vue-jsx': 3.0.0_vite@4.1.4+vue@3.2.47
   autoprefixer: 10.4.13_postcss@8.4.21
   highlight.js: 11.7.0
+  lodash-es: 4.17.21
   marked: 4.2.12
   naive-ui: 2.34.3_vue@3.2.47
   postcss: 8.4.21

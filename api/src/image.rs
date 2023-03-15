@@ -50,8 +50,8 @@ mod tests {
     async fn test_image_basic() {
         dotenv::dotenv().unwrap();
 
-        let api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
-        api.set_proxy(&std::env::var("PROXY").unwrap()).await;
+        let mut api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
+        api.set_proxy(&std::env::var("PROXY").unwrap());
 
         let data = api
             .create_image(CreateImageRequestParams {

@@ -6,10 +6,10 @@ mod image;
 mod result;
 mod types;
 
-pub use chat::{StreamContent, Topic};
+pub use chat::{ChatLog, StreamContent, Topic};
 use client::{Client, ClientOpts};
+use error::ApiErrorResponse;
 pub use error::Error;
-use error::{ApiError, ApiErrorResponse};
 pub use result::Result;
 
 pub struct OpenAIApi {
@@ -39,18 +39,16 @@ impl OpenAIApi {
         })
     }
 
-    pub async fn set_proxy(&self, proxy: &str) {
+    pub fn set_proxy(&mut self, proxy: &str) {
         if proxy.is_empty() {
-            self.client.clear_proxy().await;
+            self.client.clear_proxy();
         } else {
-            self.client
-                .set_proxy(reqwest::Proxy::all(proxy).unwrap())
-                .await;
+            self.client.set_proxy(reqwest::Proxy::all(proxy).unwrap());
         }
     }
 
-    pub async fn clear_proxy(&self) {
-        self.client.clear_proxy().await;
+    pub async fn clear_proxy(&mut self) {
+        self.client.clear_proxy();
     }
 
     pub async fn check_api_key(api_key: &str) -> Result<()> {

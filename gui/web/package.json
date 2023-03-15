@@ -16,6 +16,7 @@
     "@vitejs/plugin-vue-jsx": "^3.0.0",
     "autoprefixer": "^10.4.13",
     "highlight.js": "^11.7.0",
+    "lodash-es": "^4.17.21",
     "marked": "^4.2.12",
     "naive-ui": "^2.34.3",
     "postcss": "^8.4.21",

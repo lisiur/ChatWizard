@@ -1,5 +1,19 @@
-import { ConfigProviderProps, darkTheme } from 'naive-ui'
+import { ConfigProviderProps, darkTheme, lightTheme } from "naive-ui";
+import { computed } from "vue";
+import { getTheme, getNaiveUiThemeOverrides } from "./themes";
 
-export const configProviderProps: ConfigProviderProps = {
-    theme: darkTheme,
-}
+const naiveTheme = computed(() => {
+  if (getTheme() === "dark") {
+    return darkTheme;
+  } else {
+    return lightTheme;
+  }
+});
+const naiveUiOverrides = getNaiveUiThemeOverrides();
+export const configProviderProps = computed(
+  () =>
+    ({
+      theme: naiveTheme.value,
+      themeOverrides: naiveUiOverrides,
+    } as ConfigProviderProps)
+);

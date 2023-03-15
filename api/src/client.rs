@@ -1,5 +1,4 @@
 use crate::{error::ApiErrorResponse, result::Result};
-use futures::lock::Mutex;
 use serde::de::DeserializeOwned;
 
 #[derive(Clone)]
@@ -10,16 +9,13 @@ pub struct ClientOpts {
 
 pub struct Client {
     opt: ClientOpts,
-    client: Mutex<reqwest::Client>,
+    client: reqwest::Client,
 }
 
 impl Client {
     pub fn new(opt: ClientOpts) -> Self {
         let client = Self::init_client(&opt);
-        Self {
-            opt,
-            client: Mutex::new(client),
-        }
+        Self { opt, client }
     }
 
     fn init_client(opt: &ClientOpts) -> reqwest::Client {
@@ -38,20 +34,20 @@ impl Client {
         client_builder.build().unwrap()
     }
 
-    pub async fn set_proxy(&self, proxy: reqwest::Proxy) {
+    pub fn set_proxy(&mut self, proxy: reqwest::Proxy) {
         let client = Self::init_client(&ClientOpts {
             headers: self.opt.headers.clone(),
             proxy: Some(proxy),
         });
-        *self.client.lock().await = client;
+        self.client = client;
     }
 
-    pub async fn clear_proxy(&self) {
+    pub fn clear_proxy(&mut self) {
         let client = Self::init_client(&ClientOpts {
             headers: self.opt.headers.clone(),
             proxy: None,
         });
-        *self.client.lock().await = client;
+        self.client = client;
     }
 
     pub async fn get(
@@ -59,13 +55,13 @@ impl Client {
         url: &str,
         _params: Option<serde_json::Value>,
     ) -> Result<reqwest::Response> {
-        let request = self.client.lock().await.get(url);
+        let request = self.client.get(url);
 
         request.send().await.map_err(Into::into)
     }
 
     pub async fn post(&self, url: &str, data: serde_json::Value) -> Result<reqwest::Response> {
-        let request = self.client.lock().await.post(url).json(&data);
+        let request = self.client.post(url).json(&data);
 
         request.send().await.map_err(Into::into)
     }

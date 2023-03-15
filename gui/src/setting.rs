@@ -1,35 +1,9 @@
+use crate::project::Project;
+use askai_api::OpenAIApi;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
-
-use directories::ProjectDirs;
 
 use crate::result::Result;
-
-struct Project {
-    config_dir: PathBuf,
-    setting_path: PathBuf,
-}
-
-impl Default for Project {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Project {
-    pub fn new() -> Self {
-        let config_dir = ProjectDirs::from("com", "lisiur", "askai").unwrap();
-
-        let config_dir = config_dir.config_dir().to_path_buf();
-        let setting_path = config_dir.join("setting.toml");
-
-        Self {
-            config_dir,
-            setting_path,
-        }
-    }
-}
 
 pub struct Setting {
     project: Project,
@@ -55,8 +29,8 @@ pub enum Theme {
 impl Setting {
     pub fn init() -> Result<Self> {
         let project = Project::default();
-        if !project.config_dir.exists() {
-            fs::create_dir_all(project.config_dir.as_path())?;
+        if !project.setting_dir.exists() {
+            fs::create_dir_all(project.setting_dir.as_path())?;
         }
         if !project.setting_path.exists() {
             fs::File::create(project.setting_path.as_path())?;
@@ -69,9 +43,21 @@ impl Setting {
         Ok(Setting { project, opts })
     }
 
-    pub fn setting_path(&self) -> &PathBuf {
-        &self.project.setting_path
+    pub fn create_api(&self) -> Result<askai_api::OpenAIApi> {
+        let setting = Setting::init()?;
+        let api_key = setting.opts.api_key.as_deref().unwrap_or("");
+
+        let mut api = OpenAIApi::new(api_key);
+        if let Some(proxy) = &setting.opts.proxy {
+            api.set_proxy(proxy);
+        }
+
+        Ok(api)
     }
+
+    // pub fn setting_path(&self) -> &PathBuf {
+    //     &self.project.setting_path
+    // }
 
     pub fn set_api_key(&mut self, api_key: &str) -> Result<()> {
         self.opts.api_key = Some(api_key.to_string());
@@ -93,19 +79,19 @@ impl Setting {
         self.save()
     }
 
-    pub fn get_theme(&self) -> Theme {
-        match self.opts.theme.as_deref() {
-            Some("light") => Theme::Light,
-            Some("dark") => Theme::Dark,
-            Some("system") => Theme::System,
-            _ => Theme::System,
-        }
-    }
+    // pub fn get_theme(&self) -> Theme {
+    //     match self.opts.theme.as_deref() {
+    //         Some("light") => Theme::Light,
+    //         Some("dark") => Theme::Dark,
+    //         Some("system") => Theme::System,
+    //         _ => Theme::System,
+    //     }
+    // }
 
-    pub fn set_theme(&mut self, theme: &str) -> Result<()> {
-        self.opts.theme = Some(theme.to_string());
-        self.save()
-    }
+    // pub fn set_theme(&mut self, theme: &str) -> Result<()> {
+    //     self.opts.theme = Some(theme.to_string());
+    //     self.save()
+    // }
 
     fn save(&self) -> Result<()> {
         let opts_string = toml::to_string(&self.opts).unwrap();
