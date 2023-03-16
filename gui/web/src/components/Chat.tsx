@@ -6,6 +6,7 @@ import {
   PropType,
   ref,
   onMounted,
+  watch,
 } from "vue";
 import mdRender from "../utils/mdRender";
 import assistantAvatar from "../assets/assistant_avatar.png";
@@ -51,6 +52,12 @@ export default defineComponent({
       scrollToBottom,
     } = useAutoScroll(scrollEle);
 
+    watch(
+      () => props.chat,
+      () => {
+        nextTick(scrollToBottom);
+      }
+    );
     onMounted(() => {
       nextTick(scrollToBottom);
     });
