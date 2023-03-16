@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "cd gui && RUST_LOG=debug cargo tauri dev --no-watch",
+    "build": "cd gui && cargo tauri build",
     "release:patch": "node release.js patch",
     "release:minor": "node release.js minor",
     "release:major": "node release.js major",
