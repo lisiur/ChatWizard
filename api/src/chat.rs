@@ -235,10 +235,22 @@ impl Topic {
         api: &OpenAIApi,
         message_id: Uuid,
     ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
-        self.truncate_message_from(message_id)?;
+        self.truncate_message_after(message_id)?;
 
         // send the message again
         self.send(api).await
+    }
+
+    fn truncate_message_after(&mut self, id: Uuid) -> Result<()> {
+        // find the message index
+        let Some(index) = self.logs.iter().position(|log| log.id == id) else {
+            return Err(Error::NotFound("message not found".to_string()))
+        };
+
+        // remove all messages after the message need to resend
+        self.logs.truncate(index + 1);
+
+        Ok(())
     }
 
     fn truncate_message_from(&mut self, id: Uuid) -> Result<()> {
@@ -247,7 +259,7 @@ impl Topic {
             return Err(Error::NotFound("message not found".to_string()))
         };
 
-        // remove all messages after the message need to resend
+        // remove all messages from the message need to resend
         self.logs.truncate(index);
 
         Ok(())
