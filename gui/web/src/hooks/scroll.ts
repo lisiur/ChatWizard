@@ -11,7 +11,6 @@ export function useAutoScroll(el: HTMLElement | Ref<HTMLElement>) {
       (e) => {
         if (e) {
           ele = e;
-          console.log('a', e)
           ele.addEventListener("scroll", handleScroll);
           unwatch();
         }
