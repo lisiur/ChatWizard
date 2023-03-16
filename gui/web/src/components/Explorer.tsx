@@ -18,10 +18,7 @@ export default defineComponent({
   },
   setup(props) {
     return () => (
-      <div
-        class="select-none"
-        style="background-color: var(--explorer-bg-color); color: var(--explorer-color)"
-      >
+      <div class="select-none">
         <NScrollbar>
           {props.list?.map((item) => (
             <ChatColumn
@@ -81,7 +78,7 @@ const ChatColumn = defineComponent({
 
     return () => (
       <div
-        class="flex items-center p-2"
+        class="flex items-center py-2 px-4"
         style={{
           color:
             props.active === props.chat.id

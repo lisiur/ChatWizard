@@ -85,6 +85,7 @@
       {
         "fullscreen": false,
         "width": 860,
+        "minWidth": 720,
         "height": 680,
         "resizable": true,
         "title": "AskAI",

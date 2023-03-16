@@ -50,6 +50,12 @@ async function prompt(
   const showCancel = config?.showCancel ?? true;
   return new Promise((resolve, reject) => {
     const value = ref(config?.defaultValue || "");
+    function keydownHandler(e: KeyboardEvent) {
+      if (e.code === "Enter") {
+        e.preventDefault();
+        okHandler();
+      }
+    }
     const { destroy } = dialog.create({
       type: "default",
       closable: false,
@@ -57,7 +63,9 @@ async function prompt(
       showIcon: false,
       maskClosable: false,
       title,
-      content: () => <NInput v-model:value={value.value}></NInput>,
+      content: () => (
+        <NInput v-model:value={value.value} onKeydown={keydownHandler}></NInput>
+      ),
       action: () => (
         <NSpace>
           {showCancel ? (

@@ -22,7 +22,6 @@ import { useConfig } from "../hooks/config";
 import { NButton, NIcon, NScrollbar, NSpace, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
-import { useVersion } from "../hooks/version";
 import { AngleDoubleUp, Markdown, Key, NetworkWired } from "@vicons/fa";
 import { dialog, message } from "../utils/prompt";
 import { Chat } from "../models/chat";
@@ -40,7 +39,7 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup(props, { expose }) {
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
@@ -70,8 +69,6 @@ export default defineComponent({
       destroyAutoScroll();
     });
 
-    const { version, hasNewVersion, installNewVersion, newVersion, relaunch } =
-      useVersion();
     const { checkApiKey: check_api_key, setProxy, setApiKey } = useConfig();
 
     check_api_key();
@@ -92,58 +89,6 @@ export default defineComponent({
       }
     }
 
-    function showUpdateHandler() {
-      const releaseContent = (newVersion.value?.body ?? "").replaceAll(
-        /%0A/g,
-        "\n"
-      );
-      const renderContent = mdRender(releaseContent);
-      const loading = ref(false);
-      const dl = dialog.create({
-        showIcon: false,
-        title: "New version is available!",
-        content: () => {
-          return <div class="markdown-root" v-html={renderContent}></div>;
-        },
-        action: () => {
-          const positiveText = ref("Upgrade");
-          return (
-            <NSpace>
-              <NButton onClick={() => dl.destroy()}>Cancel</NButton>
-              <NButton
-                type="primary"
-                loading={loading.value}
-                onClick={() => {
-                  positiveText.value = "Downloading...";
-                  loading.value = true;
-                  installNewVersion()
-                    .then(() => {
-                      dl.destroy();
-                      dialog.success({
-                        title: "Download Success",
-                        content: "Please restart the app to apply the update.",
-                        positiveText: "Restart",
-                        negativeText: "Later",
-                        onPositiveClick: relaunch,
-                      });
-                    })
-                    .catch((err) => {
-                      message.error(err);
-                    })
-                    .finally(() => {
-                      positiveText.value = "Upgrade";
-                      loading.value = false;
-                    });
-                }}
-              >
-                {positiveText.value}
-              </NButton>
-            </NSpace>
-          );
-        },
-      });
-    }
-
     async function exportMarkdown() {
       const filePath = await save({
         title: props.chatMetaData.title,
@@ -159,14 +104,23 @@ export default defineComponent({
       }
     }
 
-    return () => (
+    function focusInput() {
+      inputRef.value?.focus();
+    }
+
+    const publicExpose = {
+      focusInput,
+    };
+    expose(publicExpose);
+
+    return (() => (
       <div
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
         <div class="flex-1 overflow-hidden">
           <NScrollbar ref={scrollRef} class="py-4">
-            <div class="grid gap-6 pb-8">
+            <div class="grid gap-6">
               {props.chat.messages.map((message, index) => (
                 <div key={index}>
                   {renderMessage(message, props.chat, {
@@ -179,16 +133,6 @@ export default defineComponent({
         </div>
         <div class="border-t" style="border-color: var(--border-color)">
           <div class="flex items-center">
-            <div class="text-gray-600 p-2">
-              <span> v{version.value} </span>
-              {hasNewVersion.value ? (
-                <span onClick={showUpdateHandler} class="cursor-pointer">
-                  <NIcon>
-                    <AngleDoubleUp />
-                  </NIcon>
-                </span>
-              ) : null}
-            </div>
             <div class="flex-1 flex justify-end p-1">
               {renderButton({
                 handler: exportMarkdown,
@@ -217,7 +161,7 @@ export default defineComponent({
           ></textarea>
         </div>
       </div>
-    );
+    )) as unknown as typeof publicExpose;
   },
 });
 
@@ -303,7 +247,7 @@ function renderMessage(
 function renderAssistantMessage(message: AssistantMessage) {
   const html = mdRender(message.content);
   return (
-    <div class="flex justify-start items-start pl-4 pr-24">
+    <div class="flex relative justify-start items-start pl-4 pr-24">
       {renderAvatar(assistantAvatar)}
       <div class="relative ml-2 flex-1 overflow-hidden">
         <div class="absolute left-[-.2rem] top-1">
@@ -317,20 +261,20 @@ function renderAssistantMessage(message: AssistantMessage) {
           style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
           v-html={html}
         ></div>
-        {message.done ? (
-          <div class="absolute bottom-0 right-[-2.2rem] text-xs">
-            <NButton
-              type="default"
-              text
-              size="tiny"
-              class="ml-2 text-gray-500"
-              onClick={() => writeToClipboard(message.content)}
-            >
-              Copy
-            </NButton>
-          </div>
-        ) : null}
       </div>
+      {message.done ? (
+        <div class="absolute bottom-[-1.2rem] left-14 text-xs">
+          <NButton
+            type="default"
+            text
+            size="tiny"
+            class="ml-2 text-gray-500"
+            onClick={() => writeToClipboard(message.content)}
+          >
+            copy
+          </NButton>
+        </div>
+      ) : null}
     </div>
   );
 }
