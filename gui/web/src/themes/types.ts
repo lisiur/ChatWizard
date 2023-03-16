@@ -12,5 +12,6 @@ export interface ThemeVars extends GlobalThemeOverrides {
     explorerColor: string;
     explorerActiveBgColor: string;
     explorerActiveColor: string;
+    chatBtnColor: string;
   };
 }

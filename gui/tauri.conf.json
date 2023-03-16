@@ -27,6 +27,14 @@
         "exit": false,
         "relaunch": true,
         "relaunchDangerousAllowSymlinkMacos": false
+      },
+      "dialog": {
+        "all": false,
+        "ask": false,
+        "confirm": false,
+        "message": false,
+        "open": false,
+        "save": true
       }
     },
     "bundle": {

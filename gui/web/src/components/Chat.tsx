@@ -7,12 +7,11 @@ import {
   ref,
   onMounted,
   watch,
+  DefineComponent,
 } from "vue";
 import mdRender from "../utils/mdRender";
 import assistantAvatar from "../assets/assistant_avatar.png";
 import userAvatar from "../assets/user_avatar.png";
-import networkIcon from "../assets/networks.svg";
-import keyIcon from "../assets/key.svg";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -24,15 +23,20 @@ import { NButton, NIcon, NScrollbar, NSpace, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
 import { useVersion } from "../hooks/version";
-import { AngleDoubleUp } from "@vicons/fa";
+import { AngleDoubleUp, Markdown, Key, NetworkWired } from "@vicons/fa";
 import { dialog, message } from "../utils/prompt";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
+import { save } from "@tauri-apps/api/dialog";
 
 export default defineComponent({
   props: {
     chat: {
       type: Object as PropType<Chat>,
+      required: true,
+    },
+    chatMetaData: {
+      type: Object as PropType<{ title: string; id: string }>,
       required: true,
     },
   },
@@ -140,6 +144,21 @@ export default defineComponent({
       });
     }
 
+    async function exportMarkdown() {
+      const filePath = await save({
+        title: props.chatMetaData.title,
+        filters: [
+          {
+            name: "Markdown",
+            extensions: ["md"],
+          },
+        ],
+      });
+      if (filePath) {
+        props.chat.exportMarkdown(filePath);
+      }
+    }
+
     return () => (
       <div
         class="h-full flex flex-col"
@@ -172,13 +191,18 @@ export default defineComponent({
             </div>
             <div class="flex-1 flex justify-end p-1">
               {renderButton({
+                handler: exportMarkdown,
+                icon: Markdown,
+                tooltip: "Export Markdown",
+              })}
+              {renderButton({
                 handler: setApiKey,
-                icon: keyIcon,
+                icon: Key,
                 tooltip: "Set Api Key",
               })}
               {renderButton({
                 handler: setProxy,
-                icon: networkIcon,
+                icon: NetworkWired,
                 tooltip: "Set proxy",
               })}
             </div>
@@ -198,7 +222,7 @@ export default defineComponent({
 });
 
 function renderButton(props: {
-  icon: string;
+  icon: DefineComponent<any, any, any>;
   tooltip: string;
   handler: () => void;
 }) {
@@ -210,7 +234,12 @@ function renderButton(props: {
             class="bg-transparent rounded px-2 py-1"
             onClick={props.handler}
           >
-            <img src={props.icon} class="w-6"></img>
+            <NIcon
+              size="1rem"
+              class="text-[var(--chat-btn-color)] hover:text-[var(--primary-color)]"
+            >
+              <props.icon></props.icon>
+            </NIcon>
           </button>
         ),
         default: () => props.tooltip,

@@ -64,3 +64,10 @@ export function hasApiKey() {
 export function showMainWindow() {
   return invoke<void>("show_main_window");
 }
+
+export function saveAsMarkdown(chatId: string, path: string) {
+  return invoke<void>("save_as_markdown", {
+    chatId,
+    path,
+  });
+}

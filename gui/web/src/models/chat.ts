@@ -1,6 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { reactive } from "vue";
-import { resendMessage, sendMessage } from "../api";
+import { resendMessage, sendMessage, saveAsMarkdown } from "../api";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -42,6 +42,10 @@ export class Chat {
     await resendMessage(this.id, userMessage.id);
 
     this.__receiveAssistantMessage(userMessage, params);
+  }
+
+  async exportMarkdown(path: string) {
+    saveAsMarkdown(this.id, path);
   }
 
   async __receiveAssistantMessage(

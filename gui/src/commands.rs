@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use askai_api::{ChatLog, OpenAIApi, StreamContent};
 use tauri::{Manager, State, Window};
 use tokio::sync::mpsc;
@@ -40,6 +42,17 @@ pub async fn read_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<Vec<
 pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
     state.delete_chat(chat_id).await?;
 
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn save_as_markdown(
+    chat_id: Uuid,
+    path: PathBuf,
+    state: State<'_, AppState>,
+) -> Result<()> {
+    let chat = state.get_chat(chat_id).await;
+    chat.lock().await.save_as_markdown(path.as_path()).await?;
     Ok(())
 }
 

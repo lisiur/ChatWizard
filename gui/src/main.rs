@@ -31,6 +31,7 @@ async fn main() {
             commands::get_proxy,
             commands::has_api_key,
             commands::show_main_window,
+            commands::save_as_markdown,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

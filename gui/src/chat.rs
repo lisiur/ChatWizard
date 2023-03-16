@@ -1,7 +1,8 @@
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
-use askai_api::{OpenAIApi, StreamContent, Topic};
+use askai_api::{OpenAIApi, Role, StreamContent, Topic};
 use futures::{lock::Mutex, StreamExt};
+use tokio::fs;
 use tokio::sync::mpsc::Sender;
 use uuid::Uuid;
 
@@ -95,5 +96,37 @@ impl Chat {
 
     pub async fn topic_json_string(&self) -> String {
         self.topic.lock().await.to_json_string()
+    }
+
+    pub async fn save_as_markdown(&self, path: &Path) -> Result<()> {
+        let markdown = self.to_markdown().await?;
+
+        fs::write(path, markdown).await?;
+
+        Ok(())
+    }
+
+    async fn to_markdown(&self) -> Result<String> {
+        let mut markdown = String::new();
+
+        if !self.title.is_empty() {
+            markdown.push_str(&format!("# {}\n\n", self.title));
+        }
+
+        let messages = self.topic.lock().await.messages();
+
+        for message in messages {
+            match message.role {
+                Role::User => {
+                    markdown.push_str(&format!("## {}\n", message.content));
+                }
+                Role::Assistant => {
+                    markdown.push_str(&format!("{}\n", message.content));
+                }
+                _ => {}
+            }
+        }
+
+        Ok(markdown)
     }
 }

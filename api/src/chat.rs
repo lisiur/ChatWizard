@@ -29,8 +29,8 @@ impl Default for CreateChatRequestParams {
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct Message {
-    role: Role,
-    content: String,
+    pub role: Role,
+    pub content: String,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]

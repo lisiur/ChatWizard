@@ -11,6 +11,7 @@ export default defineComponent({
     const chatMetaList = ref<Array<{ id: string; title: string }>>([]);
     const chats = new Map<string, Chat>();
     const currentChat = ref<Chat>();
+    const currentChatMeta = ref<{ id: string; title: string }>();
     refreshChatMetaList();
 
     function refreshChatMetaList() {
@@ -74,10 +75,13 @@ export default defineComponent({
           }
         }
       }) as Message[];
+
       const chat = new Chat(chatId, messages);
       chats.set(chatId, chat);
-
       currentChat.value = chat;
+
+      const chatMetaData = chatMetaList.value.find((m) => m.id === chatId)!;
+      currentChatMeta.value = chatMetaData;
     }
 
     return () => (
@@ -102,7 +106,10 @@ export default defineComponent({
         </div>
         <div class="flex-1" style="background-color: var(--body-color)">
           {currentChat.value ? (
-            <ChatComp chat={currentChat.value}></ChatComp>
+            <ChatComp
+              chat={currentChat.value}
+              chatMetaData={currentChatMeta.value!}
+            ></ChatComp>
           ) : null}
         </div>
       </div>
