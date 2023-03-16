@@ -3,6 +3,7 @@
     windows_subsystem = "windows"
 )]
 
+mod chat;
 mod commands;
 mod error;
 mod project;

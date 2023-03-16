@@ -5,9 +5,9 @@ use tokio::fs;
 use serde_json::json;
 use uuid::Uuid;
 
+use crate::chat::Chat;
 use crate::project::Project;
 use crate::result::Result;
-use crate::state::Chat;
 
 pub struct Store {
     chat_data_dir: PathBuf,
