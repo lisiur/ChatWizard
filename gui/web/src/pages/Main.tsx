@@ -104,7 +104,7 @@ export default defineComponent({
             onAction={explorerHandler}
           ></ExplorerComp>
         </div>
-        <div class="flex-1" style="background-color: var(--body-color)">
+        <div class="flex-1 overflow-hidden" style="background-color: var(--body-color)">
           {currentChat.value ? (
             <ChatComp
               chat={currentChat.value}

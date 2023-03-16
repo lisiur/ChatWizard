@@ -305,7 +305,7 @@ function renderAssistantMessage(message: AssistantMessage) {
   return (
     <div class="flex justify-start items-start pl-4 pr-24">
       {renderAvatar(assistantAvatar)}
-      <div class="relative ml-2">
+      <div class="relative ml-2 flex-1 overflow-hidden">
         <div class="absolute left-[-.2rem] top-1">
           {renderTriangle("left", {
             color: "var(--assistant-msg-bg-color)",
