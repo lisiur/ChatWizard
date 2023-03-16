@@ -138,9 +138,9 @@ export default defineComponent({
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
-        <div class="flex-1 overflow-hidden py-4">
-          <NScrollbar ref={scrollRef}>
-            <div class="grid gap-6">
+        <div class="flex-1 overflow-hidden">
+          <NScrollbar ref={scrollRef} class="py-4">
+            <div class="grid gap-6 pb-8">
               {props.chat.messages.map((message, index) => (
                 <div key={index}>
                   {renderMessage(message, props.chat, {
@@ -267,7 +267,7 @@ function renderMessage(
 function renderAssistantMessage(message: AssistantMessage) {
   const html = mdRender(message.content);
   return (
-    <div class="flex justify-start items-start pl-4 pr-16">
+    <div class="flex justify-start items-start pl-4 pr-24">
       {renderAvatar(assistantAvatar)}
       <div class="relative ml-2">
         <div class="absolute left-[-.2rem] top-1">
@@ -305,7 +305,7 @@ function renderUserMessage(
   params?: { onFinish?: () => void }
 ) {
   return (
-    <div class="flex justify-end items-start pr-4 pl-16">
+    <div class="flex justify-end items-start pr-4 pl-24">
       <div class="relative mr-2">
         <div
           class="inline-block py-2 px-3 mr-1 rounded-md"

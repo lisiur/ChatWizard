@@ -76,10 +76,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "width": 860,
+        "height": 680,
         "resizable": true,
         "title": "AskAI",
-        "width": 1000,
         "visible": false
       }
     ]
