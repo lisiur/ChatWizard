@@ -97,7 +97,7 @@ export default defineComponent({
             class="flex-1 overflow-auto"
             active={currentChat.value?.id}
             list={chatMetaList.value}
-            handler={explorerHandler}
+            onAction={explorerHandler}
           ></ExplorerComp>
         </div>
         <div class="flex-1" style="background-color: var(--body-color)">
