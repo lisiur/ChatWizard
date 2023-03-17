@@ -7,6 +7,8 @@ specifiers:
   '@types/marked': ^4.0.8
   '@types/node': ^18.7.10
   '@vicons/fa': ^0.12.0
+  '@vicons/ionicons5': ^0.12.0
+  '@vicons/tabler': ^0.12.0
   '@vitejs/plugin-vue': ^4.0.0
   '@vitejs/plugin-vue-jsx': ^3.0.0
   autoprefixer: ^10.4.13
@@ -27,6 +29,8 @@ dependencies:
   '@types/lodash-es': 4.17.7
   '@types/marked': 4.0.8
   '@vicons/fa': 0.12.0
+  '@vicons/ionicons5': 0.12.0
+  '@vicons/tabler': 0.12.0
   '@vitejs/plugin-vue-jsx': 3.0.0_vite@4.1.4+vue@3.2.47
   autoprefixer: 10.4.13_postcss@8.4.21
   highlight.js: 11.7.0
@@ -735,6 +739,14 @@ packages:
 
   /@vicons/fa/0.12.0:
     resolution: {integrity: sha512-g2PIeJLsTHUjt6bK63LxqC0uYQB7iu+xViJOxvp1s8b9/akpXVPVWjDTTsP980/0KYyMMe4U7F/aUo7wY+MsXA==}
+    dev: false
+
+  /@vicons/ionicons5/0.12.0:
+    resolution: {integrity: sha512-Iy1EUVRpX0WWxeu1VIReR1zsZLMc4fqpt223czR+Rpnrwu7pt46nbnC2ycO7ItI/uqDLJxnbcMC7FujKs9IfFA==}
+    dev: false
+
+  /@vicons/tabler/0.12.0:
+    resolution: {integrity: sha512-3+wUFuxb7e8OzZ8Wryct1pzfA2vyoF4lwW98O9s27ZrfCGaJGNmqG+q8A7vQ92Mf+COCgxpK+rhNPTtTvaU6qw==}
     dev: false
 
   /@vitejs/plugin-vue-jsx/3.0.0_vite@4.1.4+vue@3.2.47:

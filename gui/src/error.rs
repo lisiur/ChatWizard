@@ -10,6 +10,9 @@ pub enum Error {
 
     #[error(transparent)]
     Send(#[from] tokio::sync::mpsc::error::SendError<StreamContent>),
+
+    #[error("{0} not found")]
+    NotFound(String),
 }
 
 impl serde::Serialize for Error {

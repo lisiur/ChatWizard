@@ -1,46 +1,70 @@
 use std::path::PathBuf;
 
-use askai_api::{ChatLog, OpenAIApi, StreamContent};
+use askai_api::{Logs, OpenAIApi, StreamContent};
 use tauri::{Manager, State, Window};
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
+use crate::chat::ChatMetadata;
+use crate::prompt::{Prompt, PromptMeta};
 use crate::result::Result;
 use crate::state::AppState;
-use crate::store::ChatMetadata;
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct ChatData {
+    id: Uuid,
+    title: String,
+    prompt: Option<String>,
+    logs: Logs,
+}
+
+// chats
 
 #[tauri::command]
 pub async fn new_chat(
-    topic: Option<String>,
+    act: Option<String>,
     title: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<Uuid> {
+    let mut chat_manager = state.chat_manager.lock().await;
+
     let title = title.as_deref().unwrap_or("New Chat");
-    let chat_id = state.create_chat(topic, title).await?;
+    let chat_id = chat_manager.create_chat(act, title).await?;
 
     Ok(chat_id)
 }
 
 #[tauri::command]
 pub async fn all_chats(state: State<'_, AppState>) -> Result<Vec<ChatMetadata>> {
-    let store = state.store.lock().await;
-    let chat_metadata_list = store.all_chats().await?;
+    let chat_manager = state.chat_manager.lock().await;
+
+    let chat_metadata_list = chat_manager.all_chat_meta().await;
 
     Ok(chat_metadata_list)
 }
 
 #[tauri::command]
-pub async fn read_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<Vec<ChatLog>> {
-    let chat = state.read_chat(chat_id).await?;
+pub async fn load_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<ChatData> {
+    let chat_manager = state.chat_manager.lock().await;
 
-    let chat_log = chat.lock().await.topic.lock().await.logs.clone();
+    let chat = chat_manager.get_chat(chat_id).await?;
+    let chat = chat.lock().await;
 
-    Ok(chat_log)
+    let logs = chat.get_logs().await;
+
+    Ok(ChatData {
+        id: chat.id,
+        title: chat.title.clone(),
+        prompt: chat.prompt.clone(),
+        logs,
+    })
 }
 
 #[tauri::command]
 pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
-    state.delete_chat(chat_id).await?;
+    let mut chat_manager = state.chat_manager.lock().await;
+
+    chat_manager.delete_chat(chat_id).await?;
 
     Ok(())
 }
@@ -51,8 +75,12 @@ pub async fn save_as_markdown(
     path: PathBuf,
     state: State<'_, AppState>,
 ) -> Result<()> {
-    let chat = state.get_chat(chat_id).await;
-    chat.lock().await.save_as_markdown(path.as_path()).await?;
+    let chat_manager = state.chat_manager.lock().await;
+
+    let chat = chat_manager.get_chat(chat_id).await?;
+    let chat = chat.lock().await;
+    chat.save_as_markdown(path.as_path()).await?;
+
     Ok(())
 }
 
@@ -63,20 +91,23 @@ pub async fn send_message(
     window: Window,
     state: State<'_, AppState>,
 ) -> Result<Uuid> {
-    let api = state.create_api().await?;
-    let chat = state.get_chat(chat_id).await;
-    let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    let message_id = chat.lock().await.send_message(sender, &message, api).await;
+    let setting = state.setting.lock().await;
+    let chat_manager = state.chat_manager.lock().await;
 
-    let store = state.store.clone();
-    let chat = state.get_chat(chat_id).await;
+    let api = setting.create_api().await?;
+    let chat = chat_manager.get_chat(chat_id).await?;
+    let chat = chat.lock().await;
+    let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
+    let message_id = chat.send_message(sender, &message, api).await;
+
+    let chat_id = chat.id;
+    let chat_manager = state.chat_manager.clone();
     tokio::spawn(async move {
         let event_id = message_id.to_string();
         while let Some(content) = receiver.recv().await {
             window.emit(&event_id, content).unwrap();
         }
-        let chat = chat.lock().await;
-        store.lock().await.save_chat(&chat).await.unwrap();
+        chat_manager.lock().await.save_chat(chat_id).await.unwrap();
     });
 
     Ok(message_id)
@@ -89,37 +120,83 @@ pub async fn resend_message(
     window: Window,
     state: State<'_, AppState>,
 ) -> Result<()> {
-    let api = state.create_api().await?;
-    let chat = state.get_chat(chat_id).await;
+    let setting = state.setting.lock().await;
+    let chat_manager = state.chat_manager.clone();
+
+    let api = setting.create_api().await?;
+    let chat = chat_manager.lock().await.get_chat(chat_id).await?;
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
     chat.lock()
         .await
         .resend_message(sender, message_id, api)
         .await?;
 
-    let store = state.store.clone();
-    let chat = state.get_chat(chat_id).await;
+    let chat_id = chat.lock().await.id;
     tokio::spawn(async move {
         let event_id = message_id.to_string();
         while let Some(content) = receiver.recv().await {
             window.emit(&event_id, content).unwrap();
         }
-        let chat = chat.lock().await;
-        store.lock().await.save_chat(&chat).await.unwrap();
+        chat_manager.lock().await.save_chat(chat_id).await.unwrap();
     });
 
     Ok(())
 }
 
+// prompts
+
 #[tauri::command]
-pub async fn reset_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
-    state.get_chat(chat_id).await.lock().await.reset().await;
+pub async fn all_prompts(state: State<'_, AppState>) -> Result<Vec<PromptMeta>> {
+    let prompt_manager = state.prompt_manager.lock().await;
+
+    let prompt_list = prompt_manager.all_prompt_meta().clone();
+
+    Ok(prompt_list)
+}
+
+#[tauri::command]
+pub async fn load_prompt(act: String, state: State<'_, AppState>) -> Result<Option<Prompt>> {
+    let mut prompt_manager = state.prompt_manager.lock().await;
+
+    let prompt = prompt_manager.get_prompt(&act).await?;
+
+    Ok(prompt)
+}
+
+#[tauri::command]
+pub async fn create_prompt(prompt: Prompt, state: State<'_, AppState>) -> Result<()> {
+    let mut prompt_manager = state.prompt_manager.lock().await;
+
+    prompt_manager.add_prompt(&prompt).await?;
+
     Ok(())
 }
 
 #[tauri::command]
+pub async fn update_prompt(prompt: Prompt, state: State<'_, AppState>) -> Result<()> {
+    let mut prompt_manager = state.prompt_manager.lock().await;
+
+    prompt_manager.update_prompt(&prompt).await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_prompt(act: String, state: State<'_, AppState>) -> Result<()> {
+    let mut prompt_manager = state.prompt_manager.lock().await;
+
+    prompt_manager.delete_prompt(&act).await?;
+
+    Ok(())
+}
+
+// settings
+
+#[tauri::command]
 pub async fn set_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
-    state.set_api_key(&api_key).await?;
+    let mut setting = state.setting.lock().await;
+
+    setting.set_api_key(&api_key).await?;
 
     OpenAIApi::check_api_key(&api_key).await?;
 
@@ -134,20 +211,28 @@ pub async fn check_api_key(api_key: String) -> Result<()> {
 
 #[tauri::command]
 pub async fn set_proxy(proxy: String, state: State<'_, AppState>) -> Result<()> {
-    state.set_proxy(&proxy).await?;
+    let mut setting = state.setting.lock().await;
+
+    setting.set_proxy(&proxy).await?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn get_proxy(state: State<'_, AppState>) -> Result<Option<String>> {
-    state.get_proxy().await
+    let mut setting = state.setting.lock().await;
+
+    Ok(setting.get_proxy().clone())
 }
 
 #[tauri::command]
 pub async fn has_api_key(state: State<'_, AppState>) -> Result<bool> {
-    state.has_api_key().await
+    let setting = state.setting.lock().await;
+
+    Ok(setting.has_api_key())
 }
+
+// others
 
 #[tauri::command]
 pub async fn show_main_window(window: Window) {

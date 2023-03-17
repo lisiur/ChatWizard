@@ -2,6 +2,8 @@ import { GlobalThemeOverrides } from "naive-ui";
 
 export interface ThemeVars extends GlobalThemeOverrides {
   custom?: {
+    switcherBgColor: string;
+    switcherColor: string;
     assistantMsgBgColor: string;
     assistantMsgColor: string;
     userMsgBgColor: string;

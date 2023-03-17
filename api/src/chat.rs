@@ -105,12 +105,10 @@ impl OpenAIApi {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Topic {
-    pub logs: Vec<ChatLog>,
-}
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct Logs(Vec<ChatLog>);
 
-impl Topic {
+impl Logs {
     pub fn new(topic: Option<String>) -> Self {
         let mut logs = vec![];
 
@@ -124,25 +122,43 @@ impl Topic {
             });
         }
 
-        Self { logs }
+        Self(logs)
     }
 
     pub fn from_logs(logs: Vec<ChatLog>) -> Self {
-        Self { logs }
+        Self(logs)
     }
 
     pub fn messages(&self) -> Vec<Message> {
-        self.logs.iter().map(|log| log.message.clone()).collect()
+        self.0.iter().map(|log| log.message.clone()).collect()
     }
 
     fn limited_messages(&self, limit: usize) -> Vec<Message> {
-        self.logs
+        let mut messages: Vec<Message> = self
+            .0
             .iter()
             .rev()
             .take(limit)
             .rev()
             .map(|log| log.message.clone())
-            .collect()
+            .collect();
+
+        // gpt-3.5-turbo-0301 does not always pay strong attention to system messages.
+        // so we add a user message to the beginning of the message list.
+        if let Some(log) = self.0.first() {
+            let message = &log.message;
+            if matches!(message.role, Role::System) {
+                messages.insert(
+                    0,
+                    Message {
+                        role: Role::User,
+                        content: message.content.clone(),
+                    },
+                );
+            }
+        }
+
+        messages
     }
 
     // Add user message
@@ -155,7 +171,7 @@ impl Topic {
                 content: message.to_string(),
             },
         };
-        self.logs.push(log);
+        self.0.push(log);
         message_id
     }
 
@@ -169,7 +185,7 @@ impl Topic {
                 content: message,
             },
         };
-        self.logs.push(log);
+        self.0.push(log);
         message_id
     }
 
@@ -243,42 +259,30 @@ impl Topic {
 
     fn truncate_message_after(&mut self, id: Uuid) -> Result<()> {
         // find the message index
-        let Some(index) = self.logs.iter().position(|log| log.id == id) else {
+        let Some(index) = self.0.iter().position(|log| log.id == id) else {
             return Err(Error::NotFound("message not found".to_string()))
         };
 
         // remove all messages after the message need to resend
-        self.logs.truncate(index + 1);
-
-        Ok(())
-    }
-
-    fn truncate_message_from(&mut self, id: Uuid) -> Result<()> {
-        // find the message index
-        let Some(index) = self.logs.iter().position(|log| log.id == id) else {
-            return Err(Error::NotFound("message not found".to_string()))
-        };
-
-        // remove all messages from the message need to resend
-        self.logs.truncate(index);
+        self.0.truncate(index + 1);
 
         Ok(())
     }
 
     pub fn discard_message(&mut self, id: Uuid) -> Result<()> {
         // find the message index
-        let Some(index) = self.logs.iter().position(|log| log.id == id) else {
+        let Some(index) = self.0.iter().position(|log| log.id == id) else {
             return Err(Error::NotFound("message not found".to_string()))
         };
 
         // remove the message
-        self.logs.remove(index);
+        self.0.remove(index);
 
         Ok(())
     }
 
     pub fn reset(&mut self) {
-        self.logs.clear();
+        self.0.clear();
     }
 
     pub fn to_json_string(&self) -> String {
@@ -297,7 +301,7 @@ mod tests {
         let mut api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
         api.set_proxy(&std::env::var("PROXY").unwrap());
 
-        let mut topic = Topic::new(Some(
+        let mut topic = Logs::new(Some(
             "Repeat what user says, no more other words".to_string(),
         ));
 

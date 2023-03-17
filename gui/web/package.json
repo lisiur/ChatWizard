@@ -14,6 +14,8 @@
     "@types/lodash-es": "^4.17.7",
     "@types/marked": "^4.0.8",
     "@vicons/fa": "^0.12.0",
+    "@vicons/ionicons5": "^0.12.0",
+    "@vicons/tabler": "^0.12.0",
     "@vitejs/plugin-vue-jsx": "^3.0.0",
     "autoprefixer": "^10.4.13",
     "highlight.js": "^11.7.0",

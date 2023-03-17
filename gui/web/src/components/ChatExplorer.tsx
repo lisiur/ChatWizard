@@ -21,11 +21,11 @@ export default defineComponent({
       <div class="select-none">
         <NScrollbar>
           {props.list?.map((item) => (
-            <ChatColumn
+            <Column
               active={props.active}
               chat={item}
               onAction={(e) => props.onAction?.(e, item.id)}
-            ></ChatColumn>
+            ></Column>
           ))}
         </NScrollbar>
       </div>
@@ -33,7 +33,7 @@ export default defineComponent({
   },
 });
 
-const ChatColumn = defineComponent({
+const Column = defineComponent({
   props: {
     active: String,
     chat: {

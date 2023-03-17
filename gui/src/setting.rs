@@ -1,13 +1,15 @@
-use crate::project::Project;
+use std::path::{Path, PathBuf};
+
+use crate::utils::ensure_file_exists;
 use askai_api::OpenAIApi;
 use serde::{Deserialize, Serialize};
-use std::fs;
+use tokio::fs;
 
 use crate::result::Result;
 
 pub struct Setting {
-    project: Project,
-    pub opts: Opts,
+    setting_path: PathBuf,
+    opts: Opts,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -27,28 +29,24 @@ pub enum Theme {
 }
 
 impl Setting {
-    pub fn init() -> Result<Self> {
-        let project = Project::default();
-        if !project.setting_dir.exists() {
-            fs::create_dir_all(project.setting_dir.as_path())?;
-        }
-        if !project.setting_path.exists() {
-            fs::File::create(project.setting_path.as_path())?;
-        }
+    pub async fn init(setting_path: &Path) -> Result<Self> {
+        ensure_file_exists(setting_path, String::new).await?;
 
-        let opts_string = fs::read_to_string(project.setting_path.as_path())?;
+        let opts_string = fs::read_to_string(setting_path).await?;
 
         let opts: Opts = toml::from_str(&opts_string).unwrap();
 
-        Ok(Setting { project, opts })
+        Ok(Setting {
+            setting_path: setting_path.to_path_buf(),
+            opts,
+        })
     }
 
-    pub fn create_api(&self) -> Result<askai_api::OpenAIApi> {
-        let setting = Setting::init()?;
-        let api_key = setting.opts.api_key.as_deref().unwrap_or("");
+    pub async fn create_api(&self) -> Result<askai_api::OpenAIApi> {
+        let api_key = self.opts.api_key.as_deref().unwrap_or("");
 
         let mut api = OpenAIApi::new(api_key);
-        if let Some(proxy) = &setting.opts.proxy {
+        if let Some(proxy) = &self.opts.proxy {
             api.set_proxy(proxy);
         }
 
@@ -59,24 +57,32 @@ impl Setting {
     //     &self.project.setting_path
     // }
 
-    pub fn set_api_key(&mut self, api_key: &str) -> Result<()> {
-        self.opts.api_key = Some(api_key.to_string());
-        self.save()
+    pub fn has_api_key(&self) -> bool {
+        self.opts.api_key.is_some()
     }
 
-    pub fn set_proxy(&mut self, proxy: &str) -> Result<()> {
+    pub async fn set_api_key(&mut self, api_key: &str) -> Result<()> {
+        self.opts.api_key = Some(api_key.to_string());
+        self.save().await
+    }
+
+    pub fn get_proxy(&mut self) -> &Option<String> {
+        &self.opts.proxy
+    }
+
+    pub async fn set_proxy(&mut self, proxy: &str) -> Result<()> {
         if proxy.is_empty() {
-            self.clear_proxy()?;
+            self.clear_proxy().await?;
         } else {
             self.opts.proxy = Some(proxy.to_string());
-            self.save()?;
+            self.save().await?;
         }
         Ok(())
     }
 
-    pub fn clear_proxy(&mut self) -> Result<()> {
+    pub async fn clear_proxy(&mut self) -> Result<()> {
         self.opts.proxy = None;
-        self.save()
+        self.save().await
     }
 
     // pub fn get_theme(&self) -> Theme {
@@ -93,19 +99,9 @@ impl Setting {
     //     self.save()
     // }
 
-    fn save(&self) -> Result<()> {
+    async fn save(&self) -> Result<()> {
         let opts_string = toml::to_string(&self.opts).unwrap();
-        fs::write(self.project.setting_path.as_path(), opts_string)?;
+        fs::write(self.setting_path.as_path(), opts_string).await?;
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        assert!(Setting::init().is_ok());
     }
 }

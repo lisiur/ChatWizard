@@ -1,27 +1,38 @@
 import { invoke } from "@tauri-apps/api";
 
+export interface ChatMetadata {
+  id: string;
+  title: string;
+  act?: string;
+}
+
+export interface ChatData {
+  id: string;
+  title: string;
+  prompt?: string;
+  logs: Array<{
+    id: string;
+    message: {
+      role: "system" | "user" | "assistant";
+      content: string;
+    };
+  }>;
+}
+
+export interface Prompt {
+  act: string;
+  prompt: string;
+}
+
 export async function allChats() {
-  return invoke<
-    Array<{
-      id: string;
-      title: string;
-    }>
-  >("all_chats");
+  return invoke<Array<ChatMetadata>>("all_chats");
 }
 
 export async function readChat(chatId: string) {
-  return invoke<
-    Array<{
-      id: string;
-      message: {
-        role: "system" | "user" | "assistant";
-        content: string;
-      };
-    }>
-  >("read_chat", { chatId });
+  return invoke<ChatData>("load_chat", { chatId });
 }
 
-export async function createChat(params?: { topic?: string; title?: string }) {
+export async function createChat(params?: { act?: string; title?: string }) {
   return invoke<string>("new_chat", params);
 }
 
@@ -37,8 +48,28 @@ export function resendMessage(chatId: string, messageId: string) {
   return invoke<void>("resend_message", { chatId, messageId });
 }
 
-export function resetChat(chatId: string) {
-  return invoke<void>("reset_chat", { chatId });
+export function allPrompts() {
+  return invoke<
+    Array<{
+      act: string;
+    }>
+  >("all_prompts");
+}
+
+export function createPrompt(prompt: Prompt) {
+  return invoke("create_prompt", { prompt });
+}
+
+export function updatePrompt(prompt: Prompt) {
+  return invoke("update_prompt", { prompt });
+}
+
+export function deletePrompt(act: string) {
+  return invoke("delete_prompt", { act });
+}
+
+export function loadPrompt(act: string) {
+  return invoke<Prompt>("load_prompt", { act });
 }
 
 export function setApiKey(apiKey: string) {

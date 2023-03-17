@@ -19,11 +19,10 @@ import {
   UserMessage,
 } from "../models/message";
 import { useConfig } from "../hooks/config";
-import { NButton, NIcon, NScrollbar, NSpace, NTooltip } from "naive-ui";
+import { NButton, NIcon, NScrollbar, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
-import { AngleDoubleUp, Markdown, Key, NetworkWired } from "@vicons/fa";
-import { dialog, message } from "../utils/prompt";
+import { Markdown, Key, NetworkWired } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";

@@ -30,6 +30,8 @@ const vars: ThemeVars = {
     borderColor: "#333",
   },
   custom: {
+    switcherBgColor: "#222027",
+    switcherColor: "#918f93",
     assistantMsgBgColor: "#2c2c2c",
     assistantMsgColor: "#fff",
     userMsgBgColor: "#59b269",
