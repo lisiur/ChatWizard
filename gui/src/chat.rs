@@ -276,7 +276,7 @@ impl ChatStore {
     }
 
     pub async fn save_chat(&self, chat: &Chat) -> Result<()> {
-        let path = self.chat_save_path(chat.id, &chat.title);
+        let path = self.chat_save_path(chat.id);
         let chat_data = chat.topic_json_string().await;
 
         // Update chat data
@@ -298,7 +298,7 @@ impl ChatStore {
         prompt_manager: Arc<Mutex<PromptManager>>,
     ) -> Result<Chat> {
         let chat_metadata = self.chat_metadata(chat_id)?;
-        let chat_data_path = self.chat_save_path(chat_metadata.id, &chat_metadata.title);
+        let chat_data_path = self.chat_save_path(chat_metadata.id);
         let topic_json_string = fs::read_to_string(&chat_data_path).await?;
         let logs: Logs = serde_json::from_str(&topic_json_string).unwrap();
 
@@ -316,7 +316,7 @@ impl ChatStore {
 
     pub async fn delete_chat(&mut self, chat_id: Uuid) -> Result<()> {
         let chat_metadata = self.chat_metadata(chat_id)?;
-        let chat_data_path = self.chat_save_path(chat_metadata.id, &chat_metadata.title);
+        let chat_data_path = self.chat_save_path(chat_metadata.id);
         fs::remove_file(&chat_data_path).await?;
 
         self.metadata.retain(|chat| chat.id != chat_id);
@@ -335,8 +335,8 @@ impl ChatStore {
         Ok(chat_metadata)
     }
 
-    fn chat_save_path(&self, id: Uuid, title: &str) -> PathBuf {
-        self.data_dir.join(format!("{}_{}.json", id, title))
+    fn chat_save_path(&self, id: Uuid) -> PathBuf {
+        self.data_dir.join(format!("{}.json", id))
     }
 }
 

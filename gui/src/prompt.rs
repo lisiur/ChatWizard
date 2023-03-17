@@ -179,6 +179,6 @@ impl PromptStore {
     }
 
     fn prompt_data_path(&self, act: &str) -> PathBuf {
-        self.data_dir.join(act)
+        self.data_dir.join(act).join(".json")
     }
 }
