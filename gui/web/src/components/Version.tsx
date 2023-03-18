@@ -1,5 +1,4 @@
-import { AngleDoubleUp } from "@vicons/fa";
-import { NButton, NIcon, NSpace } from "naive-ui";
+import { NBadge, NButton, NSpace } from "naive-ui";
 import { defineComponent, ref } from "vue";
 import { useVersion } from "../hooks/version";
 import mdRender from "../utils/mdRender";
@@ -63,15 +62,15 @@ export default defineComponent({
     }
 
     return () => (
-      <div class="flex justify-center text-gray-500 p-2">
-        <span> v{version.value} </span>
-        {hasNewVersion.value ? (
-          <span onClick={showUpdateHandler} class="cursor-pointer">
-            <NIcon color="var(--primary-color)" class="ml-1">
-              <AngleDoubleUp />
-            </NIcon>
+      <div
+        class="flex justify-center p-2"
+        onClick={hasNewVersion.value ? showUpdateHandler : () => null}
+      >
+        <NBadge dot show={hasNewVersion.value}>
+          <span class="select-none cursor-default text-gray-500">
+            v{version.value}
           </span>
-        ) : null}
+        </NBadge>
       </div>
     );
   },
