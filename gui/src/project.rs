@@ -18,7 +18,7 @@ impl Project {
         let config_dir = ProjectDirs::from("com", "lisiur", "askai").unwrap();
 
         let setting_dir = config_dir.config_dir().to_path_buf();
-        let setting_path = setting_dir.join("setting.toml");
+        let setting_path = setting_dir.join("setting.json");
 
         let chat_data_dir = config_dir.data_dir().join("chat_data");
         let chat_metadata_path = config_dir.data_dir().join("chat_metadata.json");

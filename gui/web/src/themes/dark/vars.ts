@@ -43,6 +43,7 @@ const vars: ThemeVars = {
     explorerActiveBgColor: "#363636",
     explorerActiveColor: "",
     chatBtnColor: "#666",
+    inputBgColor: "#2c2c2c"
   },
 };
 

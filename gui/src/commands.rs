@@ -1,14 +1,16 @@
 use std::path::PathBuf;
 
 use askai_api::{Logs, OpenAIApi, StreamContent};
-use tauri::{Manager, State, Window};
+use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
 use crate::chat::ChatMetadata;
 use crate::prompt::{Prompt, PromptMeta};
 use crate::result::Result;
+use crate::setting::{Settings, Theme};
 use crate::state::AppState;
+use crate::window::{self, WindowOptions};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct ChatData {
@@ -193,6 +195,34 @@ pub async fn delete_prompt(act: String, state: State<'_, AppState>) -> Result<()
 // settings
 
 #[tauri::command]
+pub async fn get_settings(state: State<'_, AppState>) -> Result<Settings> {
+    let setting = state.setting.lock().await;
+
+    Ok(setting.settings.clone())
+}
+
+#[tauri::command]
+pub async fn get_theme(state: State<'_, AppState>) -> Result<Option<Theme>> {
+    let setting = state.setting.lock().await;
+
+    Ok(setting.get_theme())
+}
+
+#[tauri::command]
+pub async fn set_theme(theme: Theme, state: State<'_, AppState>, window: Window) -> Result<()> {
+    let mut setting = state.setting.lock().await;
+
+    setting.set_theme(theme.clone()).await?;
+
+    let windows = window.windows();
+    windows.values().for_each(|win| {
+        win.emit("theme-changed", theme.clone()).unwrap();
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn set_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
     let mut setting = state.setting.lock().await;
 
@@ -235,6 +265,18 @@ pub async fn has_api_key(state: State<'_, AppState>) -> Result<bool> {
 // others
 
 #[tauri::command]
-pub async fn show_main_window(window: Window) {
-    window.get_window("main").unwrap().show().unwrap();
+pub async fn show_window(
+    label: String,
+    options: Option<WindowOptions>,
+    window: Window,
+    handle: AppHandle,
+) -> Result<()> {
+    log::debug!("show_window: {} {:?}", label, options);
+    window::show_window_lazy(label, options, window, handle)
+}
+
+#[tauri::command]
+pub async fn debug_log(log: String) -> Result<()> {
+    log::debug!("{}", log);
+    Ok(())
 }

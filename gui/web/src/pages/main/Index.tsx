@@ -1,33 +1,55 @@
 import { defineComponent } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
-import Version from "../components/Version";
+import Version from "../../components/Version";
 import {
   ChatbubbleEllipsesOutline as InactiveChatIcon,
   ChatbubbleEllipses as ActiveChatIcon,
+  Settings as SettingIcon,
 } from "@vicons/ionicons5";
 
 import { Prompt as PromptIcon } from "@vicons/tabler";
 import { NIcon } from "naive-ui";
+import { WebviewWindow } from "@tauri-apps/api/window";
+import { message } from "../../utils/prompt";
+import { showWindow } from "../../api";
 
 export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
 
-    const menus = [
+    const topMenus = [
       {
         name: "chat",
-        url: router.resolve({ name: "chat" }).href,
+        url: router.resolve({ name: "chat" }).path,
         icon: InactiveChatIcon,
         activeIcon: ActiveChatIcon,
       },
       {
         name: "prompt",
-        url: router.resolve({ name: "prompt" }).href,
+        url: router.resolve({ name: "prompt" }).path,
         icon: PromptIcon,
         activeIcon: PromptIcon,
       },
     ];
+
+    const bottomMenus = [
+      {
+        title: "Setting",
+        name: "setting",
+        url: router.resolve({ name: "setting" }).path,
+        icon: SettingIcon,
+      },
+    ];
+
+    function actionHandler(action: typeof bottomMenus[0]) {
+      showWindow("setting", {
+        title: action.title,
+        url: `/#${action.url}`,
+        width: 500,
+        height: 400,
+      });
+    }
 
     return () => (
       <div class="h-full flex">
@@ -36,7 +58,7 @@ export default defineComponent({
           style="background-color: var(--switcher-bg-color); border-color: var(--border-color)"
         >
           <div class="grid gap-1 place-content-center">
-            {menus.map((m) => {
+            {topMenus.map((m) => {
               const isActive = route.name === m.name;
               const color = isActive
                 ? "var(--primary-color)"
@@ -51,7 +73,19 @@ export default defineComponent({
               );
             })}
           </div>
-          <div class="mt-auto flex justify-center">
+          <div class="mt-auto flex justify-center items-center flex-col">
+            <div class="grid gap-1 place-content-center">
+              {bottomMenus.map((m) => {
+                const Icon = m.icon;
+                return (
+                  <div class="mt-4" onClick={() => actionHandler(m)}>
+                    <NIcon size="2rem" color="var(--switcher-color)">
+                      <Icon></Icon>
+                    </NIcon>
+                  </div>
+                );
+              })}
+            </div>
             <Version></Version>
           </div>
         </div>

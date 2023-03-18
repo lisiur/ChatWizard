@@ -1,7 +1,7 @@
 import { defineComponent, ref } from "vue";
-import * as api from "../api";
-import PromptExplorer from "../components/PromptExplorer";
-import { message, prompt } from "../utils/prompt";
+import * as api from "../../api";
+import PromptExplorer from "../../components/PromptExplorer";
+import { message, prompt } from "../../utils/prompt";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon, NScrollbar } from "naive-ui";
 import { useRouter } from "vue-router";
@@ -64,18 +64,14 @@ export default defineComponent({
     }
 
     async function newChatHandler(act: string) {
-      prompt("Please input chat title:", {
-        async okHandler(title) {
-          const chatId = await api.createChat({
-            title,
-            act,
-          });
-          router.push({
-            name: "chat",
-            query: {
-              id: chatId,
-            },
-          });
+      const chatId = await api.createChat({
+        title: act,
+        act,
+      });
+      router.push({
+        name: "chat",
+        query: {
+          id: chatId,
         },
       });
     }
@@ -157,8 +153,8 @@ export default defineComponent({
               <textarea
                 ref={promptRef}
                 v-model={currentPrompt.value.prompt}
-                class="p-4 h-full resize-none w-full bg-transparent outline-none placeholder-slate-500"
-                style="color: var(--input-msg-color)"
+                class="p-4 h-full resize-none w-full outline-none placeholder-slate-500"
+                style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
                 onFocusout={updateHandler}
                 onInput={(e) =>
                   autoGrowHandler(e.target as HTMLTextAreaElement)

@@ -35,6 +35,38 @@
         "message": false,
         "open": false,
         "save": true
+      },
+      "window": {
+        "all": false,
+        "center": false,
+        "close": false,
+        "create": true,
+        "hide": false,
+        "maximize": false,
+        "minimize": false,
+        "print": false,
+        "requestUserAttention": false,
+        "setAlwaysOnTop": false,
+        "setCursorGrab": false,
+        "setCursorIcon": false,
+        "setCursorPosition": false,
+        "setCursorVisible": false,
+        "setDecorations": false,
+        "setFocus": false,
+        "setFullscreen": false,
+        "setIcon": false,
+        "setIgnoreCursorEvents": false,
+        "setMaxSize": false,
+        "setMinSize": false,
+        "setPosition": false,
+        "setResizable": false,
+        "setSize": false,
+        "setSkipTaskbar": false,
+        "setTitle": false,
+        "show": false,
+        "startDragging": false,
+        "unmaximize": false,
+        "unminimize": false
       }
     },
     "bundle": {
@@ -89,7 +121,9 @@
         "height": 680,
         "resizable": true,
         "title": "AskAI",
-        "visible": false
+        "visible": false,
+        "label": "main",
+        "url": "index.html"
       }
     ]
   }

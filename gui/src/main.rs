@@ -12,6 +12,7 @@ mod result;
 mod setting;
 mod state;
 mod utils;
+mod window;
 
 #[tokio::main]
 async fn main() {
@@ -27,16 +28,20 @@ async fn main() {
             commands::resend_message,
             commands::set_api_key,
             commands::check_api_key,
+            commands::get_settings,
+            commands::get_theme,
+            commands::set_theme,
             commands::set_proxy,
             commands::get_proxy,
             commands::has_api_key,
-            commands::show_main_window,
             commands::save_as_markdown,
             commands::all_prompts,
             commands::create_prompt,
             commands::update_prompt,
             commands::delete_prompt,
             commands::load_prompt,
+            commands::show_window,
+            commands::debug_log,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

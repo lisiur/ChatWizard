@@ -6,22 +6,28 @@ export default createRouter({
     {
       path: "/",
       component: () => import("./App"),
+      redirect: "/main/chat",
       children: [
         {
-          path: "",
-          component: () => import("./pages/Main"),
+          path: "main",
+          component: () => import("./pages/main/Index"),
           children: [
             {
               name: "chat",
-              path: "",
-              component: () => import("./pages/Chat"),
+              path: "chat",
+              component: () => import("./pages/main/Chat"),
             },
             {
               name: "prompt",
               path: "prompt",
-              component: () => import("./pages/Prompt"),
+              component: () => import("./pages/main/Prompt"),
             },
           ],
+        },
+        {
+          name: "setting",
+          path: "setting",
+          component: () => import("./pages/setting/Index"),
         },
       ],
     },

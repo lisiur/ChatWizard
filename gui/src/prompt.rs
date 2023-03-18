@@ -128,6 +128,8 @@ impl PromptStore {
     pub async fn add_prompt(&mut self, prompt: &Prompt) -> Result<()> {
         let act = &prompt.act;
 
+        // save prompt data
+        self.save_data(prompt).await?;
         let meta = PromptMeta {
             act: act.to_string(),
         };
@@ -135,9 +137,6 @@ impl PromptStore {
         // update meta
         self.meta_list.push(meta.clone());
         self.save_meta().await?;
-
-        // save prompt data
-        self.save_data(prompt).await?;
 
         Ok(())
     }
@@ -169,16 +168,17 @@ impl PromptStore {
     }
 
     pub async fn save_data(&self, prompt: &Prompt) -> Result<()> {
-        fs::write(
-            &self.prompt_data_path(&prompt.act),
-            serde_json::to_string(prompt).unwrap(),
-        )
-        .await?;
+        log::debug!("save prompt data: {:?}", prompt);
+
+        let save_path = self.prompt_data_path(&prompt.act);
+        log::debug!("save prompt path: {:?}", &save_path);
+
+        fs::write(&save_path, serde_json::to_string(prompt).unwrap()).await?;
 
         Ok(())
     }
 
     fn prompt_data_path(&self, act: &str) -> PathBuf {
-        self.data_dir.join(act).join(".json")
+        self.data_dir.join(format!("{}.json", act))
     }
 }

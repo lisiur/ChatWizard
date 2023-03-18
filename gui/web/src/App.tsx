@@ -1,31 +1,46 @@
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onBeforeUnmount, onMounted } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { invoke } from "@tauri-apps/api";
-import { setTheme } from "./themes";
-import { listen } from "@tauri-apps/api/event";
+import { getTheme, Theme, showWindow, debugLog } from "./api";
+import { setTheme } from "./utils/theme";
+import { useRoute } from "vue-router";
 import { window } from "@tauri-apps/api";
+import { UnlistenFn } from "@tauri-apps/api/event";
 
 export default defineComponent({
   setup() {
-    window
-      .getCurrent()
-      .theme()
-      .then((theme) => {
-        setTheme(theme ?? "light");
-      });
-    listen("tauri://theme-changed", (payload) => {
-      const theme = payload.payload as "light" | "dark";
-      setTheme(theme);
-    });
+    const route = useRoute();
+    const windowLabel = route.path.split("/")[1];
+
+    let unListen: UnlistenFn;
 
     onMounted(() => {
-      invoke("show_main_window");
+      getTheme().then(async (theme) => {
+        setTheme(theme ?? Theme.System);
+        if (windowLabel) {
+          unListen = await window.getCurrent().listen("theme-changed", (e) => {
+            debugLog(`window: ${windowLabel} change theme to ${e.payload}`);
+            setTheme(e.payload as Theme);
+          });
+          debugLog(`current window: ${windowLabel}`);
+          showWindow(windowLabel);
+        }
+      });
+    });
+
+    onBeforeUnmount(() => {
+      if (unListen) {
+        unListen();
+      }
     });
 
     return () => (
-      <NConfigProvider class="h-full" {...configProviderProps.value}>
+      <NConfigProvider
+        class="h-full"
+        style="background-color: var(--body-color)"
+        {...configProviderProps.value}
+      >
         <RouterView />
       </NConfigProvider>
     );

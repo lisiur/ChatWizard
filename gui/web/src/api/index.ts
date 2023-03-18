@@ -24,6 +24,26 @@ export interface Prompt {
   prompt: string;
 }
 
+export interface Settings {
+  apiKey?: string;
+  orgId?: string;
+  proxy?: string;
+  theme?: Theme;
+}
+
+export enum Theme {
+  Light = "light",
+  Dark = "dark",
+  System = "system",
+}
+
+export interface WindowOptions {
+  title: string;
+  url?: string;
+  width: number;
+  height: number;
+}
+
 export async function allChats() {
   return invoke<Array<ChatMetadata>>("all_chats");
 }
@@ -72,6 +92,18 @@ export function loadPrompt(act: string) {
   return invoke<Prompt>("load_prompt", { act });
 }
 
+export function getSettings() {
+  return invoke<Settings>("get_settings");
+}
+
+export function setTheme(theme: Theme) {
+  return invoke<void>("set_theme", { theme });
+}
+
+export function getTheme() {
+  return invoke<Theme | undefined>("get_theme");
+}
+
 export function setApiKey(apiKey: string) {
   return invoke<void>("set_api_key", { apiKey });
 }
@@ -92,13 +124,17 @@ export function hasApiKey() {
   return invoke<boolean>("has_api_key");
 }
 
-export function showMainWindow() {
-  return invoke<void>("show_main_window");
-}
-
 export function saveAsMarkdown(chatId: string, path: string) {
   return invoke<void>("save_as_markdown", {
     chatId,
     path,
   });
+}
+
+export function showWindow(label: string, options?: WindowOptions) {
+  return invoke<void>("show_window", { label, options });
+}
+
+export function debugLog(log: string) {
+  return invoke<void>("debug_log", { log });
 }

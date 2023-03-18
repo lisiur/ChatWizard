@@ -1,10 +1,10 @@
 import { defineComponent, ref } from "vue";
-import ChatComp from "../components/Chat";
-import ExplorerComp from "../components/ChatExplorer";
-import * as api from "../api";
-import { Chat } from "../models/chat";
-import { AssistantMessage, Message, UserMessage } from "../models/message";
-import { prompt } from "../utils/prompt";
+import ChatComp from "../../components/Chat";
+import ExplorerComp from "../../components/ChatExplorer";
+import * as api from "../../api";
+import { Chat } from "../../models/chat";
+import { AssistantMessage, Message, UserMessage } from "../../models/message";
+import { prompt } from "../../utils/prompt";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
@@ -25,25 +25,22 @@ export default defineComponent({
       selectChatHandler(route.query.id as string);
     }
 
-    function refreshChatMetaList() {
-      api.allChats().then((list) => {
+    async function refreshChatMetaList() {
+      await api.allChats().then((list) => {
         chatMetaList.value = list;
       });
     }
 
     async function createChat() {
-      prompt("Please input chat title:", {
-        async okHandler(title) {
-          const chatId = await api.createChat({
-            title,
-          });
-          const chat = new Chat(chatId);
-          refreshChatMetaList();
-          currentChat.value = chat;
-          setTimeout(() => {
-            chatRef.value?.focusInput();
-          });
-        },
+      const chatId = await api.createChat({
+        title: "New Chat",
+      });
+      const chat = new Chat(chatId);
+      await refreshChatMetaList();
+      currentChatMeta.value = chatMetaList.value.find((m) => m.id === chatId)!;
+      currentChat.value = chat;
+      setTimeout(() => {
+        chatRef.value?.focusInput();
       });
     }
 
