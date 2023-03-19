@@ -27,6 +27,7 @@ import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
 import { ChatMetadata } from "../api";
+import { useI18n } from "../hooks/i18n";
 
 export default defineComponent({
   props: {
@@ -40,6 +41,8 @@ export default defineComponent({
     },
   },
   setup(props, { expose }) {
+    const { t } = useI18n();
+
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
@@ -107,6 +110,201 @@ export default defineComponent({
       inputRef.value?.focus();
     }
 
+    function renderButton(props: {
+      icon: DefineComponent<any, any, any>;
+      tooltip: string;
+      handler: () => void;
+    }) {
+      return (
+        <NTooltip trigger="hover" delay={500}>
+          {{
+            trigger: () => (
+              <button
+                class="bg-transparent rounded px-2 py-1"
+                onClick={props.handler}
+              >
+                <NIcon
+                  size="1rem"
+                  class="text-[var(--chat-btn-color)] hover:text-[var(--primary-color)]"
+                >
+                  <props.icon></props.icon>
+                </NIcon>
+              </button>
+            ),
+            default: () => props.tooltip,
+          }}
+        </NTooltip>
+      );
+    }
+
+    function renderAvatar(avatar: string) {
+      return <img src={avatar} class="w-8 h-8 "></img>;
+    }
+
+    function renderTriangle(
+      direction: "left" | "right",
+      style?: {
+        color: string;
+        size: string;
+      }
+    ) {
+      if (direction === "left") {
+        return (
+          <div
+            class={"border-solid border-y-transparent border-l-0"}
+            style={{
+              borderRightColor: style?.color,
+              borderRightWidth: style?.size,
+              borderTopWidth: style?.size,
+              borderBottomWidth: style?.size,
+            }}
+          ></div>
+        );
+      } else if (direction === "right") {
+        return (
+          <div
+            class={"border-solid border-y-transparent border-r-0"}
+            style={{
+              borderLeftColor: style?.color,
+              borderLeftWidth: style?.size,
+              borderTopWidth: style?.size,
+              borderBottomWidth: style?.size,
+            }}
+          ></div>
+        );
+      }
+    }
+
+    function renderMessage(
+      message: Message,
+      chat: Chat,
+      params?: { onFinish?: () => void }
+    ) {
+      if (message instanceof AssistantMessage) {
+        return renderAssistantMessage(message);
+      } else if (message instanceof UserMessage) {
+        return renderUserMessage(message, chat, params);
+      } else if (message instanceof ErrorMessage) {
+        return renderErrorMessage(message);
+      }
+    }
+
+    function renderAssistantMessage(message: AssistantMessage) {
+      const html = mdRender(message.content);
+      return (
+        <div class="flex relative justify-start items-start pl-4 pr-24">
+          {renderAvatar(assistantAvatar)}
+          <div class="relative ml-2 flex-1 overflow-hidden">
+            <div class="absolute left-[-.2rem] top-1">
+              {renderTriangle("left", {
+                color: "var(--assistant-msg-bg-color)",
+                size: ".5rem",
+              })}
+            </div>
+            <div
+              class="markdown-root inline-block px-3 ml-1 rounded-md z-1"
+              style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
+              v-html={html}
+            ></div>
+          </div>
+          {message.done ? (
+            <div class="absolute bottom-[-1.2rem] left-14 text-xs">
+              <NButton
+                type="default"
+                text
+                size="tiny"
+                class="ml-2 text-gray-500"
+                onClick={() => writeToClipboard(message.content)}
+              >
+                {t("common.copy")}
+              </NButton>
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    function renderUserMessage(
+      message: UserMessage,
+      chat: Chat,
+      params?: { onFinish?: () => void }
+    ) {
+      return (
+        <div class="flex justify-end items-start pr-4 pl-24">
+          <div class="relative mr-2">
+            <div
+              class="inline-block py-2 px-3 mr-1 rounded-md"
+              style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
+            >
+              {message.content}
+            </div>
+            <div class="absolute right-[-.2rem] top-1">
+              {renderTriangle("right", {
+                color: "var(--user-msg-bg-color)",
+                size: ".5rem",
+              })}
+            </div>
+            <div class="absolute bottom-[-1.1rem] right-0 text-xs">
+              {(() => {
+                switch (message.delivered) {
+                  case null: {
+                    break;
+                  }
+                  case true: {
+                    return (
+                      <span class="text-gray-600">{t("chat.delivered")}</span>
+                    );
+                  }
+                  case false: {
+                    return (
+                      <NButton
+                        type="error"
+                        text
+                        size="tiny"
+                        class="mr-2"
+                        onClick={() => chat.resendMessage(message.id, params)}
+                      >
+                        resend
+                      </NButton>
+                    );
+                  }
+                }
+              })()}
+            </div>
+          </div>
+          {renderAvatar(userAvatar)}
+        </div>
+      );
+    }
+
+    function renderErrorMessage(message: ErrorMessage) {
+      return (
+        <div class="flex justify-center px-16">
+          <div class="text-xs text-white bg-red-400 px-4 py-1 rounded">
+            {(() => {
+              switch (message.error.type) {
+                case "network": {
+                  const error = message.error.data;
+                  switch (error.type) {
+                    case "timeout": {
+                      return "Timeout";
+                    }
+                    case "unknown": {
+                      return error.message;
+                    }
+                  }
+                }
+                case "api": {
+                  const error = message.error.data;
+                  return error.message;
+                }
+              }
+            })()}
+          </div>
+        </div>
+      );
+    }
+
     const publicExpose = {
       focusInput,
     };
@@ -144,7 +342,7 @@ export default defineComponent({
               {renderButton({
                 handler: exportMarkdown,
                 icon: Markdown,
-                tooltip: "Export Markdown",
+                tooltip: t("chat.exportMarkdown"),
               })}
             </div>
           </div>
@@ -161,196 +359,3 @@ export default defineComponent({
     )) as unknown as typeof publicExpose;
   },
 });
-
-function renderButton(props: {
-  icon: DefineComponent<any, any, any>;
-  tooltip: string;
-  handler: () => void;
-}) {
-  return (
-    <NTooltip trigger="hover" delay={500}>
-      {{
-        trigger: () => (
-          <button
-            class="bg-transparent rounded px-2 py-1"
-            onClick={props.handler}
-          >
-            <NIcon
-              size="1rem"
-              class="text-[var(--chat-btn-color)] hover:text-[var(--primary-color)]"
-            >
-              <props.icon></props.icon>
-            </NIcon>
-          </button>
-        ),
-        default: () => props.tooltip,
-      }}
-    </NTooltip>
-  );
-}
-
-function renderAvatar(avatar: string) {
-  return <img src={avatar} class="w-8 h-8 "></img>;
-}
-
-function renderTriangle(
-  direction: "left" | "right",
-  style?: {
-    color: string;
-    size: string;
-  }
-) {
-  if (direction === "left") {
-    return (
-      <div
-        class={"border-solid border-y-transparent border-l-0"}
-        style={{
-          borderRightColor: style?.color,
-          borderRightWidth: style?.size,
-          borderTopWidth: style?.size,
-          borderBottomWidth: style?.size,
-        }}
-      ></div>
-    );
-  } else if (direction === "right") {
-    return (
-      <div
-        class={"border-solid border-y-transparent border-r-0"}
-        style={{
-          borderLeftColor: style?.color,
-          borderLeftWidth: style?.size,
-          borderTopWidth: style?.size,
-          borderBottomWidth: style?.size,
-        }}
-      ></div>
-    );
-  }
-}
-
-function renderMessage(
-  message: Message,
-  chat: Chat,
-  params?: { onFinish?: () => void }
-) {
-  if (message instanceof AssistantMessage) {
-    return renderAssistantMessage(message);
-  } else if (message instanceof UserMessage) {
-    return renderUserMessage(message, chat, params);
-  } else if (message instanceof ErrorMessage) {
-    return renderErrorMessage(message);
-  }
-}
-
-function renderAssistantMessage(message: AssistantMessage) {
-  const html = mdRender(message.content);
-  return (
-    <div class="flex relative justify-start items-start pl-4 pr-24">
-      {renderAvatar(assistantAvatar)}
-      <div class="relative ml-2 flex-1 overflow-hidden">
-        <div class="absolute left-[-.2rem] top-1">
-          {renderTriangle("left", {
-            color: "var(--assistant-msg-bg-color)",
-            size: ".5rem",
-          })}
-        </div>
-        <div
-          class="markdown-root inline-block px-3 ml-1 rounded-md z-1"
-          style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
-          v-html={html}
-        ></div>
-      </div>
-      {message.done ? (
-        <div class="absolute bottom-[-1.2rem] left-14 text-xs">
-          <NButton
-            type="default"
-            text
-            size="tiny"
-            class="ml-2 text-gray-500"
-            onClick={() => writeToClipboard(message.content)}
-          >
-            copy
-          </NButton>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function renderUserMessage(
-  message: UserMessage,
-  chat: Chat,
-  params?: { onFinish?: () => void }
-) {
-  return (
-    <div class="flex justify-end items-start pr-4 pl-24">
-      <div class="relative mr-2">
-        <div
-          class="inline-block py-2 px-3 mr-1 rounded-md"
-          style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
-        >
-          {message.content}
-        </div>
-        <div class="absolute right-[-.2rem] top-1">
-          {renderTriangle("right", {
-            color: "var(--user-msg-bg-color)",
-            size: ".5rem",
-          })}
-        </div>
-        <div class="absolute bottom-[-1.1rem] right-0 text-xs">
-          {(() => {
-            switch (message.delivered) {
-              case null: {
-                break;
-              }
-              case true: {
-                return <span class="text-gray-600">delivered</span>;
-              }
-              case false: {
-                return (
-                  <NButton
-                    type="error"
-                    text
-                    size="tiny"
-                    class="mr-2"
-                    onClick={() => chat.resendMessage(message.id, params)}
-                  >
-                    resend
-                  </NButton>
-                );
-              }
-            }
-          })()}
-        </div>
-      </div>
-      {renderAvatar(userAvatar)}
-    </div>
-  );
-}
-
-function renderErrorMessage(message: ErrorMessage) {
-  return (
-    <div class="flex justify-center px-16">
-      <div class="text-xs text-white bg-red-400 px-4 py-1 rounded">
-        {(() => {
-          switch (message.error.type) {
-            case "network": {
-              const error = message.error.data;
-              switch (error.type) {
-                case "timeout": {
-                  return "Timeout";
-                }
-                case "unknown": {
-                  return error.message;
-                }
-              }
-            }
-            case "api": {
-              const error = message.error.data;
-              return error.message;
-            }
-          }
-        })()}
-      </div>
-    </div>
-  );
-}

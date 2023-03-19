@@ -1,13 +1,29 @@
 import { NForm, NFormItem, NInput, NSelect } from "naive-ui";
 import { defineComponent, nextTick } from "vue";
-import { getSettings, setApiKey, setProxy, setTheme, Theme } from "../../api";
+import {
+  getSettings,
+  setApiKey,
+  setLocale,
+  setProxy,
+  setTheme,
+  Theme,
+} from "../../api";
 import { useAsyncData } from "../../hooks/asyncData";
+import { useI18n } from "../../hooks/i18n";
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
+
     const model = useAsyncData(async () => {
       return getSettings();
     }, {});
+
+    async function changeLocaleHandler() {
+      nextTick().then(async () => {
+        await setLocale(model.value.locale as string);
+      });
+    }
 
     async function changeApiKeyHandler() {
       await setApiKey(model.value.apiKey ?? "");
@@ -24,11 +40,31 @@ export default defineComponent({
     }
 
     return () => (
-      <div data-tauri-drag-region class="h-full p-8 flex flex-col">
-        <div class="flex-1 overflow-auto">
+      <div
+        data-tauri-drag-region
+        class="h-full p-8 flex flex-col justify-center"
+      >
+        <div class="mt-8">
           {model.value ? (
             <NForm model={model.value} labelPlacement="left" labelWidth="5rem">
-              <NFormItem label="Api Key">
+              <NFormItem label={t("setting.locale")}>
+                <NSelect
+                  v-model:value={model.value.locale}
+                  placeholder="Locale"
+                  onUpdateValue={changeLocaleHandler}
+                  options={[
+                    {
+                      label: "English",
+                      value: "enUS",
+                    },
+                    {
+                      label: "中文",
+                      value: "zhCN",
+                    },
+                  ]}
+                ></NSelect>
+              </NFormItem>
+              <NFormItem label={t("setting.apiKey")}>
                 <NInput
                   v-model:value={model.value.apiKey}
                   type="password"
@@ -36,29 +72,27 @@ export default defineComponent({
                   onBlur={changeApiKeyHandler}
                 ></NInput>
               </NFormItem>
-              <NFormItem label="Proxy">
+              <NFormItem label={t("setting.proxy")}>
                 <NInput
                   v-model:value={model.value.proxy}
-                  placeholder="Proxy"
                   onBlur={changeProxyHandler}
                 ></NInput>
               </NFormItem>
-              <NFormItem label="Theme">
+              <NFormItem label={t("setting.theme")}>
                 <NSelect
                   v-model:value={model.value.theme}
-                  placeholder="Theme"
                   onUpdateValue={changeThemeHandler}
                   options={[
                     {
-                      label: "System",
+                      label: t("setting.theme.system"),
                       value: "system",
                     },
                     {
-                      label: "Light",
+                      label: t("setting.theme.light"),
                       value: "light",
                     },
                     {
-                      label: "Dark",
+                      label: t("setting.theme.dark"),
                       value: "dark",
                     },
                   ]}

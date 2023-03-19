@@ -2,38 +2,52 @@ import { defineComponent, onBeforeUnmount, onMounted } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { getTheme, Theme, showWindow, debugLog } from "./api";
+import { getTheme, Theme, showWindow, getLocale, debugLog } from "./api";
 import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { window } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/event";
+import { setupLifeCycle } from "./utils/setupLifeCycle";
+import { setLocale } from "./hooks/i18n";
 
 export default defineComponent({
   setup() {
     const route = useRoute();
     const windowLabel = route.path.split("/")[1];
+    debugLog(`window label: ${windowLabel}`);
 
-    let unListen: UnlistenFn;
+    setupLifeCycle()
+      .onMounted((ctx) => {
+        getTheme().then(async (theme) => {
+          setTheme(theme ?? Theme.System);
 
-    onMounted(() => {
-      getTheme().then(async (theme) => {
-        setTheme(theme ?? Theme.System);
-        if (windowLabel) {
-          unListen = await window.getCurrent().listen("theme-changed", (e) => {
-            debugLog(`window: ${windowLabel} change theme to ${e.payload}`);
-            setTheme(e.payload as Theme);
-          });
-          debugLog(`current window: ${windowLabel}`);
-          showWindow(windowLabel);
-        }
-      });
-    });
+          // show window after theme is set
+          // to avoid flash of unstyled content
+          if (windowLabel) {
+            debugLog(`show window: ${windowLabel}`);
+            showWindow(windowLabel);
+          }
 
-    onBeforeUnmount(() => {
-      if (unListen) {
-        unListen();
-      }
-    });
+          const unListen = await window
+            .getCurrent()
+            .listen("theme-changed", (e) => {
+              setTheme(e.payload as Theme);
+            });
+          ctx.onBeforeUnmount(unListen);
+        });
+      })
+      .onMounted((ctx) => {
+        getLocale().then(async (_locale) => {
+          const locale = _locale || "enUS";
+          setLocale(locale);
+          const unListen = await window
+            .getCurrent()
+            .listen("locale-changed", (e) => {
+              setLocale(e.payload as string);
+            });
+          ctx.onBeforeUnmount(unListen);
+        });
+      })
+      .setup();
 
     return () => (
       <NConfigProvider

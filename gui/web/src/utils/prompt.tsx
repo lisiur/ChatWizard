@@ -5,11 +5,14 @@ import { MessageApiInjection } from "naive-ui/es/message/src/MessageProvider";
 import { NotificationApiInjection } from "naive-ui/es/notification/src/NotificationProvider";
 import { DialogApiInjection } from "naive-ui/es/dialog/src/DialogProvider";
 import { LoadingBarApiInjection } from "naive-ui/es/loading-bar/src/LoadingBarProvider";
+import { i18n } from "../hooks/i18n";
 
 let message!: MessageApiInjection;
 let notification!: NotificationApiInjection;
 let dialog!: DialogApiInjection;
 let loadingBar!: LoadingBarApiInjection;
+
+const { t } = i18n.global;
 
 watch(
   configProviderProps,
@@ -69,10 +72,10 @@ async function prompt(
       action: () => (
         <NSpace>
           {showCancel ? (
-            <NButton onClick={cancelHandler}>Cancel</NButton>
+            <NButton onClick={cancelHandler}>{t("common.cancel")}</NButton>
           ) : null}
           <NButton type="primary" onClick={okHandler} loading={loading.value}>
-            Ok
+            {t("common.ok")}
           </NButton>
         </NSpace>
       ),

@@ -7,9 +7,11 @@ import { AssistantMessage, Message, UserMessage } from "../../models/message";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
+import { useI18n } from "../../hooks/i18n";
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
     const route = useRoute();
 
     const chatRef = ref<InstanceType<typeof ChatComp>>();
@@ -112,9 +114,9 @@ export default defineComponent({
             <NIcon class="mr-1">
               <PlusIcon />
             </NIcon>
-            <span> New Chat </span>
+            <span> {t("chat.new")} </span>
           </div>
-          <div class="p-2 text-gray-400">Conversations</div>
+          <div class="p-2 text-gray-400">{t("chat.conversations")}</div>
           <ExplorerComp
             class="flex-1 overflow-auto"
             active={currentChat.value?.id}

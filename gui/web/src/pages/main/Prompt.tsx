@@ -5,9 +5,12 @@ import { message, prompt } from "../../utils/prompt";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon, NScrollbar } from "naive-ui";
 import { useRouter } from "vue-router";
+import { useI18n } from "../../hooks/i18n";
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
+
     const router = useRouter();
 
     const promptRef = ref<HTMLInputElement>();
@@ -26,7 +29,7 @@ export default defineComponent({
     }
 
     async function createPrompt() {
-      prompt("Please input prompt name:", {
+      prompt(t("prompt.inputNameHint"), {
         async okHandler(title) {
           const prompt: api.Prompt = {
             act: title,
@@ -134,9 +137,9 @@ export default defineComponent({
             <NIcon class="mr-1">
               <PlusIcon />
             </NIcon>
-            <span> New Prompt </span>
+            <span> {t("prompt.new")} </span>
           </div>
-          <div class="p-2 text-gray-400">Prompts</div>
+          <div class="p-2 text-gray-400">{t("prompt.prompts")}</div>
           <PromptExplorer
             class="flex-1 overflow-auto"
             active={currentPrompt.value?.act}

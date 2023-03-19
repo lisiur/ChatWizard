@@ -58,7 +58,7 @@ export default defineComponent({
             title: "Setting",
             url: `/#${router.resolve({ name: "setting" }).path}`,
             width: 500,
-            height: 250,
+            height: 300,
           });
           break;
         }

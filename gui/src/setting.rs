@@ -21,6 +21,7 @@ pub struct Settings {
     pub org_id: Option<String>,
     pub proxy: Option<String>,
     pub theme: Option<Theme>,
+    pub locale: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -96,6 +97,17 @@ impl Setting {
 
     pub async fn set_theme(&mut self, theme: Theme) -> Result<()> {
         self.settings.theme = Some(theme);
+        self.save().await?;
+
+        Ok(())
+    }
+
+    pub fn get_locale(&self) -> String {
+        self.settings.locale.clone().unwrap_or("enUS".to_string())
+    }
+
+    pub async fn set_locale(&mut self, locale: &str) -> Result<()> {
+        self.settings.locale = Some(locale.to_string());
         self.save().await?;
 
         Ok(())

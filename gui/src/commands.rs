@@ -262,6 +262,27 @@ pub async fn has_api_key(state: State<'_, AppState>) -> Result<bool> {
     Ok(setting.has_api_key())
 }
 
+#[tauri::command]
+pub async fn get_locale(state: State<'_, AppState>) -> Result<String> {
+    let setting = state.setting.lock().await;
+
+    Ok(setting.get_locale())
+}
+
+#[tauri::command]
+pub async fn set_locale(locale: String, state: State<'_, AppState>, window: Window) -> Result<()> {
+    let mut setting = state.setting.lock().await;
+
+    setting.set_locale(&locale).await?;
+
+    let windows = window.windows();
+    windows.values().for_each(|win| {
+        win.emit("locale-changed", locale.clone()).unwrap();
+    });
+
+    Ok(())
+}
+
 // others
 
 #[tauri::command]

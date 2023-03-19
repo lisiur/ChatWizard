@@ -29,6 +29,7 @@ export interface Settings {
   orgId?: string;
   proxy?: string;
   theme?: Theme;
+  locale?: string;
 }
 
 export enum Theme {
@@ -122,6 +123,14 @@ export function getProxy() {
 
 export function hasApiKey() {
   return invoke<boolean>("has_api_key");
+}
+
+export function getLocale() {
+  return invoke<string>("get_locale");
+}
+
+export function setLocale(locale: string) {
+  return invoke<void>("set_locale", { locale });
 }
 
 export function saveAsMarkdown(chatId: string, path: string) {

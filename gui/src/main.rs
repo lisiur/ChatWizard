@@ -28,7 +28,8 @@ async fn main() {
                     .inner_size(860.0, 720.0)
                     .min_inner_size(720.0, 640.0)
                     .resizable(true)
-                    .visible(false);
+                    .visible(true);
+
             if cfg!(target_os = "macos") {
                 main_window_builder = main_window_builder
                     .title("")
@@ -53,6 +54,8 @@ async fn main() {
             commands::set_proxy,
             commands::get_proxy,
             commands::has_api_key,
+            commands::get_locale,
+            commands::set_locale,
             commands::save_as_markdown,
             commands::all_prompts,
             commands::create_prompt,
