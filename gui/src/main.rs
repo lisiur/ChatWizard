@@ -30,7 +30,8 @@ async fn main() {
                     .resizable(true)
                     .visible(true);
 
-            if cfg!(target_os = "macos") {
+            #[cfg(target_os = "macos")]
+            {
                 main_window_builder = main_window_builder
                     .title("")
                     .title_bar_style(tauri::TitleBarStyle::Overlay);

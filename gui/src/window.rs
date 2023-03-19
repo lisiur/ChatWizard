@@ -40,7 +40,8 @@ pub fn show_window_lazy(
                 .title(&title)
                 .resizable(resizable);
 
-            if cfg!(target_os = "macos") {
+            #[cfg(target_os = "macos")]
+            {
                 builder = builder
                     .title("")
                     .title_bar_style(tauri::TitleBarStyle::Overlay);
