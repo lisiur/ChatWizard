@@ -26,6 +26,7 @@ import { Markdown, Key, NetworkWired } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
+import { ChatMetadata } from "../api";
 
 export default defineComponent({
   props: {
@@ -34,7 +35,7 @@ export default defineComponent({
       required: true,
     },
     chatMetaData: {
-      type: Object as PropType<{ title: string; id: string }>,
+      type: Object as PropType<ChatMetadata>,
       required: true,
     },
   },
@@ -63,7 +64,6 @@ export default defineComponent({
     onMounted(() => {
       nextTick(scrollToBottom);
     });
-
     onBeforeUnmount(() => {
       destroyAutoScroll();
     });
@@ -117,19 +117,27 @@ export default defineComponent({
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
-        <div class="flex-1 overflow-hidden">
-          <NScrollbar ref={scrollRef} class="py-4">
-            <div class="grid gap-6">
-              {props.chat.messages.map((message, index) => (
-                <div key={index}>
-                  {renderMessage(message, props.chat, {
-                    onFinish: stopAutoScroll,
-                  })}
-                </div>
-              ))}
-            </div>
-          </NScrollbar>
+        {/* history */}
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <div class="px-4 py-3 border-b border-color" data-tauri-drag-region>
+            <span class="text-lg">{props.chatMetaData.title}</span>
+          </div>
+          <div class="flex-1 overflow-hidden">
+            <NScrollbar ref={scrollRef} class="py-4">
+              <div class="grid gap-6">
+                {props.chat.messages.map((message, index) => (
+                  <div key={index}>
+                    {renderMessage(message, props.chat, {
+                      onFinish: stopAutoScroll,
+                    })}
+                  </div>
+                ))}
+              </div>
+            </NScrollbar>
+          </div>
         </div>
+
+        {/* input */}
         <div class="border-t" style="border-color: var(--border-color)">
           <div class="flex items-center">
             <div class="flex-1 flex justify-end p-1">

@@ -4,7 +4,6 @@ import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";
 import { Chat } from "../../models/chat";
 import { AssistantMessage, Message, UserMessage } from "../../models/message";
-import { prompt } from "../../utils/prompt";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";

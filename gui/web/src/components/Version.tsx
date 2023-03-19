@@ -67,7 +67,7 @@ export default defineComponent({
         onClick={hasNewVersion.value ? showUpdateHandler : () => null}
       >
         <NBadge dot show={hasNewVersion.value}>
-          <span class="select-none cursor-default text-gray-500">
+          <span class="select-none cursor-default">
             v{version.value}
           </span>
         </NBadge>

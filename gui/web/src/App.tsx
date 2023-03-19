@@ -38,7 +38,10 @@ export default defineComponent({
     return () => (
       <NConfigProvider
         class="h-full"
-        style="background-color: var(--body-color)"
+        style={{
+          backgroundColor: "var(--body-color)",
+          color: "var(--text-color-base)",
+        }}
         {...configProviderProps.value}
       >
         <RouterView />

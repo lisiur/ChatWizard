@@ -24,46 +24,49 @@ export default defineComponent({
     }
 
     return () => (
-      <div class="h-full p-4">
-        {model.value ? (
-          <NForm model={model.value} labelPlacement="left" labelWidth="5rem">
-            <NFormItem label="Api Key">
-              <NInput
-                v-model:value={model.value.apiKey}
-                placeholder="Api Key"
-                onBlur={changeApiKeyHandler}
-              ></NInput>
-            </NFormItem>
-            <NFormItem label="Proxy">
-              <NInput
-                v-model:value={model.value.proxy}
-                placeholder="Proxy"
-                onBlur={changeProxyHandler}
-              ></NInput>
-            </NFormItem>
-            <NFormItem label="Theme">
-              <NSelect
-                v-model:value={model.value.theme}
-                placeholder="Theme"
-                onUpdateValue={changeThemeHandler}
-                options={[
-                  {
-                    label: "System",
-                    value: "system",
-                  },
-                  {
-                    label: "Light",
-                    value: "light",
-                  },
-                  {
-                    label: "Dark",
-                    value: "dark",
-                  },
-                ]}
-              ></NSelect>
-            </NFormItem>
-          </NForm>
-        ) : null}
+      <div data-tauri-drag-region class="h-full p-8 flex flex-col">
+        <div class="flex-1 overflow-auto">
+          {model.value ? (
+            <NForm model={model.value} labelPlacement="left" labelWidth="5rem">
+              <NFormItem label="Api Key">
+                <NInput
+                  v-model:value={model.value.apiKey}
+                  type="password"
+                  placeholder={`sk-${"*".repeat(48)}`}
+                  onBlur={changeApiKeyHandler}
+                ></NInput>
+              </NFormItem>
+              <NFormItem label="Proxy">
+                <NInput
+                  v-model:value={model.value.proxy}
+                  placeholder="Proxy"
+                  onBlur={changeProxyHandler}
+                ></NInput>
+              </NFormItem>
+              <NFormItem label="Theme">
+                <NSelect
+                  v-model:value={model.value.theme}
+                  placeholder="Theme"
+                  onUpdateValue={changeThemeHandler}
+                  options={[
+                    {
+                      label: "System",
+                      value: "system",
+                    },
+                    {
+                      label: "Light",
+                      value: "light",
+                    },
+                    {
+                      label: "Dark",
+                      value: "dark",
+                    },
+                  ]}
+                ></NSelect>
+              </NFormItem>
+            </NForm>
+          ) : null}
+        </div>
       </div>
     );
   },

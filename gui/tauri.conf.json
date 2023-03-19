@@ -64,9 +64,12 @@
         "setSkipTaskbar": false,
         "setTitle": false,
         "show": false,
-        "startDragging": false,
+        "startDragging": true,
         "unmaximize": false,
         "unminimize": false
+      },
+      "os": {
+        "all": true
       }
     },
     "bundle": {
@@ -112,19 +115,6 @@
       ],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZEMTAwM0ZCOTE5M0NBODIKUldTQ3lwT1Ird01RL2RQLzkxWlN3eFV6MG1WQm9COWpqOHcrNk9lb3NHU2VDNm1XZ0E0RzBsK2EK"
-    },
-    "windows": [
-      {
-        "fullscreen": false,
-        "width": 860,
-        "minWidth": 720,
-        "height": 680,
-        "resizable": true,
-        "title": "AskAI",
-        "visible": false,
-        "label": "main",
-        "url": "index.html"
-      }
-    ]
+    }
   }
 }

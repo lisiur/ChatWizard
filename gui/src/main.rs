@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+use tauri::{WindowBuilder, WindowUrl};
+
 mod chat;
 mod commands;
 mod error;
@@ -19,6 +21,23 @@ async fn main() {
     env_logger::init();
     tauri::Builder::default()
         .manage(state::AppState::init().await.unwrap())
+        .setup(|app| {
+            let mut main_window_builder =
+                WindowBuilder::new(app, "main", WindowUrl::App("index.html".into()))
+                    .title("AskAI")
+                    .inner_size(860.0, 720.0)
+                    .min_inner_size(720.0, 640.0)
+                    .resizable(true)
+                    .visible(false);
+            if cfg!(target_os = "macos") {
+                main_window_builder = main_window_builder
+                    .title("")
+                    .title_bar_style(tauri::TitleBarStyle::Overlay);
+            }
+
+            main_window_builder.build().unwrap();
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::all_chats,
             commands::load_chat,

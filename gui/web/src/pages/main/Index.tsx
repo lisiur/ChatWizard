@@ -1,6 +1,5 @@
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
-import Version from "../../components/Version";
 import {
   ChatbubbleEllipsesOutline as InactiveChatIcon,
   ChatbubbleEllipses as ActiveChatIcon,
@@ -8,15 +7,18 @@ import {
 } from "@vicons/ionicons5";
 
 import { Prompt as PromptIcon } from "@vicons/tabler";
-import { NIcon } from "naive-ui";
-import { WebviewWindow } from "@tauri-apps/api/window";
-import { message } from "../../utils/prompt";
+import { NBadge, NDropdown, NIcon } from "naive-ui";
 import { showWindow } from "../../api";
+import { os } from "@tauri-apps/api";
+import { useAsyncData } from "../../hooks/asyncData";
+import { useVersion } from "../../hooks/version";
+import Version from "../../components/Version";
 
 export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
+    const { hasNewVersion } = useVersion();
 
     const topMenus = [
       {
@@ -33,29 +35,54 @@ export default defineComponent({
       },
     ];
 
-    const bottomMenus = [
+    const bottomMenus = computed(() => [
       {
         title: "Setting",
         name: "setting",
         url: router.resolve({ name: "setting" }).path,
         icon: SettingIcon,
+        dot: hasNewVersion.value,
       },
-    ];
+    ]);
 
-    function actionHandler(action: typeof bottomMenus[0]) {
-      showWindow("setting", {
-        title: action.title,
-        url: `/#${action.url}`,
-        width: 500,
-        height: 400,
-      });
+    const platform = useAsyncData(async () => {
+      return await os.platform();
+    });
+
+    const isMacos = computed(() => platform.value === "darwin");
+
+    function settingActionHandler(key: string) {
+      switch (key) {
+        case "setting": {
+          showWindow("setting", {
+            title: "Setting",
+            url: `/#${router.resolve({ name: "setting" }).path}`,
+            width: 500,
+            height: 250,
+          });
+          break;
+        }
+      }
     }
+
+    const Setting = () => (
+      <NBadge dot show={hasNewVersion.value}>
+        <NIcon size="2rem" color="var(--switcher-color)">
+          <SettingIcon />
+        </NIcon>
+      </NBadge>
+    );
 
     return () => (
       <div class="h-full flex">
         <div
+          data-tauri-drag-region
           class="w-16 border-r h-full flex flex-col"
-          style="background-color: var(--switcher-bg-color); border-color: var(--border-color)"
+          style={{
+            backgroundColor: "var(--switcher-bg-color)",
+            borderColor: "var(--border-color)",
+            paddingTop: isMacos.value ? "22px" : "0",
+          }}
         >
           <div class="grid gap-1 place-content-center">
             {topMenus.map((m) => {
@@ -73,20 +100,35 @@ export default defineComponent({
               );
             })}
           </div>
-          <div class="mt-auto flex justify-center items-center flex-col">
+          <div class="mt-auto mb-4 flex justify-center items-center flex-col">
             <div class="grid gap-1 place-content-center">
-              {bottomMenus.map((m) => {
-                const Icon = m.icon;
-                return (
-                  <div class="mt-4" onClick={() => actionHandler(m)}>
-                    <NIcon size="2rem" color="var(--switcher-color)">
-                      <Icon></Icon>
-                    </NIcon>
-                  </div>
-                );
-              })}
+              {hasNewVersion.value ? (
+                <NDropdown
+                  trigger="click"
+                  placement="right-end"
+                  options={[
+                    {
+                      label: "Setting",
+                      key: "setting",
+                    },
+                    {
+                      type: "divider",
+                    },
+                    {
+                      type: "render",
+                      render: () => <Version></Version>,
+                    },
+                  ]}
+                  onSelect={settingActionHandler}
+                >
+                  <Setting></Setting>
+                </NDropdown>
+              ) : (
+                <div onClick={() => settingActionHandler("setting")}>
+                  <Setting></Setting>
+                </div>
+              )}
             </div>
-            <Version></Version>
           </div>
         </div>
         <div class="flex-1 overflow-hidden">

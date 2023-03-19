@@ -9,6 +9,10 @@
   [type="submit"] {
     background-color: var(--n-color);
   }
+
+  .border-color{
+    border-color: var(--border-color);
+  }
 }
 
 html, body, #app {

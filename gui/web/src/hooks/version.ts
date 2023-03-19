@@ -10,19 +10,17 @@ import { relaunch } from "@tauri-apps/api/process";
 import { emit, Event, listen } from "@tauri-apps/api/event";
 import { ref } from "vue";
 
+const version = ref("");
+app.getVersion().then((v) => {
+  version.value = v;
+});
+const hasNewVersion = ref(false);
+const newVersion = ref<UpdateManifest>();
+checkUpdate().then(({ shouldUpdate, manifest }) => {
+  hasNewVersion.value = shouldUpdate;
+  newVersion.value = manifest;
+});
 export function useVersion() {
-  const version = ref("");
-  app.getVersion().then((v) => {
-    version.value = v;
-  });
-
-  const hasNewVersion = ref(false);
-  const newVersion = ref<UpdateManifest>();
-  checkUpdate().then(({ shouldUpdate, manifest }) => {
-    hasNewVersion.value = shouldUpdate;
-    newVersion.value = manifest;
-  });
-
   function installNewVersion() {
     emit("tauri://update-install");
     return new Promise(async (resolve, reject) => {

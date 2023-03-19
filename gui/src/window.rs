@@ -8,6 +8,7 @@ pub struct WindowOptions {
     url: Option<String>,
     width: Option<f64>,
     height: Option<f64>,
+    resizable: Option<bool>,
 }
 
 pub fn show_window_lazy(
@@ -25,16 +26,25 @@ pub fn show_window_lazy(
             let title = options
                 .as_ref()
                 .and_then(|o| o.title.clone())
-                .unwrap_or_else(|| label.clone());
+                .unwrap_or_default();
             let url = options
                 .as_ref()
                 .and_then(|o| o.url.clone())
                 .unwrap_or_default();
+            let resizable = options.as_ref().and_then(|o| o.resizable).unwrap_or(false);
 
             let url = WindowUrl::App(format!("index.html{}", url).into());
             log::debug!("creating window {} with url {}", label, url.to_string());
 
-            let mut builder = WindowBuilder::new(&handle, &label, url).title(&title);
+            let mut builder = WindowBuilder::new(&handle, &label, url)
+                .title(&title)
+                .resizable(resizable);
+
+            if cfg!(target_os = "macos") {
+                builder = builder
+                    .title("")
+                    .title_bar_style(tauri::TitleBarStyle::Overlay);
+            }
 
             if let (Some(width), Some(height)) = (
                 options.as_ref().and_then(|o| o.width),
