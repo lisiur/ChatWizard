@@ -22,7 +22,7 @@ import { useConfig } from "../hooks/config";
 import { NButton, NIcon, NScrollbar, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
-import { Markdown, Key, NetworkWired } from "@vicons/fa";
+import { Markdown } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
@@ -68,7 +68,7 @@ export default defineComponent({
       destroyAutoScroll();
     });
 
-    const { checkApiKey: check_api_key, setProxy, setApiKey } = useConfig();
+    const { checkApiKey: check_api_key } = useConfig();
 
     check_api_key();
 
@@ -145,16 +145,6 @@ export default defineComponent({
                 handler: exportMarkdown,
                 icon: Markdown,
                 tooltip: "Export Markdown",
-              })}
-              {renderButton({
-                handler: setApiKey,
-                icon: Key,
-                tooltip: "Set Api Key",
-              })}
-              {renderButton({
-                handler: setProxy,
-                icon: NetworkWired,
-                tooltip: "Set proxy",
               })}
             </div>
           </div>
