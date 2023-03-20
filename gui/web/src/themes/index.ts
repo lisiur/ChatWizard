@@ -25,6 +25,11 @@ observer.observe(document.documentElement, {
   attributes: true,
 });
 
+const themeChangeCbs = [] as Array<(theme: ThemeLiteral) => void>;
+export function onThemeChanged(fn: (theme: ThemeLiteral) => void) {
+  themeChangeCbs.push(fn);
+}
+
 export function useThemeVar(name: string): Ref<string> {
   if (!vars[name]) {
     vars[name] = getComputedStyle(document.documentElement).getPropertyValue(
@@ -70,6 +75,7 @@ export function setTheme(theme: ThemeLiteral) {
   currentTheme.value = theme;
   setThemeVars(themeVars[theme].common!);
   setThemeVars(themeVars[theme].custom!);
+  themeChangeCbs.forEach((fn) => fn(theme));
 }
 
 export function useThemeVars() {

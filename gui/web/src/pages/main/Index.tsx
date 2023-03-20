@@ -35,16 +35,6 @@ export default defineComponent({
       },
     ];
 
-    const bottomMenus = computed(() => [
-      {
-        title: "Setting",
-        name: "setting",
-        url: router.resolve({ name: "setting" }).path,
-        icon: SettingIcon,
-        dot: hasNewVersion.value,
-      },
-    ]);
-
     const platform = useAsyncData(async () => {
       return await os.platform();
     });

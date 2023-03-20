@@ -40,3 +40,9 @@ html, body, #app {
   list-style: inside;
   list-style-type: decimal;
 }
+
+.markdown-root pre {
+  background: var(--code-bg-color);
+  padding: .5rem;
+  border-radius: .5rem;
+}
