@@ -9,7 +9,6 @@ export interface ChatMetadata {
 export interface ChatData {
   id: string;
   title: string;
-  prompt?: string;
   logs: Array<{
     id: string;
     message: {
@@ -19,10 +18,24 @@ export interface ChatData {
   }>;
 }
 
+export interface ChatUpdatePayload {
+  id: string;
+  title?: string;
+  promptId?: string;
+}
+
+export interface PromptMetadata {
+  id: string;
+  act: string;
+}
+
 export interface Prompt {
+  id: string;
   act: string;
   prompt: string;
 }
+
+export type PromptUpdatePayload = Partial<Prompt> & { id: string };
 
 export interface Settings {
   apiKey?: string;
@@ -53,7 +66,14 @@ export async function readChat(chatId: string) {
   return invoke<ChatData>("load_chat", { chatId });
 }
 
-export async function createChat(params?: { act?: string; title?: string }) {
+export async function updateChat(payload: ChatUpdatePayload) {
+  return invoke<void>("update_chat", { payload });
+}
+
+export async function createChat(params?: {
+  promptId?: string;
+  title?: string;
+}) {
   return invoke<string>("new_chat", params);
 }
 
@@ -70,27 +90,26 @@ export function resendMessage(chatId: string, messageId: string) {
 }
 
 export function allPrompts() {
-  return invoke<
-    Array<{
-      act: string;
-    }>
-  >("all_prompts");
+  return invoke<Array<PromptMetadata>>("all_prompts");
 }
 
-export function createPrompt(prompt: Prompt) {
-  return invoke("create_prompt", { prompt });
+export function createPrompt(prompt: Omit<Prompt, "id">) {
+  return invoke<string>("create_prompt", {
+    act: prompt.act,
+    prompt: prompt.prompt,
+  });
 }
 
-export function updatePrompt(prompt: Prompt) {
-  return invoke("update_prompt", { prompt });
+export function updatePrompt(payload: PromptUpdatePayload) {
+  return invoke("update_prompt", { payload });
 }
 
-export function deletePrompt(act: string) {
-  return invoke("delete_prompt", { act });
+export function deletePrompt(id: string) {
+  return invoke("delete_prompt", { id });
 }
 
-export function loadPrompt(act: string) {
-  return invoke<Prompt>("load_prompt", { act });
+export function loadPrompt(id: string) {
+  return invoke<Prompt>("load_prompt", { id });
 }
 
 export function getSettings() {

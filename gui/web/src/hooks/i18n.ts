@@ -1,7 +1,7 @@
 import { zhCN, dateZhCN, enUS, dateEnUS } from "naive-ui";
 import { ref, computed } from "vue";
-import { createI18n, useI18n } from "vue-i18n";
-import messages from "../i18n";
+import { createI18n, useI18n as _useI18n } from "vue-i18n";
+import messages, { Messages } from "../i18n";
 
 export const Lang: Record<string, any> = {
   zhCN,
@@ -32,6 +32,17 @@ const i18n = createI18n({
 function setLocale(lang: string) {
   currentLang.value = lang;
   i18n.global.locale = lang as any;
+}
+
+function useI18n() {
+  const { t: _t } = _useI18n();
+  const t = (key: keyof Messages) => {
+    return _t(key);
+  };
+
+  return {
+    t,
+  };
 }
 
 export {

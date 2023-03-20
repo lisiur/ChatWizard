@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "lsof -i:1420 | awk 'NR>1 {print $2}' | xargs kill && pnpm dev",
     "beforeBuildCommand": "pnpm build",
     "devPath": "http://localhost:1420",
     "distDir": "./web/dist",

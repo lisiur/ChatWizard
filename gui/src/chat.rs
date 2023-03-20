@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::{path::Path, sync::Arc};
 
-use askai_api::{Logs, OpenAIApi, Role, StreamContent};
+use askai_api::{Chat as ChatApi, ChatLog, OpenAIApi, Role, StreamContent};
 use futures::{lock::Mutex, StreamExt};
 use serde_json::json;
 use tokio::fs;
@@ -17,33 +17,31 @@ use crate::utils::{ensure_directory_exists, ensure_file_exists};
 pub struct Chat {
     pub id: Uuid,
     pub title: String,
-    pub prompt: Option<String>,
-    logs: Arc<Mutex<Logs>>,
+    chat_api: Arc<Mutex<ChatApi>>,
 }
 
 impl Chat {
     pub fn new(prompt: Option<String>, title: &str) -> Self {
-        let logs = Logs::new(prompt.clone());
+        let chat_api = ChatApi::new(prompt);
         Self {
             id: Uuid::new_v4(),
             title: title.to_string(),
-            prompt,
-            logs: Arc::new(Mutex::new(logs)),
+            chat_api: Arc::new(Mutex::new(chat_api)),
         }
     }
 
     pub fn new_with_id(id: Uuid, prompt: Option<String>, title: &str) -> Self {
-        let logs = Logs::new(prompt.clone());
+        let chat_api = ChatApi::new(prompt);
         Self {
             id,
             title: title.to_string(),
-            prompt,
-            logs: Arc::new(Mutex::new(logs)),
+            chat_api: Arc::new(Mutex::new(chat_api)),
         }
     }
 
-    pub async fn get_logs(&self) -> Logs {
-        (*self.logs.lock().await).clone()
+    pub async fn get_logs(&self) -> Vec<ChatLog> {
+        let chat_api = self.chat_api.lock().await;
+        chat_api.get_logs().clone()
     }
 
     pub async fn send_message(
@@ -52,10 +50,10 @@ impl Chat {
         message: &str,
         api: OpenAIApi,
     ) -> Uuid {
-        let mut topic = self.logs.lock().await;
+        let mut topic = self.chat_api.lock().await;
         let message_id = topic.add_user_message(message);
 
-        let topic = self.logs.clone();
+        let topic = self.chat_api.clone();
         tokio::spawn(async move {
             let mut topic = topic.lock().await;
             match topic.send(&api).await {
@@ -82,7 +80,7 @@ impl Chat {
         message_id: Uuid,
         api: OpenAIApi,
     ) -> Result<()> {
-        let topic = self.logs.clone();
+        let topic = self.chat_api.clone();
 
         tokio::spawn(async move {
             let mut topic = topic.lock().await;
@@ -104,12 +102,12 @@ impl Chat {
         Ok(())
     }
 
-    pub async fn set_logs(&self, logs: Logs) {
-        *self.logs.lock().await = logs;
+    pub async fn set_logs(&self, logs: ChatApi) {
+        *self.chat_api.lock().await = logs;
     }
 
     pub async fn topic_json_string(&self) -> String {
-        self.logs.lock().await.to_json_string()
+        self.chat_api.lock().await.to_json_string()
     }
 
     pub async fn save_as_markdown(&self, path: &Path) -> Result<()> {
@@ -127,7 +125,7 @@ impl Chat {
             markdown.push_str(&format!("# {}\n\n", self.title));
         }
 
-        let messages = self.logs.lock().await.messages();
+        let messages = self.chat_api.lock().await.messages();
 
         for message in messages {
             match message.role {
@@ -143,6 +141,20 @@ impl Chat {
 
         Ok(markdown)
     }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct ChatMetadata {
+    id: Uuid,
+    title: String,
+    prompt_id: Option<Uuid>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct ChatUpdatePayload {
+    pub id: Uuid,
+    pub title: Option<String>,
+    pub prompt_id: Option<Uuid>,
 }
 
 pub struct ChatManager {
@@ -172,11 +184,11 @@ impl ChatManager {
         store.metadata.clone()
     }
 
-    pub async fn create_chat(&mut self, act: Option<String>, title: &str) -> Result<Uuid> {
-        let prompt = match act {
-            Some(act) => {
+    pub async fn create_chat(&mut self, prompt_id: Option<Uuid>, title: &str) -> Result<Uuid> {
+        let prompt = match prompt_id {
+            Some(id) => {
                 let mut prompt_manager = self.prompt_manager.lock().await;
-                prompt_manager.get_prompt(&act).await?
+                prompt_manager.get_prompt(id).await?
             }
             None => None,
         };
@@ -195,10 +207,40 @@ impl ChatManager {
         Ok(())
     }
 
+    pub async fn update_chat(&mut self, payload: ChatUpdatePayload) -> Result<()> {
+        let mut store = self.store.lock().await;
+        store.update_chat(&payload).await?;
+
+        if let Some(title) = payload.title {
+            let chat = self.get_chat(payload.id).await?;
+            let mut chat = chat.lock().await;
+            chat.title = title;
+        }
+
+        if let Some(prompt_id) = payload.prompt_id {
+            let chat = self.get_chat(payload.id).await?;
+            let chat = chat.lock().await;
+
+            let prompt = match prompt_id {
+                id if id.is_nil() => None,
+                id => {
+                    let mut prompt_manager = self.prompt_manager.lock().await;
+                    prompt_manager
+                        .get_prompt(id)
+                        .await?
+                        .map(|prompt| prompt.prompt)
+                }
+            };
+            chat.chat_api.lock().await.set_prompt(prompt.as_deref());
+        }
+
+        Ok(())
+    }
+
     pub async fn save_chat(&mut self, chat_id: Uuid) -> Result<()> {
         let chat = self.get_chat(chat_id).await?;
         let chat = chat.lock().await;
-        self.store.lock().await.save_chat(&chat).await?;
+        self.store.lock().await.save_chat_data(&chat).await?;
 
         Ok(())
     }
@@ -263,24 +305,40 @@ impl ChatStore {
             ChatMetadata {
                 id: chat.id,
                 title: chat.title.clone(),
-                act: prompt.map(|p| p.act),
+                prompt_id: prompt.map(|p| p.id),
             },
         );
 
         // Update metadata
         self.save_metadata().await?;
         // Update chat data
-        self.save_chat(&chat).await.unwrap();
+        self.save_chat_data(&chat).await.unwrap();
 
         Ok(chat)
     }
 
-    pub async fn save_chat(&self, chat: &Chat) -> Result<()> {
+    pub async fn save_chat_data(&self, chat: &Chat) -> Result<()> {
         let path = self.chat_save_path(chat.id);
         let chat_data = chat.topic_json_string().await;
 
         // Update chat data
         fs::write(&path, chat_data).await?;
+
+        Ok(())
+    }
+
+    pub async fn update_chat(&mut self, payload: &ChatUpdatePayload) -> Result<()> {
+        let chat_metadata = self.chat_metadata_mut(payload.id)?;
+
+        if let Some(title) = &payload.title {
+            chat_metadata.title = title.to_string();
+        }
+
+        if let Some(prompt_id) = payload.prompt_id {
+            chat_metadata.prompt_id = Some(prompt_id);
+        }
+
+        self.save_metadata().await?;
 
         Ok(())
     }
@@ -300,10 +358,10 @@ impl ChatStore {
         let chat_metadata = self.chat_metadata(chat_id)?;
         let chat_data_path = self.chat_save_path(chat_metadata.id);
         let topic_json_string = fs::read_to_string(&chat_data_path).await?;
-        let logs: Logs = serde_json::from_str(&topic_json_string).unwrap();
+        let logs: ChatApi = serde_json::from_str(&topic_json_string).unwrap();
 
-        let prompt = match &chat_metadata.act {
-            Some(act) => prompt_manager.lock().await.get_prompt(act).await?,
+        let prompt = match &chat_metadata.prompt_id {
+            Some(id) => prompt_manager.lock().await.get_prompt(*id).await?,
             None => None,
         };
         let title = &chat_metadata.title;
@@ -335,14 +393,17 @@ impl ChatStore {
         Ok(chat_metadata)
     }
 
+    fn chat_metadata_mut(&mut self, chat_id: Uuid) -> Result<&mut ChatMetadata> {
+        let chat_metadata = self
+            .metadata
+            .iter_mut()
+            .find(|chat| chat.id == chat_id)
+            .unwrap();
+
+        Ok(chat_metadata)
+    }
+
     fn chat_save_path(&self, id: Uuid) -> PathBuf {
         self.data_dir.join(format!("{}.json", id))
     }
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct ChatMetadata {
-    id: Uuid,
-    title: String,
-    act: Option<String>,
 }

@@ -1,5 +1,7 @@
 import { NDropdown, NScrollbar } from "naive-ui";
 import { computed, defineComponent, nextTick, PropType, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { PromptMetadata } from "../api";
 
 export default defineComponent({
   props: {
@@ -7,12 +9,15 @@ export default defineComponent({
       type: String,
     },
     list: {
-      type: Array as PropType<{ act: string }[]>,
+      type: Array as PropType<PromptMetadata[]>,
       default: () => [],
     },
     onAction: {
       type: Function as PropType<
-        (action: "select" | "delete" | "newChat", chatId: string) => void
+        (
+          action: "select" | "delete" | "newChat" | "rename",
+          prompt: PromptMetadata
+        ) => void
       >,
     },
   },
@@ -24,7 +29,7 @@ export default defineComponent({
             <Column
               active={props.active}
               prompt={item}
-              onAction={(e) => props.onAction?.(e, item.act)}
+              onAction={(e) => props.onAction?.(e, item)}
             ></Column>
           ))}
         </NScrollbar>
@@ -41,21 +46,32 @@ const Column = defineComponent({
       required: true,
     },
     onAction: {
-      type: Function as PropType<(action: "select" | "delete" | "newChat") => void>,
+      type: Function as PropType<
+        (action: "select" | "delete" | "newChat" | "rename") => void
+      >,
     },
   },
   setup(props) {
+    const { t } = useI18n();
+
     const x = ref(0);
     const y = ref(0);
     const showDropdown = ref(false);
     const options = computed(() => {
       return [
         {
-          label: "New Chat",
+          label: t("prompt.newChat"),
           key: "newChat",
         },
         {
-          label: "Delete",
+          label: t("prompt.rename"),
+          key: "rename",
+        },
+        {
+          type: "divider"
+        },
+        {
+          label: t("common.delete"),
           key: "delete",
         },
       ];

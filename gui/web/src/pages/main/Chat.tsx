@@ -8,6 +8,7 @@ import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 import { useI18n } from "../../hooks/i18n";
+import { prompt } from "../../utils/prompt";
 
 export default defineComponent({
   setup() {
@@ -23,7 +24,7 @@ export default defineComponent({
     refreshChatMetaList();
 
     if (route.query.id) {
-      selectChatHandler(route.query.id as string);
+      selectHandler(route.query.id as string);
     }
 
     async function refreshChatMetaList() {
@@ -46,32 +47,48 @@ export default defineComponent({
     }
 
     async function explorerHandler(
-      action: "delete" | "select",
-      chatId: string
+      action: "delete" | "select" | "rename",
+      metadata: api.ChatMetadata
     ) {
       switch (action) {
         case "delete": {
-          await deleteChatHandler(chatId);
+          await deleteHandler(metadata.id);
           return;
         }
         case "select": {
-          await selectChatHandler(chatId);
+          await selectHandler(metadata.id);
           return;
+        }
+        case "rename": {
+          await renameHandler(metadata);
         }
       }
     }
 
-    async function deleteChatHandler(chatId: string) {
-      if (currentChat.value?.id === chatId) {
+    async function renameHandler(metadata: api.ChatMetadata) {
+      prompt(t("prompt.inputNameHint"), {
+        defaultValue: metadata.title,
+        async okHandler(title) {
+          await api.updateChat({
+            id: metadata.id,
+            title,
+          });
+          await refreshChatMetaList();
+        },
+      });
+    }
+
+    async function deleteHandler(id: string) {
+      if (currentChat.value?.id === id) {
         currentChat.value = undefined;
       }
-      await api.deleteChat(chatId);
-      chats.delete(chatId);
+      await api.deleteChat(id);
+      chats.delete(id);
       refreshChatMetaList();
     }
 
-    async function selectChatHandler(chatId: string) {
-      const chatData = await api.readChat(chatId);
+    async function selectHandler(id: string) {
+      const chatData = await api.readChat(id);
       const messages = chatData.logs.map((m) => {
         switch (m.message.role) {
           case "user": {
@@ -88,11 +105,11 @@ export default defineComponent({
         }
       }) as Message[];
 
-      const chat = new Chat(chatId, messages);
-      chats.set(chatId, chat);
+      const chat = new Chat(id, messages);
+      chats.set(id, chat);
       currentChat.value = chat;
 
-      const chatMetaData = chatMetaList.value.find((m) => m.id === chatId)!;
+      const chatMetaData = chatMetaList.value.find((m) => m.id === id)!;
       currentChatMeta.value = chatMetaData;
 
       setTimeout(() => {
@@ -134,7 +151,9 @@ export default defineComponent({
               chat={currentChat.value}
               chatMetaData={currentChatMeta.value!}
             ></ChatComp>
-          ) : <div class="h-full" data-tauri-drag-region></div>}
+          ) : (
+            <div class="h-full" data-tauri-drag-region></div>
+          )}
         </div>
       </div>
     );

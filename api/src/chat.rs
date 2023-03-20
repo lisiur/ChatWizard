@@ -106,23 +106,27 @@ impl OpenAIApi {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct Logs(Vec<ChatLog>);
+pub struct Chat(Vec<ChatLog>);
 
-impl Logs {
-    pub fn new(topic: Option<String>) -> Self {
+impl Chat {
+    pub fn new(prompt: Option<String>) -> Self {
         let mut logs = vec![];
 
-        if let Some(topic) = topic {
+        if let Some(prompt) = prompt {
             logs.push(ChatLog {
                 id: Uuid::new_v4(),
                 message: Message {
                     role: Role::System,
-                    content: topic,
+                    content: prompt,
                 },
             });
         }
 
         Self(logs)
+    }
+
+    pub fn get_logs(&self) -> &Vec<ChatLog> {
+        &self.0
     }
 
     pub fn from_logs(logs: Vec<ChatLog>) -> Self {
@@ -131,6 +135,33 @@ impl Logs {
 
     pub fn messages(&self) -> Vec<Message> {
         self.0.iter().map(|log| log.message.clone()).collect()
+    }
+
+    pub fn set_prompt(&mut self, prompt: Option<&str>) {
+        if let Some(prompt) = prompt {
+            if let Some(log) = self.0.first_mut() {
+                if matches!(log.message.role, Role::System) {
+                    log.message.content = prompt.to_string();
+                    return;
+                }
+            }
+            self.0.push(ChatLog {
+                id: Uuid::new_v4(),
+                message: Message {
+                    role: Role::System,
+                    content: prompt.to_string(),
+                },
+            });
+        } else {
+            self.unset_prompt();
+        }
+    }
+
+    pub fn unset_prompt(&mut self) {
+        if self.0.first().is_some() && matches!(self.0.first().unwrap().message.role, Role::System)
+        {
+            self.0.remove(0);
+        }
     }
 
     fn limited_messages(&self, limit: usize) -> Vec<Message> {
@@ -301,7 +332,7 @@ mod tests {
         let mut api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
         api.set_proxy(&std::env::var("PROXY").unwrap());
 
-        let mut topic = Logs::new(Some(
+        let mut topic = Chat::new(Some(
             "Repeat what user says, no more other words".to_string(),
         ));
 

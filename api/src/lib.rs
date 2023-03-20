@@ -6,7 +6,7 @@ mod image;
 mod result;
 mod types;
 
-pub use chat::{ChatLog, Logs, Message, Role, StreamContent};
+pub use chat::{Chat, ChatLog, Message, Role, StreamContent};
 use client::{Client, ClientOpts};
 use error::ApiErrorResponse;
 pub use error::Error;

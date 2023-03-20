@@ -15,11 +15,11 @@ export default defineComponent({
 
     const promptRef = ref<HTMLInputElement>();
 
-    const promptMetaList = ref<Array<{ act: string }>>([]);
+    const promptMetaList = ref<Array<api.PromptMetadata>>([]);
     const prompts = new Map<string, api.Prompt>();
     const currentPrompt = ref<api.Prompt>();
     const currentPromptInitial = ref<string>();
-    const currentPromptMeta = ref<{ act: string }>();
+    const currentPromptMeta = ref<api.PromptMetadata>();
     refreshMetaList();
 
     function refreshMetaList() {
@@ -31,11 +31,15 @@ export default defineComponent({
     async function createPrompt() {
       prompt(t("prompt.inputNameHint"), {
         async okHandler(title) {
+          const id = await api.createPrompt({
+            act: title,
+            prompt: "",
+          });
           const prompt: api.Prompt = {
+            id,
             act: title,
             prompt: "",
           };
-          await api.createPrompt(prompt);
           refreshMetaList();
           currentPrompt.value = prompt;
           currentPromptInitial.value = "";
@@ -48,28 +52,44 @@ export default defineComponent({
     }
 
     async function explorerHandler(
-      action: "delete" | "select" | "newChat",
-      act: string
+      action: "delete" | "select" | "newChat" | "rename",
+      prompt: api.PromptMetadata
     ) {
       switch (action) {
         case "delete": {
-          await deleteHandler(act);
+          await deleteHandler(prompt);
           return;
         }
         case "select": {
-          await selectHandler(act);
+          await selectHandler(prompt);
           return;
         }
         case "newChat": {
-          await newChatHandler(act);
+          await newChatHandler(prompt);
+        }
+        case "rename": {
+          await renameHandler(prompt);
         }
       }
     }
 
-    async function newChatHandler(act: string) {
+    async function renameHandler(data: api.PromptMetadata) {
+      prompt(t("prompt.inputNameHint"), {
+        defaultValue: data.act,
+        async okHandler(title) {
+          await api.updatePrompt({
+            id: data.id,
+            act: title,
+          });
+          refreshMetaList();
+        },
+      });
+    }
+
+    async function newChatHandler(prompt: api.PromptMetadata) {
       const chatId = await api.createChat({
-        title: act,
-        act,
+        promptId: prompt.id,
+        title: prompt.act,
       });
       router.push({
         name: "chat",
@@ -94,23 +114,25 @@ export default defineComponent({
       message.success("Prompt updated");
     }
 
-    async function deleteHandler(act: string) {
-      if (currentPrompt.value?.act === act) {
+    async function deleteHandler(prompt: api.PromptMetadata) {
+      if (currentPrompt.value?.id === prompt.id) {
         currentPrompt.value = undefined;
         currentPromptInitial.value = undefined;
       }
-      await api.deletePrompt(act);
-      prompts.delete(act);
+      await api.deletePrompt(prompt.id);
+      prompts.delete(prompt.id);
       refreshMetaList();
     }
 
-    async function selectHandler(act: string) {
-      const promptData = await api.loadPrompt(act);
-      prompts.set(act, promptData);
+    async function selectHandler(prompt: api.PromptMetadata) {
+      const promptData = await api.loadPrompt(prompt.id);
+      prompts.set(prompt.id, promptData);
       currentPrompt.value = promptData;
       currentPromptInitial.value = promptData.prompt;
 
-      const promptMetaData = promptMetaList.value.find((m) => m.act === act)!;
+      const promptMetaData = promptMetaList.value.find(
+        (m) => m.id === prompt.id
+      )!;
       currentPromptMeta.value = promptMetaData;
 
       setTimeout(() => {
@@ -142,7 +164,7 @@ export default defineComponent({
           <div class="p-2 text-gray-400">{t("prompt.prompts")}</div>
           <PromptExplorer
             class="flex-1 overflow-auto"
-            active={currentPrompt.value?.act}
+            active={currentPrompt.value?.id}
             list={promptMetaList.value}
             onAction={explorerHandler}
           ></PromptExplorer>
@@ -167,7 +189,9 @@ export default defineComponent({
                 }
               ></textarea>
             </NScrollbar>
-          ) : <div class="h-full" data-tauri-drag-region></div>}
+          ) : (
+            <div class="h-full" data-tauri-drag-region></div>
+          )}
         </div>
       </div>
     );
