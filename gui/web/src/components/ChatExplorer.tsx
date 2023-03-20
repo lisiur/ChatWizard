@@ -39,7 +39,7 @@ const Column = defineComponent({
   props: {
     active: String,
     chat: {
-      type: Object as PropType<{ id: string; title: string }>,
+      type: Object as PropType<ChatMetadata>,
       required: true,
     },
     onAction: {
@@ -105,8 +105,10 @@ const Column = defineComponent({
         onClick={() => props.onAction?.("select")}
         onContextmenu={contextMenuHandler}
       >
-        <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">
-          {props.chat.title || t("chat.new.defaultTitle")}
+        <div class="flex-1 overflow-hidden flex items-center cursor-default">
+          <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap ">
+            {props.chat.title || t("chat.new.defaultTitle")}
+          </div>
         </div>
         <NDropdown
           trigger="manual"

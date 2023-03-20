@@ -72,7 +72,7 @@ export default defineComponent({
     }
 
     async function renameHandler(metadata: api.ChatMetadata) {
-      prompt(t("prompt.inputNameHint"), {
+      prompt(t("chat.inputNameHint"), {
         defaultValue: metadata.title,
         async okHandler(title) {
           await api.updateChat({

@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api";
 export interface ChatMetadata {
   id: string;
   title: string;
-  act?: string;
+  prompt_id?: string;
 }
 
 export interface ChatData {

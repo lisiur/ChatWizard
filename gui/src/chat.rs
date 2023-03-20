@@ -44,6 +44,10 @@ impl Chat {
         chat_api.get_logs().clone()
     }
 
+    pub async fn set_logs(&self, logs: Vec<ChatLog>) {
+        self.chat_api.lock().await.set_logs(logs);
+    }
+
     pub async fn send_message(
         &self,
         sender: Sender<StreamContent>,
@@ -100,10 +104,6 @@ impl Chat {
         });
 
         Ok(())
-    }
-
-    pub async fn set_logs(&self, logs: ChatApi) {
-        *self.chat_api.lock().await = logs;
     }
 
     pub async fn topic_json_string(&self) -> String {
@@ -358,7 +358,7 @@ impl ChatStore {
         let chat_metadata = self.chat_metadata(chat_id)?;
         let chat_data_path = self.chat_save_path(chat_metadata.id);
         let topic_json_string = fs::read_to_string(&chat_data_path).await?;
-        let logs: ChatApi = serde_json::from_str(&topic_json_string).unwrap();
+        let chat_logs: Vec<ChatLog> = serde_json::from_str(&topic_json_string).unwrap();
 
         let prompt = match &chat_metadata.prompt_id {
             Some(id) => prompt_manager.lock().await.get_prompt(*id).await?,
@@ -367,7 +367,7 @@ impl ChatStore {
         let title = &chat_metadata.title;
 
         let chat = Chat::new_with_id(chat_metadata.id, prompt.map(|it| it.prompt), title);
-        chat.set_logs(logs).await;
+        chat.set_logs(chat_logs).await;
 
         Ok(chat)
     }

@@ -19,15 +19,16 @@ import {
   UserMessage,
 } from "../models/message";
 import { useConfig } from "../hooks/config";
-import { NButton, NIcon, NScrollbar, NTooltip } from "naive-ui";
+import { NButton, NIcon, NScrollbar, NTab, NTag, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
 import { Markdown } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
-import { ChatMetadata, updateChat } from "../api";
+import { ChatMetadata } from "../api";
 import { useI18n } from "../hooks/i18n";
+import { usePrompt } from "../hooks/prompt";
 
 export default defineComponent({
   props: {
@@ -41,10 +42,13 @@ export default defineComponent({
     },
     onMessage: {
       type: Function as PropType<(message: Message) => void>,
-    }
+    },
   },
   setup(props, { expose }) {
     const { t } = useI18n();
+    const { prompt: chatPrompt } = usePrompt(
+      computed(() => props.chatMetaData.prompt_id)
+    );
 
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const inputRef = ref<HTMLTextAreaElement>();
@@ -201,14 +205,14 @@ export default defineComponent({
         <div class="flex relative justify-start items-start pl-4 pr-24">
           {renderAvatar(assistantAvatar)}
           <div class="relative ml-2 flex-1 overflow-hidden">
-            <div class="absolute left-[-.2rem] top-1">
+            <div class="absolute left-[-.1.5rem] top-1">
               {renderTriangle("left", {
                 color: "var(--assistant-msg-bg-color)",
                 size: ".5rem",
               })}
             </div>
             <div
-              class="markdown-root inline-block px-3 ml-1 rounded-md z-1"
+              class="markdown-root inline-block px-3 ml-2 rounded-md z-1"
               style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
               v-html={html}
             ></div>
@@ -321,13 +325,30 @@ export default defineComponent({
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
+        {/* title */}
+        <div
+          class="px-4 py-3 border-b border-color flex items-center"
+          data-tauri-drag-region
+        >
+          <span class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+            {props.chatMetaData.title || t("chat.new.defaultTitle")}
+          </span>
+          {chatPrompt.value ? (
+            <NTooltip>
+              {{
+                trigger: () => (
+                  <NTag size="small" round type="primary">
+                    {chatPrompt.value?.act}
+                  </NTag>
+                ),
+                default: () => chatPrompt.value?.prompt,
+              }}
+            </NTooltip>
+          ) : null}
+        </div>
+
         {/* history */}
         <div class="flex-1 flex flex-col overflow-hidden">
-          <div class="px-4 py-3 border-b border-color" data-tauri-drag-region>
-            <span class="text-lg">
-              {props.chatMetaData.title || t("chat.new.defaultTitle")}
-            </span>
-          </div>
           <div class="flex-1 overflow-hidden">
             <NScrollbar ref={scrollRef} class="py-4">
               <div class="grid gap-6">

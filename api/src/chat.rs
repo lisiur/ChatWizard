@@ -129,12 +129,25 @@ impl Chat {
         &self.0
     }
 
+    pub fn set_logs(&mut self, logs: Vec<ChatLog>) {
+        self.0 = logs;
+    }
+
     pub fn from_logs(logs: Vec<ChatLog>) -> Self {
         Self(logs)
     }
 
     pub fn messages(&self) -> Vec<Message> {
         self.0.iter().map(|log| log.message.clone()).collect()
+    }
+
+    pub fn get_prompt(&self) -> Option<String> {
+        if let Some(log) = self.0.first() {
+            if matches!(log.message.role, Role::System) {
+                return Some(log.message.content.clone());
+            }
+        }
+        None
     }
 
     pub fn set_prompt(&mut self, prompt: Option<&str>) {
@@ -318,6 +331,11 @@ impl Chat {
 
     pub fn to_json_string(&self) -> String {
         serde_json::to_string(self).unwrap()
+    }
+
+    pub fn from_json_string(json: &str) -> Result<Self> {
+        let chat = serde_json::from_str::<Self>(json).unwrap();
+        Ok(chat)
     }
 }
 

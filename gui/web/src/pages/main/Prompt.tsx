@@ -66,9 +66,11 @@ export default defineComponent({
         }
         case "newChat": {
           await newChatHandler(prompt);
+          return;
         }
         case "rename": {
           await renameHandler(prompt);
+          return;
         }
       }
     }

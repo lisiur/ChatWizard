@@ -28,11 +28,13 @@ export class Chat {
           msg.finished = data.logs[i + 1]?.message.role === "assistant";
           msg.markHistory();
           messages.push(msg);
+          break;
         }
         case "assistant": {
           const msg = new AssistantMessage(log.message.content);
           msg.markHistory();
           messages.push(msg);
+          break;
         }
       }
     }
