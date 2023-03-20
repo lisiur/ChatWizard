@@ -1,23 +1,16 @@
 use std::path::PathBuf;
 
-use askai_api::{ChatLog, OpenAIApi, StreamContent};
+use askai_api::{OpenAIApi, StreamContent};
 use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-use crate::chat::{ChatMetadata, ChatUpdatePayload};
+use crate::chat::{ChatData, ChatMetadata, ChatUpdatePayload};
 use crate::prompt::{Prompt, PromptMeta, PromptUpdatePayload};
 use crate::result::Result;
 use crate::setting::{Settings, Theme};
 use crate::state::AppState;
 use crate::window::{self, WindowOptions};
-
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct ChatData {
-    id: Uuid,
-    title: String,
-    logs: Vec<ChatLog>,
-}
 
 // chats
 
@@ -48,6 +41,8 @@ pub async fn all_chats(state: State<'_, AppState>) -> Result<Vec<ChatMetadata>> 
 pub async fn update_chat(payload: ChatUpdatePayload, state: State<'_, AppState>) -> Result<()> {
     let mut chat_manager = state.chat_manager.lock().await;
 
+    log::debug!("Updating chat: {:?}", payload);
+
     chat_manager.update_chat(payload).await?;
 
     Ok(())
@@ -61,12 +56,9 @@ pub async fn load_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<Chat
     let chat = chat.lock().await;
 
     let logs = chat.get_logs().await;
+    let config = chat.config.clone();
 
-    Ok(ChatData {
-        id: chat.id,
-        title: chat.title.clone(),
-        logs,
-    })
+    Ok(ChatData { logs, config })
 }
 
 #[tauri::command]
@@ -107,7 +99,7 @@ pub async fn send_message(
     let chat = chat_manager.get_chat(chat_id).await?;
     let chat = chat.lock().await;
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    let message_id = chat.send_message(sender, &message, api).await;
+    let message_id = chat.send_message(sender, Some(&message), api).await?;
 
     let chat_id = chat.id;
     let chat_manager = state.chat_manager.clone();

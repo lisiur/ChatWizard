@@ -3,10 +3,11 @@ mod client;
 mod completion;
 mod error;
 mod image;
+mod models;
 mod result;
 mod types;
 
-pub use chat::{Chat, ChatLog, Message, Role, StreamContent};
+pub use chat::{Chat, ChatParams, Message, Role, StreamContent};
 use client::{Client, ClientOpts};
 use error::ApiErrorResponse;
 pub use error::Error;

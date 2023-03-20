@@ -1,4 +1,4 @@
-import { defineComponent, onBeforeUnmount, onMounted } from "vue";
+import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";

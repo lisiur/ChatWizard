@@ -1,6 +1,12 @@
 import { listen } from "@tauri-apps/api/event";
 import { reactive } from "vue";
-import { resendMessage, sendMessage, saveAsMarkdown, ChatData } from "../api";
+import {
+  resendMessage,
+  sendMessage,
+  saveAsMarkdown,
+  ChatData,
+  ChatConfig,
+} from "../api";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -12,12 +18,14 @@ import {
 export class Chat {
   busy: boolean;
   messages: Message[];
-  constructor(public id: string, messages: Message[] = []) {
+  config: ChatConfig;
+  constructor(public id: string, messages: Message[] = [], config: ChatConfig = {}) {
     this.busy = false;
     this.messages = reactive(messages);
+    this.config = reactive(config);
   }
 
-  static init(data: ChatData) {
+  static init(id: string, data: ChatData) {
     const messages: Message[] = [];
     for (let i = 0; i < data.logs.length; i++) {
       const log = data.logs[i];
@@ -39,7 +47,7 @@ export class Chat {
       }
     }
 
-    return new Chat(data.id, messages);
+    return new Chat(id, messages, data.config);
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {

@@ -7,8 +7,6 @@ export interface ChatMetadata {
 }
 
 export interface ChatData {
-  id: string;
-  title: string;
   logs: Array<{
     id: string;
     message: {
@@ -16,12 +14,27 @@ export interface ChatData {
       content: string;
     };
   }>;
+  config: ChatConfig;
 }
 
 export interface ChatUpdatePayload {
   id: string;
   title?: string;
   promptId?: string;
+  config?: ChatConfig;
+}
+
+export interface ChatConfig {
+  model?: string;
+  maxBacktrack?: number;
+  temperature?: number;
+  topP?: number;
+  n?: number;
+  stop?: Array<string>;
+  maxTokens?: number;
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+  user?: string;
 }
 
 export interface PromptMetadata {

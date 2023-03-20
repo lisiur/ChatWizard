@@ -3,7 +3,7 @@ import ChatComp from "../../components/Chat";
 import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";
 import { Chat } from "../../models/chat";
-import { AssistantMessage, Message, UserMessage } from "../../models/message";
+import { Message, UserMessage } from "../../models/message";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
@@ -95,7 +95,7 @@ export default defineComponent({
 
     async function selectHandler(id: string) {
       const chatData = await api.readChat(id);
-      const chat = Chat.init(chatData);
+      const chat = Chat.init(id, chatData);
       chats.set(id, chat);
       currentChatId.value = id;
 

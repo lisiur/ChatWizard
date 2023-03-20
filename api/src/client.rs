@@ -66,6 +66,22 @@ impl Client {
         request.send().await.map_err(Into::into)
     }
 
+    pub async fn get_json<T: DeserializeOwned>(&self, url: &str) -> Result<T> {
+        let res_data = self
+            .get(url, None)
+            .await?
+            .json::<serde_json::Value>()
+            .await?;
+
+        log::debug!("response data: {}", res_data);
+
+        let res_data = serde_json::from_value::<OpenAIApiResponse<T>>(res_data).unwrap();
+        match res_data {
+            OpenAIApiResponse::Ok(data) => Ok(data),
+            OpenAIApiResponse::Err(err) => Err(err.into()),
+        }
+    }
+
     pub async fn post_json<T: DeserializeOwned>(
         &self,
         url: &str,

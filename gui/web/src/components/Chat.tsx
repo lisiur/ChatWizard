@@ -19,7 +19,7 @@ import {
   UserMessage,
 } from "../models/message";
 import { useConfig } from "../hooks/config";
-import { NButton, NIcon, NScrollbar, NTab, NTag, NTooltip } from "naive-ui";
+import { NButton, NIcon, NScrollbar, NTag, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
 import { Markdown } from "@vicons/fa";
@@ -29,6 +29,7 @@ import { save } from "@tauri-apps/api/dialog";
 import { ChatMetadata } from "../api";
 import { useI18n } from "../hooks/i18n";
 import { usePrompt } from "../hooks/prompt";
+import ChatConfig from "./ChatConfig";
 
 export default defineComponent({
   props: {
@@ -91,14 +92,27 @@ export default defineComponent({
         props.onMessage?.(new UserMessage(message));
 
         prompt.value = "";
-        props.chat.sendMessage(message, {
-          onFinish: stopAutoScroll,
-        });
-        setTimeout(() => {
-          startAutoScroll();
-        }, 20);
+        sendMessage(message);
         e.preventDefault();
       }
+    }
+
+    function sendMessage(message: string) {
+      props.chat.sendMessage(message, {
+        onFinish: stopAutoScroll,
+      });
+      setTimeout(() => {
+        startAutoScroll();
+      }, 20);
+    }
+
+    function resendMessage(id: string) {
+      props.chat.resendMessage(id, {
+        onFinish: stopAutoScroll,
+      });
+      setTimeout(() => {
+        startAutoScroll();
+      }, 20);
     }
 
     async function exportMarkdown() {
@@ -272,7 +286,7 @@ export default defineComponent({
                         text
                         size="tiny"
                         class="mr-2"
-                        onClick={() => chat.resendMessage(message.id, params)}
+                        onClick={() => resendMessage(message.id)}
                       >
                         resend
                       </NButton>
@@ -330,7 +344,10 @@ export default defineComponent({
           class="px-4 py-3 border-b border-color flex items-center"
           data-tauri-drag-region
         >
-          <span class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+          <span
+            class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+            data-tauri-drag-region
+          >
             {props.chatMetaData.title || t("chat.new.defaultTitle")}
           </span>
           {chatPrompt.value ? (
@@ -345,13 +362,14 @@ export default defineComponent({
               }}
             </NTooltip>
           ) : null}
+          <ChatConfig class="ml-2" chat={props.chat}></ChatConfig>
         </div>
 
         {/* history */}
         <div class="flex-1 flex flex-col overflow-hidden">
           <div class="flex-1 overflow-hidden">
             <NScrollbar ref={scrollRef} class="py-4">
-              <div class="grid gap-6">
+              <div class="grid gap-6 pb-2">
                 {props.chat.messages.map((message, index) => (
                   <div key={index}>
                     {renderMessage(message, props.chat, {

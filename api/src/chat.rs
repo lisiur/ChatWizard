@@ -1,6 +1,5 @@
 use futures::{stream, Stream, StreamExt};
 use std::pin::Pin;
-use uuid::Uuid;
 
 use crate::error::{ApiErrorResponse, Error};
 use crate::result::Result;
@@ -10,19 +9,84 @@ use crate::{
     OpenAIApi,
 };
 
-#[derive(serde::Serialize, Debug)]
-pub struct CreateChatRequestParams {
-    model: String,
-    messages: Vec<Message>,
-    stream: bool,
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct ChatParams {
+    /// ID of the model to use.
+    pub model: String,
+
+    /// The messages to generate chat completions for, in the chat format.
+    pub messages: Vec<Message>,
+
+    /// What sampling temperature to use, between 0 and 2.
+    /// Higher values like 0.8 will make the output more random,
+    /// while lower values like 0.2 will make it more focused and deterministic.
+    ///
+    /// We generally recommend altering this or top_p but not both.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub temperature: Option<f32>,
+
+    /// An alternative to sampling with temperature, called nucleus sampling,
+    /// where the model considers the results of the tokens with top_p probability mass.
+    /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+    ///
+    /// We generally recommend altering this or top_p but not both.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_p: Option<f32>,
+
+    /// An alternative to sampling with temperature, called nucleus sampling,
+    /// where the model considers the results of the tokens with top_p probability mass.
+    /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+    ///
+    /// We generally recommend altering this or temperature but not both.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub n: Option<u32>,
+
+    /// If set, partial message deltas will be sent, like in ChatGPT.
+    /// Tokens will be sent as data-only server-sent events as they become available,
+    /// with the stream terminated by a data: [DONE] message.
+    pub stream: bool,
+
+    /// Up to 4 sequences where the API will stop generating further tokens.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop: Option<Vec<String>>,
+
+    /// The maximum number of tokens to generate in the chat completion.
+    ///
+    /// The total length of input tokens and generated tokens is limited by the model's context length.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_tokens: Option<u32>,
+
+    /// Number between -2.0 and 2.0.
+    /// Positive values penalize new tokens based on whether they appear in the text so far,
+    /// increasing the model's likelihood to talk about new topics.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub presence_penalty: Option<f32>,
+
+    /// Number between -2.0 and 2.0.
+    /// Positive values penalize new tokens based on their existing frequency in the text so far,
+    /// decreasing the model's likelihood to repeat the same line verbatim.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub frequency_penalty: Option<f32>,
+
+    /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<String>,
 }
 
-impl Default for CreateChatRequestParams {
+impl Default for ChatParams {
     fn default() -> Self {
         Self {
             model: "gpt-3.5-turbo".to_string(),
             messages: vec![],
+            temperature: None,
+            top_p: None,
+            n: None,
             stream: true,
+            stop: None,
+            max_tokens: None,
+            presence_penalty: None,
+            frequency_penalty: None,
+            user: None,
         }
     }
 }
@@ -31,12 +95,6 @@ impl Default for CreateChatRequestParams {
 pub struct Message {
     pub role: Role,
     pub content: String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct ChatLog {
-    pub id: Uuid,
-    message: Message,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -95,7 +153,7 @@ pub enum StreamContent {
 }
 
 impl OpenAIApi {
-    pub async fn create_chat(&self, params: CreateChatRequestParams) -> Result<reqwest::Response> {
+    pub async fn create_chat(&self, params: &ChatParams) -> Result<reqwest::Response> {
         self.client
             .post_stream::<CreateChatResponseData>(
                 "https://api.openai.com/v1/chat/completions",
@@ -105,148 +163,19 @@ impl OpenAIApi {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct Chat(Vec<ChatLog>);
+#[derive(serde::Serialize, serde::Deserialize, Default, Clone, Debug)]
+pub struct Chat;
 
 impl Chat {
-    pub fn new(prompt: Option<String>) -> Self {
-        let mut logs = vec![];
-
-        if let Some(prompt) = prompt {
-            logs.push(ChatLog {
-                id: Uuid::new_v4(),
-                message: Message {
-                    role: Role::System,
-                    content: prompt,
-                },
-            });
-        }
-
-        Self(logs)
-    }
-
-    pub fn get_logs(&self) -> &Vec<ChatLog> {
-        &self.0
-    }
-
-    pub fn set_logs(&mut self, logs: Vec<ChatLog>) {
-        self.0 = logs;
-    }
-
-    pub fn from_logs(logs: Vec<ChatLog>) -> Self {
-        Self(logs)
-    }
-
-    pub fn messages(&self) -> Vec<Message> {
-        self.0.iter().map(|log| log.message.clone()).collect()
-    }
-
-    pub fn get_prompt(&self) -> Option<String> {
-        if let Some(log) = self.0.first() {
-            if matches!(log.message.role, Role::System) {
-                return Some(log.message.content.clone());
-            }
-        }
-        None
-    }
-
-    pub fn set_prompt(&mut self, prompt: Option<&str>) {
-        if let Some(prompt) = prompt {
-            if let Some(log) = self.0.first_mut() {
-                if matches!(log.message.role, Role::System) {
-                    log.message.content = prompt.to_string();
-                    return;
-                }
-            }
-            self.0.push(ChatLog {
-                id: Uuid::new_v4(),
-                message: Message {
-                    role: Role::System,
-                    content: prompt.to_string(),
-                },
-            });
-        } else {
-            self.unset_prompt();
-        }
-    }
-
-    pub fn unset_prompt(&mut self) {
-        if self.0.first().is_some() && matches!(self.0.first().unwrap().message.role, Role::System)
-        {
-            self.0.remove(0);
-        }
-    }
-
-    fn limited_messages(&self, limit: usize) -> Vec<Message> {
-        let mut messages: Vec<Message> = self
-            .0
-            .iter()
-            .rev()
-            .take(limit)
-            .rev()
-            .map(|log| log.message.clone())
-            .collect();
-
-        // gpt-3.5-turbo-0301 does not always pay strong attention to system messages.
-        // so we add a user message to the beginning of the message list.
-        if let Some(log) = self.0.first() {
-            let message = &log.message;
-            if matches!(message.role, Role::System) {
-                messages.insert(
-                    0,
-                    Message {
-                        role: Role::User,
-                        content: message.content.clone(),
-                    },
-                );
-            }
-        }
-
-        messages
-    }
-
-    // Add user message
-    pub fn add_user_message(&mut self, message: &str) -> Uuid {
-        let message_id = Uuid::new_v4();
-        let log = ChatLog {
-            id: message_id,
-            message: Message {
-                role: Role::User,
-                content: message.to_string(),
-            },
-        };
-        self.0.push(log);
-        message_id
-    }
-
-    // Add assistant message
-    fn add_assistant_message(&mut self, message: String) -> Uuid {
-        let message_id = Uuid::new_v4();
-        let log = ChatLog {
-            id: message_id,
-            message: Message {
-                role: Role::Assistant,
-                content: message,
-            },
-        };
-        self.0.push(log);
-        message_id
-    }
-
     pub async fn send(
         &mut self,
         api: &OpenAIApi,
+        params: &ChatParams,
     ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
-        let res = api
-            .create_chat(CreateChatRequestParams {
-                messages: self.limited_messages(4),
-                ..CreateChatRequestParams::default()
-            })
-            .await?;
+        let res = api.create_chat(params).await?;
 
         let stream = res.bytes_stream();
 
-        let mut reply = String::new();
         let stream = stream
             .flat_map(move |chunk| {
                 if let Err(err) = chunk {
@@ -268,16 +197,16 @@ impl Chat {
                         if line.is_empty() {
                             None
                         } else if line.starts_with("data: [DONE]") {
-                            self.add_assistant_message(reply.clone());
                             Some(StreamContent::Done)
                         } else {
                             let json_data = &line[6..];
                             let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
                             json.choices.get(0).and_then(|choice| {
-                                choice.delta.content.as_ref().map(|content| {
-                                    reply.push_str(content);
-                                    StreamContent::Data(content.to_string())
-                                })
+                                choice
+                                    .delta
+                                    .content
+                                    .as_ref()
+                                    .map(|content| StreamContent::Data(content.to_string()))
                             })
                         }
                     })
@@ -288,74 +217,5 @@ impl Chat {
             .boxed();
 
         Ok(stream)
-    }
-
-    pub async fn resend(
-        &mut self,
-        api: &OpenAIApi,
-        message_id: Uuid,
-    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
-        self.truncate_message_after(message_id)?;
-
-        // send the message again
-        self.send(api).await
-    }
-
-    fn truncate_message_after(&mut self, id: Uuid) -> Result<()> {
-        // find the message index
-        let Some(index) = self.0.iter().position(|log| log.id == id) else {
-            return Err(Error::NotFound("message not found".to_string()))
-        };
-
-        // remove all messages after the message need to resend
-        self.0.truncate(index + 1);
-
-        Ok(())
-    }
-
-    pub fn discard_message(&mut self, id: Uuid) -> Result<()> {
-        // find the message index
-        let Some(index) = self.0.iter().position(|log| log.id == id) else {
-            return Err(Error::NotFound("message not found".to_string()))
-        };
-
-        // remove the message
-        self.0.remove(index);
-
-        Ok(())
-    }
-
-    pub fn reset(&mut self) {
-        self.0.clear();
-    }
-
-    pub fn to_json_string(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    pub fn from_json_string(json: &str) -> Result<Self> {
-        let chat = serde_json::from_str::<Self>(json).unwrap();
-        Ok(chat)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_chat_topic() {
-        dotenv::dotenv().unwrap();
-
-        let mut api = OpenAIApi::new(&std::env::var("OPENAI_API").unwrap());
-        api.set_proxy(&std::env::var("PROXY").unwrap());
-
-        let mut topic = Chat::new(Some(
-            "Repeat what user says, no more other words".to_string(),
-        ));
-
-        topic.add_user_message("Hello!");
-
-        assert!(topic.send(&api).await.is_ok());
     }
 }
