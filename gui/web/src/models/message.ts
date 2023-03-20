@@ -4,6 +4,7 @@ export class UserMessage extends Message {
   id = "";
   content: string;
   delivered = null as boolean | null;
+  finished = false;
 
   constructor(content: string) {
     super();

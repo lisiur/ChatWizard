@@ -7,6 +7,7 @@ const messages: Messages = {
   "common.delete": "删除",
 
   "chat.new": "新建对话",
+  "chat.new.defaultTitle": "新对话",
   "chat.conversations": "对话列表",
   "chat.inputNameHint": "请输入对话标题",
   "chat.delivered": "已发送",

@@ -1,4 +1,4 @@
-import { defineComponent, ref } from "vue";
+import { computed, defineComponent, ref } from "vue";
 import ChatComp from "../../components/Chat";
 import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";
@@ -19,8 +19,13 @@ export default defineComponent({
 
     const chatMetaList = ref<Array<{ id: string; title: string }>>([]);
     const chats = new Map<string, Chat>();
-    const currentChat = ref<Chat>();
-    const currentChatMeta = ref<{ id: string; title: string }>();
+
+    const currentChatId = ref<string>();
+    const currentChat = computed(() => chats.get(currentChatId.value!));
+    const currentChatMeta = computed(
+      () => chatMetaList.value.find((m) => m.id === currentChatId.value)!
+    );
+
     refreshChatMetaList();
 
     if (route.query.id) {
@@ -35,12 +40,13 @@ export default defineComponent({
 
     async function createChat() {
       const chatId = await api.createChat({
-        title: "New Chat",
+        title: "",
       });
       const chat = new Chat(chatId);
+      chats.set(chatId, chat);
       await refreshChatMetaList();
-      currentChatMeta.value = chatMetaList.value.find((m) => m.id === chatId)!;
-      currentChat.value = chat;
+      currentChatId.value = chatId;
+
       setTimeout(() => {
         chatRef.value?.focusInput();
       });
@@ -79,8 +85,8 @@ export default defineComponent({
     }
 
     async function deleteHandler(id: string) {
-      if (currentChat.value?.id === id) {
-        currentChat.value = undefined;
+      if (currentChatId.value === id) {
+        currentChatId.value = undefined;
       }
       await api.deleteChat(id);
       chats.delete(id);
@@ -89,32 +95,31 @@ export default defineComponent({
 
     async function selectHandler(id: string) {
       const chatData = await api.readChat(id);
-      const messages = chatData.logs.map((m) => {
-        switch (m.message.role) {
-          case "user": {
-            const msg = new UserMessage(m.message.content);
-            msg.setId(m.id);
-            msg.markHistory();
-            return msg;
-          }
-          case "assistant": {
-            const msg = new AssistantMessage(m.message.content);
-            msg.markHistory();
-            return msg;
-          }
-        }
-      }) as Message[];
-
-      const chat = new Chat(id, messages);
+      const chat = Chat.init(chatData);
       chats.set(id, chat);
-      currentChat.value = chat;
-
-      const chatMetaData = chatMetaList.value.find((m) => m.id === id)!;
-      currentChatMeta.value = chatMetaData;
+      currentChatId.value = id;
 
       setTimeout(() => {
         chatRef.value?.focusInput();
       });
+    }
+
+    async function messageHandler(message: Message) {
+      const chat = currentChat.value!;
+      const chatMetaData = currentChatMeta.value!;
+
+      // If the chat is empty, set the title to the first message.
+      if (
+        message instanceof UserMessage &&
+        chat.messages.length === 0 &&
+        chatMetaData.title === ""
+      ) {
+        await api.updateChat({
+          id: chatMetaData.id,
+          title: message.content,
+        });
+        await refreshChatMetaList();
+      }
     }
 
     return () => (
@@ -150,6 +155,7 @@ export default defineComponent({
               ref={chatRef}
               chat={currentChat.value}
               chatMetaData={currentChatMeta.value!}
+              onMessage={messageHandler}
             ></ChatComp>
           ) : (
             <div class="h-full" data-tauri-drag-region></div>

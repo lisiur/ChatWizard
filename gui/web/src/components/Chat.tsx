@@ -26,7 +26,7 @@ import { Markdown } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
-import { ChatMetadata } from "../api";
+import { ChatMetadata, updateChat } from "../api";
 import { useI18n } from "../hooks/i18n";
 
 export default defineComponent({
@@ -39,6 +39,9 @@ export default defineComponent({
       type: Object as PropType<ChatMetadata>,
       required: true,
     },
+    onMessage: {
+      type: Function as PropType<(message: Message) => void>,
+    }
   },
   setup(props, { expose }) {
     const { t } = useI18n();
@@ -80,6 +83,9 @@ export default defineComponent({
     function keydownHandler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
         const message = prompt.value;
+
+        props.onMessage?.(new UserMessage(message));
+
         prompt.value = "";
         props.chat.sendMessage(message, {
           onFinish: stopAutoScroll,
@@ -318,7 +324,9 @@ export default defineComponent({
         {/* history */}
         <div class="flex-1 flex flex-col overflow-hidden">
           <div class="px-4 py-3 border-b border-color" data-tauri-drag-region>
-            <span class="text-lg">{props.chatMetaData.title}</span>
+            <span class="text-lg">
+              {props.chatMetaData.title || t("chat.new.defaultTitle")}
+            </span>
           </div>
           <div class="flex-1 overflow-hidden">
             <NScrollbar ref={scrollRef} class="py-4">

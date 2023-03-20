@@ -5,6 +5,7 @@ export const messages = {
   "common.delete": "Delete",
 
   "chat.new": "New Chat",
+  "chat.new.defaultTitle": "New Chat",
   "chat.conversations": "Conversations",
   "chat.inputNameHint": "Please input chat name",
   "chat.delivered": "delivered",

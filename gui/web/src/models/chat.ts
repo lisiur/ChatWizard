@@ -1,6 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { reactive } from "vue";
-import { resendMessage, sendMessage, saveAsMarkdown } from "../api";
+import { resendMessage, sendMessage, saveAsMarkdown, ChatData } from "../api";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -15,6 +15,29 @@ export class Chat {
   constructor(public id: string, messages: Message[] = []) {
     this.busy = false;
     this.messages = reactive(messages);
+  }
+
+  static init(data: ChatData) {
+    const messages: Message[] = [];
+    for (let i = 0; i < data.logs.length; i++) {
+      const log = data.logs[i];
+      switch (log.message.role) {
+        case "user": {
+          const msg = new UserMessage(log.message.content);
+          msg.setId(log.id);
+          msg.finished = data.logs[i + 1]?.message.role === "assistant";
+          msg.markHistory();
+          messages.push(msg);
+        }
+        case "assistant": {
+          const msg = new AssistantMessage(log.message.content);
+          msg.markHistory();
+          messages.push(msg);
+        }
+      }
+    }
+
+    return new Chat(data.id, messages);
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {
@@ -38,6 +61,7 @@ export class Chat {
 
     const userMessage = this.messages[index] as UserMessage;
     userMessage.delivered = null;
+    userMessage.finished = false;
 
     await resendMessage(this.id, userMessage.id);
 
@@ -86,6 +110,7 @@ export class Chat {
         case "done": {
           assistantMessage.markHistory();
           this.busy = false;
+          userMessage.finished = true;
           params?.onFinish?.();
           unListen();
           break;

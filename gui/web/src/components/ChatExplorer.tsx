@@ -1,7 +1,7 @@
 import { NDropdown, NScrollbar } from "naive-ui";
 import { computed, defineComponent, nextTick, PropType, ref } from "vue";
-import { useI18n } from "vue-i18n";
 import { ChatMetadata } from "../api";
+import { useI18n } from "../hooks/i18n";
 
 export default defineComponent({
   props: {
@@ -106,7 +106,7 @@ const Column = defineComponent({
         onContextmenu={contextMenuHandler}
       >
         <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">
-          {props.chat.title}
+          {props.chat.title || t("chat.new.defaultTitle")}
         </div>
         <NDropdown
           trigger="manual"
