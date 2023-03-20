@@ -4,9 +4,30 @@ AskAI is an OpenAI chat client desktop app (Windows, MacOS, Linux)
 
 ## Screenshots
 
-![](./assets/dark.png)
+![](./assets/chat.png)
+![](./assets/chat_setting.png)
 ![](./assets/prompt.png)
 ![](./assets/setting.png)
+
+## Features
+
+- support config chat params
+    - model
+    - max backtrack
+    - temperature
+    - max tokens
+    - presence penalty
+    - frequency penalty
+- support prompt
+- support settings
+    - support language
+        - English
+        - Chinese
+    - support proxy
+    - support theme
+      - system
+      - dark
+      - light
 
 ## Installation
 
