@@ -1,23 +1,23 @@
 {
-  "version": "0.0.13",
-  "notes": "## [0.0.13](https://github.com/lisiur/askai/compare/v0.0.12...v0.0.13) (2023-03-19)%0A%0A%0A### Features%0A%0A* optimize user experience ([23e02bb](https://github.com/lisiur/askai/commit/23e02bb8be806517775c2beae86afcec1d9a782e))%0A* remove unnessary buttons in chat ([2270e13](https://github.com/lisiur/askai/commit/2270e13885b219d47507f9eb7cfc5163472388c7))%0A* support i18n ([a152460](https://github.com/lisiur/askai/commit/a1524609dd3234507ac2711cfec0b3727d7774ab)), closes [#20](https://github.com/lisiur/askai/issues/20)%0A%0A%0A### Reverts%0A%0A* Revert \"chore: bump version to 0.0.13\" ([4e3ddc6](https://github.com/lisiur/askai/commit/4e3ddc63195688c76865e32cfff873790b805ee9))",
-  "pub_date": "2023-03-19T10:28:09.610Z",
+  "version": "0.0.14",
+  "notes": "## [0.0.14](https://github.com/lisiur/askai/compare/v0.0.13...v0.0.14) (2023-03-20)%0A%0A%0A### Features%0A%0A* support light code theme ([11a2f31](https://github.com/lisiur/askai/commit/11a2f311563867d1ef8671d833eae16432e3c5b5)), closes [#17](https://github.com/lisiur/askai/issues/17)",
+  "pub_date": "2023-03-20T02:06:52.383Z",
   "platforms": {
-    "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2FXcEM5aXR5YTB1WW9wbDhmVlJVRHlPT3RMeEZJRHdMcnVhbjVFY3VSbDNjVzJ2SEU0d0gzMndWcVJISTNKa3VhUWxtaFZDMnlQbktDbDhpRVJmZHdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5MjIxMzExCWZpbGU6YXNrYWkuYXBwLnRhci5negp2c0JXeWpyME1na3FsZWl3VTBYSzNsVzFHRGxtUVNwbXRSKzZoMVdlS0pLdzI2L2xrTGg4Vmd0WUYzVHZhU3Y0eUpJZ0VpWEcwcTNLNUVNYmFkV0NCZz09Cg==",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_aarch64.app.tar.gz"
-    },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1ZoNEUwUjJZT0lWM2dBZ1ZzcmV2V2JWOXloUCtMM0ZDOHF2YTJ5QlIrSkZaZWpXbm5nRFhyMG1Ed21GS251cC9nc0NGK2JndXFFcWtPK3dpem5iUkFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5MjIxMzYyCWZpbGU6YXNrYWlfMC4wLjEzX2FtZDY0LkFwcEltYWdlLnRhci5negphVDRqOUlCVHZ2ZTE4bDczSzlmNVU5U3BGNGNZMWtDWmRKMzhDRjRnWklvNW5xZnlJYUpVdHE4TTlRK29LVS82TjJmbDNYZUFieHF0Ui9yU1E2MXZEUT09Cg==",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.13_amd64.AppImage.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1VRVW4xYUFRalVQMDh4ZmxMMDZGQk4rZFFtTGxjaXk4Y3RsTUZyUG5KQUVwZEhqZmxaRVFLcHFwNU84V3YrTTR5ZXpHd1NxMFFEVng2QzFoNUdoQWc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5Mjc3NjU3CWZpbGU6YXNrYWlfMC4wLjE0X2FtZDY0LkFwcEltYWdlLnRhci5negpVblduUGVDb2VuQ2ZyaWNkRkdJc0hocCtlRzkzZXhlKzdIcFFBeDhjb0dkQnR1dEJHRGkyTHRIb2xPMWNuR2xqOGdmaDdnSGtFL1R0cHBKWEdsaEtCdz09Cg==",
+      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.14_amd64.AppImage.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1VlZmttTGRzalFYNTgzUGpVMFA0UTN4MDVuMytia3U2c1ArbnR2T0RldFdvcE9FTlBFYlM0c3ZlZEdrTUNLWE9ZYWV1T01ueHprdndvWFNxTGJOS0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5MjIxNTAwCWZpbGU6YXNrYWkuYXBwLnRhci5negpDdkFDcjV2NGZwTDdRZjdMTS92S3BOQitiZmp4aHc0NzVZWE8vNURJRllPZU50VlhlMm03SThOK3B3NTM4bGdlRThycVlnd2o5VzFFOEFYeDNyUzNEdz09Cg==",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2RuNmw1dWtzWHUwWkZnOXZCUm1QQ3ZrT0J3YXJtcVpNMGJIMzZyYy9RbW5yRVNYdkZGTCt5WFNNTlN4ZDQvTXpSSWJUK09LbU9acUNBeTJKMmhDSkFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5Mjc3NzI0CWZpbGU6YXNrYWkuYXBwLnRhci5negowZjNNSW9BaWpBSEEzdnVVNmpXZUFVRXEvVE5ZR0ZTNmgxcGZyZWREcFZqMjFVdGdCOWRSWXVvWVZuVUl2b1phdHMzZzBmbEc4VS80aS9zTFA2ajhBQT09Cg==",
       "url": "https://github.com/lisiur/askai/releases/latest/download/askai_x64.app.tar.gz"
     },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1RYeDZITWJmUjl4c2U3NTZSckpqY2V3bGJSaEN5NjZ4dzhPSEVGbWlCdUI3N0xaajIwVFdwOExmbE8xck5hcFVqNm52YTcyOGl0b3o2SHB1ZUkxeHd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5Mjc3NzMzCWZpbGU6YXNrYWkuYXBwLnRhci5negpsMFNOeEowcVRpUjhzcUJhOWJTZ2JyVC9TeU9YWlQramVkMC92QnA3bWluM2ZYSWc1TDM2eUQwUUVZNlYvOGhhdmkxYVJzSURnVFQzdktFejh2anlDQT09Cg==",
+      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_aarch64.app.tar.gz"
+    },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2Y0dEFiMXZoZk82blBydmxUUHdudHVGQ2RFQ2NaWmtyQ0RlYWYyQ0lSaC9TaHlsdG1KS28ybXlKK3FSbmtLcHhxUTkvcE9mdmVFVDlDcURjNGpxcVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5MjIxNjg2CWZpbGU6YXNrYWlfMC4wLjEzX3g2NF9lbi1VUy5tc2kuemlwCllSTThmeGk5MGJDTmpJRlZPMjdIdGR1d0h1N1Q1MGFKSlBmS251b1pRc1V4M0huZU8wZ3Frb3ZEbW51MVd1ZFR6RjY5aEdROUNvaVhSdU9QTEJKaER3PT0K",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.13_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1U3amo4aGRDWTlja0Z0UWVZbWxrTFdMM1R3ZUN5MXhrNWVqeWtMUDd4dXZJQzVGVnZNNjY4NmtHb2ViK0FnbGZ6Q093Z0pHMWwySTBMMGpYYTVYZHdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjc5Mjc4MDA4CWZpbGU6YXNrYWlfMC4wLjE0X3g2NF9lbi1VUy5tc2kuemlwCklKTm03Y256YkFlK2FxbmpuU1ZOS05COGkxczI4cFUvVWI0NHdSVTZYYmNidldZcUFKejFSRU4zTTJ5SXBQQTRzNlpibmZkd20zZmxiYzZpd29rVEFnPT0K",
+      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.14_x64_en-US.msi.zip"
     }
   }
 }
