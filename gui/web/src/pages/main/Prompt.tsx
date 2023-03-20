@@ -167,7 +167,7 @@ export default defineComponent({
                 }
               ></textarea>
             </NScrollbar>
-          ) : null}
+          ) : <div class="h-full" data-tauri-drag-region></div>}
         </div>
       </div>
     );

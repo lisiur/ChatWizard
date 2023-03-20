@@ -134,7 +134,7 @@ export default defineComponent({
               chat={currentChat.value}
               chatMetaData={currentChatMeta.value!}
             ></ChatComp>
-          ) : null}
+          ) : <div class="h-full" data-tauri-drag-region></div>}
         </div>
       </div>
     );

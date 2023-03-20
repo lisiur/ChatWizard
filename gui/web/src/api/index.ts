@@ -102,7 +102,7 @@ export function setTheme(theme: Theme) {
 }
 
 export function getTheme() {
-  return invoke<Theme | undefined>("get_theme");
+  return invoke<Theme>("get_theme");
 }
 
 export function setApiKey(apiKey: string) {

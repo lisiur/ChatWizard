@@ -28,7 +28,7 @@ async fn main() {
                     .inner_size(860.0, 720.0)
                     .min_inner_size(720.0, 640.0)
                     .resizable(true)
-                    .visible(true);
+                    .visible(false);
 
             #[cfg(target_os = "macos")]
             {

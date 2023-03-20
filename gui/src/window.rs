@@ -38,6 +38,7 @@ pub fn show_window_lazy(
 
             let mut builder = WindowBuilder::new(&handle, &label, url)
                 .title(&title)
+                .always_on_top(true)
                 .resizable(resizable);
 
             #[cfg(target_os = "macos")]

@@ -20,8 +20,14 @@ pub struct Settings {
     pub api_key: Option<String>,
     pub org_id: Option<String>,
     pub proxy: Option<String>,
-    pub theme: Option<Theme>,
-    pub locale: Option<String>,
+    #[serde(default)]
+    pub theme: Theme,
+    #[serde(default = "default_locale")]
+    pub locale: String,
+}
+
+fn default_locale() -> String {
+    "enUS".to_string()
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -30,6 +36,12 @@ pub enum Theme {
     Light,
     Dark,
     System,
+}
+
+impl Default for Theme {
+    fn default() -> Self {
+        Self::System
+    }
 }
 
 impl Setting {
@@ -91,23 +103,23 @@ impl Setting {
         self.save().await
     }
 
-    pub fn get_theme(&self) -> Option<Theme> {
+    pub fn get_theme(&self) -> Theme {
         self.settings.theme.clone()
     }
 
     pub async fn set_theme(&mut self, theme: Theme) -> Result<()> {
-        self.settings.theme = Some(theme);
+        self.settings.theme = theme;
         self.save().await?;
 
         Ok(())
     }
 
     pub fn get_locale(&self) -> String {
-        self.settings.locale.clone().unwrap_or("enUS".to_string())
+        self.settings.locale.clone()
     }
 
     pub async fn set_locale(&mut self, locale: &str) -> Result<()> {
-        self.settings.locale = Some(locale.to_string());
+        self.settings.locale = locale.to_string();
         self.save().await?;
 
         Ok(())

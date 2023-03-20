@@ -47,7 +47,7 @@ export default defineComponent({
           showWindow("setting", {
             title: "Setting",
             url: `/#${router.resolve({ name: "setting" }).path}`,
-            width: 500,
+            width: 520,
             height: 300,
           });
           break;

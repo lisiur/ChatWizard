@@ -68,7 +68,7 @@ export default defineComponent({
                 <NInput
                   v-model:value={model.value.apiKey}
                   type="password"
-                  placeholder={`sk-${"*".repeat(48)}`}
+                  placeholder={`sk-${'x'.repeat(48)}`}
                   onBlur={changeApiKeyHandler}
                 ></NInput>
               </NFormItem>

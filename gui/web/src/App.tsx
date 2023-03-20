@@ -18,6 +18,7 @@ export default defineComponent({
     setupLifeCycle()
       .onMounted((ctx) => {
         getTheme().then(async (theme) => {
+          debugLog(`theme: ${theme}`);
           setTheme(theme ?? Theme.System);
 
           // show window after theme is set

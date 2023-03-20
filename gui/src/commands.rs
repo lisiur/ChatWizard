@@ -202,7 +202,7 @@ pub async fn get_settings(state: State<'_, AppState>) -> Result<Settings> {
 }
 
 #[tauri::command]
-pub async fn get_theme(state: State<'_, AppState>) -> Result<Option<Theme>> {
+pub async fn get_theme(state: State<'_, AppState>) -> Result<Theme> {
     let setting = state.setting.lock().await;
 
     Ok(setting.get_theme())
@@ -298,6 +298,6 @@ pub async fn show_window(
 
 #[tauri::command]
 pub async fn debug_log(log: String) -> Result<()> {
-    log::debug!("{}", log);
+    log::debug!("[debug] {}", log);
     Ok(())
 }
