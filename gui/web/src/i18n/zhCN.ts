@@ -5,6 +5,7 @@ const messages: Messages = {
   "common.ok": "确定",
   "common.copy": "复制",
   "common.delete": "删除",
+  "common.copy.success": "已复制到剪贴板",
 
   "chat.new": "新建对话",
   "chat.new.defaultTitle": "新对话",

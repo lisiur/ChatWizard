@@ -1,6 +1,8 @@
 use futures::{stream, Stream, StreamExt};
 use std::pin::Pin;
 
+use tiktoken_rs::{self, cl100k_base, model::get_context_size};
+
 use crate::error::{ApiErrorResponse, Error};
 use crate::result::Result;
 
@@ -91,10 +93,16 @@ impl Default for ChatParams {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct Message {
-    pub role: Role,
-    pub content: String,
+impl ChatParams {
+    pub fn calc_tokens(&self) -> usize {
+        let context_size = get_context_size(&self.model);
+        let mut tokens = 0;
+        for message in &self.messages {
+            tokens += message.calc_tokens();
+        }
+
+        context_size.saturating_sub(tokens)
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -103,6 +111,35 @@ pub enum Role {
     System,
     User,
     Assistant,
+}
+
+impl Role {
+    fn to_s(&self) -> String {
+        match self {
+            Self::System => "system".to_string(),
+            Self::User => "user".to_string(),
+            Self::Assistant => "assistant".to_string(),
+        }
+    }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct Message {
+    pub role: Role,
+    pub content: String,
+}
+
+impl Message {
+    pub fn calc_tokens(&self) -> usize {
+        let bpe = cl100k_base().unwrap();
+
+        let mut num_tokens = 0;
+        num_tokens += 4; // every message follows <im_start>{role/name}\n{content}<im_end>\n
+        num_tokens += bpe.encode_with_special_tokens(&self.role.to_s()).len();
+        num_tokens += bpe.encode_with_special_tokens(&self.content).len();
+
+        num_tokens
+    }
 }
 
 #[derive(serde::Deserialize, Debug)]

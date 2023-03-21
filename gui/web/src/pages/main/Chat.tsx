@@ -1,4 +1,4 @@
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, reactive, ref } from "vue";
 import ChatComp from "../../components/Chat";
 import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";

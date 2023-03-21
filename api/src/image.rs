@@ -55,7 +55,9 @@ mod tests {
 
         let data = api
             .create_image(CreateImageRequestParams {
-                prompt: "a lovely dog".to_string(),
+                prompt:
+                    "一个关于 ai 的logo，要求图案充满科技感，有机器人，简约明了，适用于macos风格"
+                        .to_string(),
                 ..CreateImageRequestParams::default()
             })
             .await
@@ -67,6 +69,7 @@ mod tests {
             .map(|item| item.url)
             .collect::<Vec<String>>();
 
+        println!("{:?}", urls);
         assert!(!urls.is_empty());
     }
 }

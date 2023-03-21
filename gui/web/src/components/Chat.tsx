@@ -10,8 +10,6 @@ import {
   DefineComponent,
 } from "vue";
 import mdRender from "../utils/mdRender";
-import assistantAvatar from "../assets/assistant_avatar.png";
-import userAvatar from "../assets/user_avatar.png";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -30,6 +28,8 @@ import { ChatMetadata } from "../api";
 import { useI18n } from "../hooks/i18n";
 import { usePrompt } from "../hooks/prompt";
 import ChatConfig from "./ChatConfig";
+import { message } from "../utils/prompt";
+import Cost from "./Cost";
 
 export default defineComponent({
   props: {
@@ -175,8 +175,8 @@ export default defineComponent({
       }
     }
 
-    function renderAssistantMessage(message: AssistantMessage) {
-      const html = mdRender(message.content);
+    function renderAssistantMessage(msg: AssistantMessage) {
+      const html = mdRender(msg.content);
       return (
         <div class="flex relative justify-start items-start pl-4 pr-24">
           <div class="relative flex-1 overflow-hidden">
@@ -186,14 +186,17 @@ export default defineComponent({
               v-html={html}
             ></div>
           </div>
-          {message.done ? (
-            <div class="absolute bottom-[-1.2rem] left-14 text-xs">
+          {msg.done ? (
+            <div class="absolute bottom-[-1.2rem] left-4 text-xs">
               <NButton
                 type="default"
                 text
                 size="tiny"
                 class="ml-2 text-gray-500"
-                onClick={() => writeToClipboard(message.content)}
+                onClick={async () => {
+                  await writeToClipboard(msg.content);
+                  message.success(t("common.copy.success"));
+                }}
               >
                 {t("common.copy")}
               </NButton>
@@ -217,7 +220,7 @@ export default defineComponent({
             >
               {message.content}
             </div>
-            <div class="absolute bottom-[-1.1rem] right-0 text-xs">
+            <div class="absolute bottom-[-1.1rem] right-1 text-xs">
               {(() => {
                 switch (message.delivered) {
                   case null: {
@@ -317,7 +320,7 @@ export default defineComponent({
         <div class="flex-1 flex flex-col overflow-hidden">
           <div class="flex-1 overflow-hidden">
             <NScrollbar ref={scrollRef} class="py-4">
-              <div class="grid gap-6 pb-2">
+              <div class="grid gap-6 pb-6">
                 {props.chat.messages.map((message, index) => (
                   <div key={index}>
                     {renderMessage(message, props.chat, {
@@ -333,6 +336,13 @@ export default defineComponent({
         {/* input */}
         <div class="border-t" style="border-color: var(--border-color)">
           <div class="flex items-center">
+            <Cost
+              class="pl-2 text-xs"
+              style={{
+                color: "var(--chat-btn-color)",
+              }}
+              chat={props.chat}
+            ></Cost>
             <div class="flex-1 flex justify-end p-1">
               {renderButton({
                 handler: exportMarkdown,

@@ -3,6 +3,7 @@ export const messages = {
   "common.ok": "Ok",
   "common.copy": "copy",
   "common.delete": "Delete",
+  "common.copy.success": "Copied to clipboard",
 
   "chat.new": "New Chat",
   "chat.new.defaultTitle": "New Chat",
@@ -36,6 +37,7 @@ export const messages = {
   "prompt.inputNameHint": "Please input prompt name",
   "prompt.newChat": "New Chat",
   "prompt.rename": "Rename",
+  "prompt.update.success": "Prompt updated successfully",
 
   "setting.locale": "Language",
   "setting.apiKey": "Api Key",

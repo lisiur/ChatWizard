@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use askai_api::{OpenAIApi, StreamContent};
+use serde_json::json;
 use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
 use uuid::Uuid;
@@ -57,8 +58,9 @@ pub async fn load_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<Chat
 
     let logs = chat.get_logs().await;
     let config = chat.config.clone();
+    let cost = chat.get_cost().await;
 
-    Ok(ChatData { logs, config })
+    Ok(ChatData { logs, config, cost })
 }
 
 #[tauri::command]
@@ -103,12 +105,15 @@ pub async fn send_message(
 
     let chat_id = chat.id;
     let chat_manager = state.chat_manager.clone();
+
     tokio::spawn(async move {
         let event_id = message_id.to_string();
         while let Some(content) = receiver.recv().await {
             window.emit(&event_id, content).unwrap();
         }
-        chat_manager.lock().await.save_chat(chat_id).await.unwrap();
+        // save message
+        let cost = chat_manager.lock().await.save_chat(chat_id).await.unwrap();
+        window.emit(&format!("{event_id}-cost"), json!({ "cost": cost }))
     });
 
     Ok(message_id)

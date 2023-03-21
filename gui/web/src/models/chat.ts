@@ -1,5 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -17,10 +17,19 @@ import {
 
 export class Chat {
   busy: boolean;
+  cost: { value: number };
   messages: Message[];
   config: ChatConfig;
-  constructor(public id: string, messages: Message[] = [], config: ChatConfig = {}) {
+  constructor(
+    public id: string,
+    messages: Message[] = [],
+    config: ChatConfig = {},
+    cost = 0
+  ) {
     this.busy = false;
+    this.cost = reactive({
+      value: cost,
+    });
     this.messages = reactive(messages);
     this.config = reactive(config);
   }
@@ -47,7 +56,7 @@ export class Chat {
       }
     }
 
-    return new Chat(id, messages, data.config);
+    return new Chat(id, messages, data.config, data.cost);
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {
@@ -57,7 +66,7 @@ export class Chat {
     const messageId = await sendMessage(this.id, message);
     userMessage.setId(messageId);
 
-    this.__receiveAssistantMessage(userMessage, params);
+    this.__receiveAssistantMessage(this, userMessage, params);
 
     return messageId;
   }
@@ -75,7 +84,7 @@ export class Chat {
 
     await resendMessage(this.id, userMessage.id);
 
-    this.__receiveAssistantMessage(userMessage, params);
+    this.__receiveAssistantMessage(this, userMessage, params);
   }
 
   async exportMarkdown(path: string) {
@@ -83,6 +92,7 @@ export class Chat {
   }
 
   async __receiveAssistantMessage(
+    chat: Chat,
     userMessage: UserMessage,
     params?: {
       onFinish?: () => void;
@@ -99,6 +109,13 @@ export class Chat {
     this.messages.push(assistantMessage);
 
     this.busy = true;
+    const unListenCost = await listen<{ cost: number }>(
+      `${userMessageId}-cost`,
+      (event) => {
+        chat.cost.value = event.payload.cost;
+        unListenCost();
+      }
+    );
     const unListen = await listen(userMessageId, (event) => {
       endLoading();
       const chunk = event.payload as MessageChunk;

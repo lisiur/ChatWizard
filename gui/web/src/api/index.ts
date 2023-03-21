@@ -14,6 +14,7 @@ export interface ChatData {
       content: string;
     };
   }>;
+  cost: number;
   config: ChatConfig;
 }
 
