@@ -161,44 +161,6 @@ export default defineComponent({
       );
     }
 
-    function renderAvatar(avatar: string) {
-      return <img src={avatar} class="w-8 h-8 "></img>;
-    }
-
-    function renderTriangle(
-      direction: "left" | "right",
-      style?: {
-        color: string;
-        size: string;
-      }
-    ) {
-      if (direction === "left") {
-        return (
-          <div
-            class={"border-solid border-y-transparent border-l-0"}
-            style={{
-              borderRightColor: style?.color,
-              borderRightWidth: style?.size,
-              borderTopWidth: style?.size,
-              borderBottomWidth: style?.size,
-            }}
-          ></div>
-        );
-      } else if (direction === "right") {
-        return (
-          <div
-            class={"border-solid border-y-transparent border-r-0"}
-            style={{
-              borderLeftColor: style?.color,
-              borderLeftWidth: style?.size,
-              borderTopWidth: style?.size,
-              borderBottomWidth: style?.size,
-            }}
-          ></div>
-        );
-      }
-    }
-
     function renderMessage(
       message: Message,
       chat: Chat,
@@ -217,16 +179,9 @@ export default defineComponent({
       const html = mdRender(message.content);
       return (
         <div class="flex relative justify-start items-start pl-4 pr-24">
-          {renderAvatar(assistantAvatar)}
-          <div class="relative ml-2 flex-1 overflow-hidden">
-            <div class="absolute left-[-.1.5rem] top-1">
-              {renderTriangle("left", {
-                color: "var(--assistant-msg-bg-color)",
-                size: ".5rem",
-              })}
-            </div>
+          <div class="relative flex-1 overflow-hidden">
             <div
-              class="markdown-root inline-block px-3 ml-2 rounded-md z-1"
+              class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
               style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
               v-html={html}
             ></div>
@@ -255,18 +210,12 @@ export default defineComponent({
     ) {
       return (
         <div class="flex justify-end items-start pr-4 pl-24">
-          <div class="relative mr-2">
+          <div class="relative">
             <div
-              class="inline-block py-2 px-3 mr-1 rounded-md"
+              class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
               style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
             >
               {message.content}
-            </div>
-            <div class="absolute right-[-.2rem] top-1">
-              {renderTriangle("right", {
-                color: "var(--user-msg-bg-color)",
-                size: ".5rem",
-              })}
             </div>
             <div class="absolute bottom-[-1.1rem] right-0 text-xs">
               {(() => {
@@ -296,7 +245,6 @@ export default defineComponent({
               })()}
             </div>
           </div>
-          {renderAvatar(userAvatar)}
         </div>
       );
     }
