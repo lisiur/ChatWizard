@@ -1,11 +1,6 @@
-## [0.0.17](https://github.com/lisiur/askai/compare/v0.0.16...v0.0.17) (2023-03-21)
-
-
-### Bug Fixes
-
-* fix prompt can not update after created immediately ([c0fe4fd](https://github.com/lisiur/askai/commit/c0fe4fdc833bd15be0c6f9850d4686aacbe67abe))
+## [0.0.18](https://github.com/lisiur/askai/compare/v0.0.17...v0.0.18) (2023-03-21)
 
 
 ### Features
 
-* remove avatar ([ffc3231](https://github.com/lisiur/askai/commit/ffc3231651bcae517e7fb37320f8847d289185aa))
+* support show chat cost ([66f504d](https://github.com/lisiur/askai/commit/66f504db3c38e8eee9b53cba1cf3465357b23d27)), closes [#24](https://github.com/lisiur/askai/issues/24)
