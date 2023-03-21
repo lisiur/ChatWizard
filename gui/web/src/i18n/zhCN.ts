@@ -38,6 +38,7 @@ const messages: Messages = {
   "prompt.inputNameHint": "请输入提示标题",
   "prompt.newChat": "新建对话",
   "prompt.rename": "重命名",
+  "prompt.update.success": "更新成功",
 
   "setting.locale": "语言",
   "setting.apiKey": "密钥",

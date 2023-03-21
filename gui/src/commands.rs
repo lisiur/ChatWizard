@@ -165,12 +165,14 @@ pub async fn load_prompt(id: Uuid, state: State<'_, AppState>) -> Result<Option<
 }
 
 #[tauri::command]
-pub async fn create_prompt(act: String, prompt: String, state: State<'_, AppState>) -> Result<()> {
+pub async fn create_prompt(
+    act: String,
+    prompt: String,
+    state: State<'_, AppState>,
+) -> Result<Uuid> {
     let mut prompt_manager = state.prompt_manager.lock().await;
 
-    prompt_manager.add_prompt(&act, &prompt).await?;
-
-    Ok(())
+    prompt_manager.add_prompt(&act, &prompt).await
 }
 
 #[tauri::command]

@@ -113,7 +113,7 @@ export default defineComponent({
       await api.updatePrompt(currentPrompt.value);
       currentPromptInitial.value = currentPrompt.value.prompt;
 
-      message.success("Prompt updated");
+      message.success(t("prompt.update.success"));
     }
 
     async function deleteHandler(prompt: api.PromptMetadata) {
@@ -172,7 +172,7 @@ export default defineComponent({
           ></PromptExplorer>
         </div>
         <div
-          class="flex-1 overflow-hidden"
+          class="flex-1 overflow-hidden p-4"
           style="background-color: var(--body-color)"
         >
           {currentPrompt.value ? (
@@ -180,7 +180,7 @@ export default defineComponent({
               <textarea
                 ref={promptRef}
                 v-model={currentPrompt.value.prompt}
-                class="p-4 h-full resize-none w-full outline-none placeholder-slate-500"
+                class="p-4 h-full resize-none w-full rounded-lg outline-none placeholder-slate-500"
                 style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
                 onFocusout={updateHandler}
                 onInput={(e) =>
