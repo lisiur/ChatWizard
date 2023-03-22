@@ -27,6 +27,7 @@ thiserror = "1.0.39"
 env_logger = "0.10.0"
 directories = "4.0.1"
 toml = "0.7.2"
+async-trait = "0.1.67"
 
 [features]
 # by default Tauri runs in production mode

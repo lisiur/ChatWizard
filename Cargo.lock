@@ -43,6 +43,7 @@ name = "askai"
 version = "0.0.1"
 dependencies = [
  "askai-api",
+ "async-trait",
  "directories",
  "env_logger",
  "futures",
@@ -96,6 +97,17 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "async-trait"
+version = "0.1.67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86ea188f25f0255d8f92797797c97ebf5631fa88178beb1a46fdf5622c9a00e4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.2",
 ]
 
 [[package]]

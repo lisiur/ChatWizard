@@ -1,7 +1,7 @@
 import { NDropdown, NScrollbar } from "naive-ui";
 import { computed, defineComponent, nextTick, PropType, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { PromptMetadata } from "../api";
+import { PromptIndex } from "../api";
 
 export default defineComponent({
   props: {
@@ -9,14 +9,14 @@ export default defineComponent({
       type: String,
     },
     list: {
-      type: Array as PropType<PromptMetadata[]>,
+      type: Array as PropType<PromptIndex[]>,
       default: () => [],
     },
     onAction: {
       type: Function as PropType<
         (
           action: "select" | "delete" | "newChat" | "rename",
-          prompt: PromptMetadata
+          prompt: PromptIndex
         ) => void
       >,
     },

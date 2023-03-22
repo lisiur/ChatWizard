@@ -24,7 +24,6 @@ import { Markdown } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
-import { ChatMetadata } from "../api";
 import { useI18n } from "../hooks/i18n";
 import { usePrompt } from "../hooks/prompt";
 import ChatConfig from "./ChatConfig";
@@ -37,18 +36,15 @@ export default defineComponent({
       type: Object as PropType<Chat>,
       required: true,
     },
-    chatMetaData: {
-      type: Object as PropType<ChatMetadata>,
-      required: true,
-    },
     onMessage: {
       type: Function as PropType<(message: Message) => void>,
     },
   },
   setup(props, { expose }) {
     const { t } = useI18n();
+    console.log(props.chat)
     const { prompt: chatPrompt } = usePrompt(
-      computed(() => props.chatMetaData.prompt_id)
+      computed(() => props.chat.config.promptId)
     );
 
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
@@ -117,7 +113,7 @@ export default defineComponent({
 
     async function exportMarkdown() {
       const filePath = await save({
-        title: props.chatMetaData.title,
+        title: props.chat.title,
         filters: [
           {
             name: "Markdown",
@@ -228,7 +224,9 @@ export default defineComponent({
                   }
                   case true: {
                     return (
-                      <span class="text-gray-600">{t("chat.delivered")}</span>
+                      <span class="text-gray-600 whitespace-nowrap">
+                        {t("chat.delivered")}
+                      </span>
                     );
                   }
                   case false: {
@@ -299,17 +297,17 @@ export default defineComponent({
             class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
             data-tauri-drag-region
           >
-            {props.chatMetaData.title || t("chat.new.defaultTitle")}
+            {props.chat.title || t("chat.new.defaultTitle")}
           </span>
-          {chatPrompt.value ? (
+          {chatPrompt.act.value ? (
             <NTooltip>
               {{
                 trigger: () => (
                   <NTag size="small" round type="primary">
-                    {chatPrompt.value?.act}
+                    {chatPrompt.act.value}
                   </NTag>
                 ),
-                default: () => chatPrompt.value?.prompt,
+                default: () => chatPrompt.prompt.value,
               }}
             </NTooltip>
           ) : null}

@@ -1,6 +1,6 @@
 import { NDropdown, NScrollbar } from "naive-ui";
 import { computed, defineComponent, nextTick, PropType, ref } from "vue";
-import { ChatMetadata } from "../api";
+import { ChatIndex, ChatMetadata } from "../api";
 import { useI18n } from "../hooks/i18n";
 
 export default defineComponent({
@@ -9,12 +9,12 @@ export default defineComponent({
       type: String,
     },
     list: {
-      type: Array as PropType<ChatMetadata[]>,
+      type: Array as PropType<ChatIndex[]>,
       default: () => [],
     },
     onAction: {
       type: Function as PropType<
-        (action: "select" | "delete" | "rename", chat: ChatMetadata) => void
+        (action: "select" | "delete" | "rename", chat: ChatIndex) => void
       >,
     },
   },
@@ -39,7 +39,7 @@ const Column = defineComponent({
   props: {
     active: String,
     chat: {
-      type: Object as PropType<ChatMetadata>,
+      type: Object as PropType<ChatIndex>,
       required: true,
     },
     onAction: {

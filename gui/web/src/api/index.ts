@@ -1,9 +1,12 @@
 import { invoke } from "@tauri-apps/api";
 
-export interface ChatMetadata {
+export interface ChatIndex {
   id: string;
   title: string;
-  prompt_id?: string;
+}
+
+export interface ChatMetadata {
+  config: ChatConfig;
 }
 
 export interface ChatData {
@@ -15,18 +18,17 @@ export interface ChatData {
     };
   }>;
   cost: number;
-  config: ChatConfig;
 }
 
 export interface ChatUpdatePayload {
   id: string;
   title?: string;
-  promptId?: string;
   config?: ChatConfig;
 }
 
 export interface ChatConfig {
   model?: string;
+  promptId?: string;
   maxBacktrack?: number;
   temperature?: number;
   topP?: number;
@@ -38,18 +40,20 @@ export interface ChatConfig {
   user?: string;
 }
 
-export interface PromptMetadata {
+export interface PromptIndex {
   id: string;
   act: string;
 }
 
-export interface Prompt {
-  id: string;
+export interface PromptMetadata {
   act: string;
+}
+
+export interface PromptData {
   prompt: string;
 }
 
-export type PromptUpdatePayload = Partial<Prompt> & { id: string };
+export type PromptUpdatePayload = { id: string; act?: string; prompt?: string };
 
 export interface Settings {
   apiKey?: string;
@@ -73,11 +77,11 @@ export interface WindowOptions {
 }
 
 export async function allChats() {
-  return invoke<Array<ChatMetadata>>("all_chats");
+  return invoke<Array<ChatIndex>>("all_chats");
 }
 
 export async function readChat(chatId: string) {
-  return invoke<ChatData>("load_chat", { chatId });
+  return invoke<[ChatMetadata, ChatData]>("load_chat", { chatId });
 }
 
 export async function updateChat(payload: ChatUpdatePayload) {
@@ -104,10 +108,10 @@ export function resendMessage(chatId: string, messageId: string) {
 }
 
 export function allPrompts() {
-  return invoke<Array<PromptMetadata>>("all_prompts");
+  return invoke<Array<PromptIndex>>("all_prompts");
 }
 
-export function createPrompt(prompt: Omit<Prompt, "id">) {
+export function createPrompt(prompt: { act: string; prompt: string }) {
   return invoke<string>("create_prompt", {
     act: prompt.act,
     prompt: prompt.prompt,
@@ -123,7 +127,7 @@ export function deletePrompt(id: string) {
 }
 
 export function loadPrompt(id: string) {
-  return invoke<Prompt>("load_prompt", { id });
+  return invoke<[PromptMetadata, PromptData]>("load_prompt", { id });
 }
 
 export function getSettings() {

@@ -1,11 +1,13 @@
 import { listen } from "@tauri-apps/api/event";
-import { reactive, ref } from "vue";
+import { reactive } from "vue";
 import {
   resendMessage,
   sendMessage,
   saveAsMarkdown,
   ChatData,
   ChatConfig,
+  ChatMetadata,
+  ChatIndex,
 } from "../api";
 import {
   AssistantMessage,
@@ -22,6 +24,7 @@ export class Chat {
   config: ChatConfig;
   constructor(
     public id: string,
+    public title: string,
     messages: Message[] = [],
     config: ChatConfig = {},
     cost = 0
@@ -34,7 +37,7 @@ export class Chat {
     this.config = reactive(config);
   }
 
-  static init(id: string, data: ChatData) {
+  static init(index: ChatIndex, metadata: ChatMetadata, data: ChatData) {
     const messages: Message[] = [];
     for (let i = 0; i < data.logs.length; i++) {
       const log = data.logs[i];
@@ -56,7 +59,13 @@ export class Chat {
       }
     }
 
-    return new Chat(id, messages, data.config, data.cost);
+    return new Chat(
+      index.id,
+      index.title,
+      messages,
+      metadata.config,
+      data.cost
+    );
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {

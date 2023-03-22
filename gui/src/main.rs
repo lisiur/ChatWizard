@@ -13,6 +13,7 @@ mod prompt;
 mod result;
 mod setting;
 mod state;
+mod store;
 mod utils;
 mod window;
 

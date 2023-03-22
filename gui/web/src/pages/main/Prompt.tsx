@@ -1,4 +1,4 @@
-import { defineComponent, ref } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import * as api from "../../api";
 import PromptExplorer from "../../components/PromptExplorer";
 import { message, prompt } from "../../utils/prompt";
@@ -15,16 +15,34 @@ export default defineComponent({
 
     const promptRef = ref<HTMLInputElement>();
 
-    const promptMetaList = ref<Array<api.PromptMetadata>>([]);
-    const prompts = new Map<string, api.Prompt>();
-    const currentPrompt = ref<api.Prompt>();
-    const currentPromptInitial = ref<string>();
-    const currentPromptMeta = ref<api.PromptMetadata>();
+    const promptIndexList = ref<Array<api.PromptIndex>>([]);
+    const prompts = new Map<string, [api.PromptMetadata, api.PromptData]>();
+
+    const currentId = ref<string>();
+
+    const currentPromptIndex = computed(() =>
+      promptIndexList.value.find((m) => m.id === currentId.value)
+    );
+    const currentPromptContent = ref<string>()
+    watch(currentPromptIndex, (value) => {
+      if (!value) {
+        currentPromptContent.value = "";
+        return
+      }
+
+      if (prompts.has(value.id)) {
+        currentPromptContent.value = prompts.get(value.id)![1].prompt;
+        return;
+      }
+    }, {
+      immediate: true,
+    })
+    const currentPromptInitialContent = ref<string>();
     refreshMetaList();
 
     function refreshMetaList() {
       api.allPrompts().then((list) => {
-        promptMetaList.value = list;
+        promptIndexList.value = list;
       });
     }
 
@@ -35,14 +53,9 @@ export default defineComponent({
             act: title,
             prompt: "",
           });
-          const prompt: api.Prompt = {
-            id,
-            act: title,
-            prompt: "",
-          };
           refreshMetaList();
-          currentPrompt.value = prompt;
-          currentPromptInitial.value = "";
+          currentId.value = id;
+          currentPromptInitialContent.value = "";
 
           setTimeout(() => {
             promptRef.value?.focus();
@@ -53,7 +66,7 @@ export default defineComponent({
 
     async function explorerHandler(
       action: "delete" | "select" | "newChat" | "rename",
-      prompt: api.PromptMetadata
+      prompt: api.PromptIndex
     ) {
       switch (action) {
         case "delete": {
@@ -75,7 +88,7 @@ export default defineComponent({
       }
     }
 
-    async function renameHandler(data: api.PromptMetadata) {
+    async function renameHandler(data: api.PromptIndex) {
       prompt(t("prompt.inputNameHint"), {
         defaultValue: data.act,
         async okHandler(title) {
@@ -88,7 +101,7 @@ export default defineComponent({
       });
     }
 
-    async function newChatHandler(prompt: api.PromptMetadata) {
+    async function newChatHandler(prompt: api.PromptIndex) {
       const chatId = await api.createChat({
         promptId: prompt.id,
         title: prompt.act,
@@ -102,40 +115,43 @@ export default defineComponent({
     }
 
     async function updateHandler() {
-      if (!currentPrompt.value) {
+      if (!currentId.value) {
         return;
       }
 
-      if (currentPromptInitial.value === currentPrompt.value.prompt) {
+      if (currentPromptInitialContent.value === currentPromptContent.value) {
         return;
       }
 
-      await api.updatePrompt(currentPrompt.value);
-      currentPromptInitial.value = currentPrompt.value.prompt;
+      await api.updatePrompt({
+        id: currentPromptIndex.value!.id,
+        prompt: currentPromptContent.value ?? "",
+      });
+      currentPromptInitialContent.value = currentPromptContent.value;
 
       message.success(t("prompt.update.success"));
     }
 
-    async function deleteHandler(prompt: api.PromptMetadata) {
-      if (currentPrompt.value?.id === prompt.id) {
-        currentPrompt.value = undefined;
-        currentPromptInitial.value = undefined;
+    async function deleteHandler(prompt: api.PromptIndex) {
+      if (currentPromptIndex.value?.id === prompt.id) {
+        currentId.value = undefined;
+        currentPromptInitialContent.value = undefined;
       }
       await api.deletePrompt(prompt.id);
       prompts.delete(prompt.id);
       refreshMetaList();
     }
 
-    async function selectHandler(prompt: api.PromptMetadata) {
-      const promptData = await api.loadPrompt(prompt.id);
-      prompts.set(prompt.id, promptData);
-      currentPrompt.value = promptData;
-      currentPromptInitial.value = promptData.prompt;
+    async function selectHandler(prompt: api.PromptIndex) {
+      const [metadata, data] = await api.loadPrompt(prompt.id);
+      prompts.set(prompt.id, [metadata, data]);
+      currentId.value = prompt.id;
+      currentPromptInitialContent.value = data.prompt;
 
-      const promptMetaData = promptMetaList.value.find(
+      const promptMetaData = promptIndexList.value.find(
         (m) => m.id === prompt.id
       )!;
-      currentPromptMeta.value = promptMetaData;
+      currentId.value = promptMetaData.id;
 
       setTimeout(() => {
         promptRef.value?.focus();
@@ -166,8 +182,8 @@ export default defineComponent({
           <div class="p-2 text-gray-400">{t("prompt.prompts")}</div>
           <PromptExplorer
             class="flex-1 overflow-auto"
-            active={currentPrompt.value?.id}
-            list={promptMetaList.value}
+            active={currentPromptIndex.value?.id}
+            list={promptIndexList.value}
             onAction={explorerHandler}
           ></PromptExplorer>
         </div>
@@ -175,11 +191,11 @@ export default defineComponent({
           class="flex-1 overflow-hidden p-4"
           style="background-color: var(--body-color)"
         >
-          {currentPrompt.value ? (
+          {currentId.value ? (
             <NScrollbar class="h-full">
               <textarea
                 ref={promptRef}
-                v-model={currentPrompt.value.prompt}
+                v-model={currentPromptContent.value}
                 class="p-4 h-full resize-none w-full rounded-lg outline-none placeholder-slate-500"
                 style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
                 onFocusout={updateHandler}

@@ -1,23 +1,29 @@
-import { Ref } from "vue";
+import { computed, Ref } from "vue";
 import { loadPrompt } from "../api";
 import { useAsyncData, useAsyncDataReactive } from "./asyncData";
 
 export function usePrompt(id: string | Ref<string | undefined>) {
   if (typeof id === "string") {
-    const prompt = useAsyncData(async () => {
+    const res = useAsyncData(async () => {
       return loadPrompt(id);
     });
     return {
-      prompt,
+      prompt: {
+        act: computed(() => res.value?.[0].act),
+        prompt: computed(() => res.value?.[1].prompt),
+      }
     };
   } else {
-    const prompt = useAsyncDataReactive(async () => {
+    const res = useAsyncDataReactive(async () => {
       if (id.value) {
         return loadPrompt(id.value);
       }
     }, [id]);
     return {
-      prompt,
-    };
+      prompt: {
+        act: computed(() => res.value?.[0].act),
+        prompt: computed(() => res.value?.[1].prompt),
+      }
+    }
   }
 }

@@ -17,24 +17,24 @@ export default defineComponent({
 
     const chatRef = ref<InstanceType<typeof ChatComp>>();
 
-    const chatMetaList = ref<Array<{ id: string; title: string }>>([]);
+    const chatIndexList = ref<Array<api.ChatIndex>>([]);
     const chats = new Map<string, Chat>();
 
     const currentChatId = ref<string>();
     const currentChat = computed(() => chats.get(currentChatId.value!));
-    const currentChatMeta = computed(
-      () => chatMetaList.value.find((m) => m.id === currentChatId.value)!
+    const currentChatIndex = computed(
+      () => chatIndexList.value.find((m) => m.id === currentChatId.value)!
     );
 
-    refreshChatMetaList();
-
-    if (route.query.id) {
-      selectHandler(route.query.id as string);
-    }
+    refreshChatMetaList().then(() => {
+      if (route.query.id) {
+        selectHandler(route.query.id as string);
+      }
+    });
 
     async function refreshChatMetaList() {
       await api.allChats().then((list) => {
-        chatMetaList.value = list;
+        chatIndexList.value = list;
       });
     }
 
@@ -42,10 +42,9 @@ export default defineComponent({
       const chatId = await api.createChat({
         title: "",
       });
-      const chat = new Chat(chatId);
-      chats.set(chatId, chat);
       await refreshChatMetaList();
-      currentChatId.value = chatId;
+
+      await selectHandler(chatId);
 
       setTimeout(() => {
         chatRef.value?.focusInput();
@@ -54,29 +53,29 @@ export default defineComponent({
 
     async function explorerHandler(
       action: "delete" | "select" | "rename",
-      metadata: api.ChatMetadata
+      index: api.ChatIndex
     ) {
       switch (action) {
         case "delete": {
-          await deleteHandler(metadata.id);
+          await deleteHandler(index.id);
           return;
         }
         case "select": {
-          await selectHandler(metadata.id);
+          await selectHandler(index.id);
           return;
         }
         case "rename": {
-          await renameHandler(metadata);
+          await renameHandler(index);
         }
       }
     }
 
-    async function renameHandler(metadata: api.ChatMetadata) {
+    async function renameHandler(index: api.ChatIndex) {
       prompt(t("chat.inputNameHint"), {
-        defaultValue: metadata.title,
+        defaultValue: index.title,
         async okHandler(title) {
           await api.updateChat({
-            id: metadata.id,
+            id: index.id,
             title,
           });
           await refreshChatMetaList();
@@ -94,8 +93,9 @@ export default defineComponent({
     }
 
     async function selectHandler(id: string) {
-      const chatData = await api.readChat(id);
-      const chat = Chat.init(id, chatData);
+      const index = chatIndexList.value.find((m) => m.id === id)!;
+      const [metadata, data] = await api.readChat(id);
+      const chat = Chat.init(index, metadata, data);
       chats.set(id, chat);
       currentChatId.value = id;
 
@@ -106,7 +106,7 @@ export default defineComponent({
 
     async function messageHandler(message: Message) {
       const chat = currentChat.value!;
-      const chatMetaData = currentChatMeta.value!;
+      const chatMetaData = currentChatIndex.value!;
 
       // If the chat is empty, set the title to the first message.
       if (
@@ -142,7 +142,7 @@ export default defineComponent({
           <ExplorerComp
             class="flex-1 overflow-auto"
             active={currentChat.value?.id}
-            list={chatMetaList.value}
+            list={chatIndexList.value}
             onAction={explorerHandler}
           ></ExplorerComp>
         </div>
@@ -154,7 +154,6 @@ export default defineComponent({
             <ChatComp
               ref={chatRef}
               chat={currentChat.value}
-              chatMetaData={currentChatMeta.value!}
               onMessage={messageHandler}
             ></ChatComp>
           ) : (
