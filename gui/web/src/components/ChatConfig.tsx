@@ -25,7 +25,7 @@ import {
 } from "naive-ui";
 import { Chat } from "../models/chat";
 import { useI18n } from "../hooks/i18n";
-import { debugLog, updateChat } from "../api";
+import { updateChat } from "../api";
 
 export default defineComponent({
   props: {
@@ -46,14 +46,7 @@ export default defineComponent({
         }
         unwatch = watch(
           Object.values(toRefs(props.chat.config)),
-          (newValue, oldValue) => {
-            debugLog(
-              `chat config changed: ${props.chat.id} ${JSON.stringify(
-                props.chat.config,
-                null,
-                2
-              )}`
-            );
+          () => {
             updateChat({
               id: props.chat.id,
               config: props.chat.config,

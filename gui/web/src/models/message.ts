@@ -3,8 +3,8 @@ export class Message {}
 export class UserMessage extends Message {
   id = "";
   content: string;
-  delivered = null as boolean | null;
-  finished = false;
+  delivered = false;
+  finished = null as boolean | null;
 
   constructor(content: string) {
     super();

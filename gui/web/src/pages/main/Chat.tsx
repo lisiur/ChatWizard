@@ -76,6 +76,9 @@ export default defineComponent({
             id: index.id,
             title,
           });
+          if (currentChat.value && currentChat.value.id === index.id) {
+            currentChat.value.title.value = title;
+          }
           await refreshChatMetaList();
         },
       });
@@ -114,6 +117,7 @@ export default defineComponent({
           id: chatMetaData.id,
           title: message.content,
         });
+        currentChatIndex.value!.title = message.content;
         await refreshChatMetaList();
       }
     }

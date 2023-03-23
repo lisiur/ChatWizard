@@ -181,7 +181,7 @@ impl Chat {
         self.send_message(sender, &message.content, api).await
     }
 
-    pub async fn save_as_markdown(&self, path: &Path) -> Result<()> {
+    pub async fn export_markdown(&self, path: &Path) -> Result<()> {
         let markdown = self.to_markdown().await?;
 
         fs::write(path, markdown).await?;
@@ -201,7 +201,7 @@ impl Chat {
         for log in logs {
             match log.message.role {
                 Role::User => {
-                    markdown.push_str(&format!("## {}\n", log.message.content));
+                    markdown.push_str(&format!("> {}\n", log.message.content));
                 }
                 Role::Assistant => {
                     markdown.push_str(&format!("{}\n", log.message.content));

@@ -47,6 +47,8 @@ export const messages = {
   "setting.theme.system": "System",
   "setting.theme.dark": "Dark",
   "setting.theme.light": "Light",
+  "setting.forwardUrl": "Forward Url",
+  "setting.forwardApiKey": "Forward Api Key",
 };
 
 export default messages;

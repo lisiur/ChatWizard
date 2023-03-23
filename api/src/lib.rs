@@ -15,22 +15,26 @@ pub use result::Result;
 
 pub struct OpenAIApi {
     client: Client,
+    host: String,
 }
 
 impl OpenAIApi {
-    pub fn new(api_key: &str) -> Self {
+    pub fn new(api_key: Option<&str>) -> Self {
         Self {
             client: Self::create_client(api_key, None),
+            host: "https://api.openai.com".to_string(),
         }
     }
 
-    fn create_client(api_key: &str, proxy: Option<String>) -> Client {
+    fn create_client(api_key: Option<&str>, proxy: Option<&str>) -> Client {
         let mut headers = reqwest::header::HeaderMap::new();
 
-        headers.insert(
-            reqwest::header::AUTHORIZATION,
-            format!("Bearer {api_key}").parse().unwrap(),
-        );
+        if let Some(api_key) = api_key {
+            headers.insert(
+                reqwest::header::AUTHORIZATION,
+                format!("Bearer {api_key}").parse().unwrap(),
+            );
+        }
 
         let proxy = proxy.map(|item| reqwest::Proxy::all(item).unwrap());
 
@@ -38,6 +42,10 @@ impl OpenAIApi {
             headers: Some(headers),
             proxy,
         })
+    }
+
+    pub fn set_host(&mut self, host: &str) {
+        self.host = host.to_string();
     }
 
     pub fn set_proxy(&mut self, proxy: &str) {
@@ -52,9 +60,11 @@ impl OpenAIApi {
         self.client.clear_proxy();
     }
 
-    pub async fn check_api_key(api_key: &str) -> Result<()> {
-        let client = Self::create_client(api_key, None);
-        let response = client.get("https://api.openai.com/v1/models", None).await?;
+    pub async fn check_api_key(&self, api_key: &str) -> Result<()> {
+        let client = Self::create_client(Some(api_key), None);
+        let response = client
+            .get(&format!("{}/v1/models", self.host), None)
+            .await?;
 
         if response.status().is_success() {
             Ok(())

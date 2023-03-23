@@ -61,6 +61,8 @@ export interface Settings {
   proxy?: string;
   theme?: Theme;
   locale?: string;
+  forwardUrl?: string;
+  forwardApiKey?: boolean;
 }
 
 export enum Theme {
@@ -134,24 +136,16 @@ export function getSettings() {
   return invoke<Settings>("get_settings");
 }
 
-export function setTheme(theme: Theme) {
-  return invoke<void>("set_theme", { theme });
+export function updateSettings(payload: Settings) {
+  return invoke<void>("update_settings", { payload });
 }
 
 export function getTheme() {
   return invoke<Theme>("get_theme");
 }
 
-export function setApiKey(apiKey: string) {
-  return invoke<void>("set_api_key", { apiKey });
-}
-
 export function checkApiKey() {
   return invoke<void>("has_api_key");
-}
-
-export function setProxy(proxy: string) {
-  return invoke<void>("set_proxy", { proxy });
 }
 
 export function getProxy() {
@@ -166,12 +160,8 @@ export function getLocale() {
   return invoke<string>("get_locale");
 }
 
-export function setLocale(locale: string) {
-  return invoke<void>("set_locale", { locale });
-}
-
-export function saveAsMarkdown(chatId: string, path: string) {
-  return invoke<void>("save_as_markdown", {
+export function exportMarkdown(chatId: string, path: string) {
+  return invoke<void>("export_markdown", {
     chatId,
     path,
   });

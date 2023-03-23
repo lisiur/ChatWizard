@@ -3,7 +3,7 @@ import { reactive, ref, Ref } from "vue";
 import {
   resendMessage,
   sendMessage,
-  saveAsMarkdown,
+  exportMarkdown,
   ChatData,
   ChatConfig,
   ChatMetadata,
@@ -85,20 +85,20 @@ export class Chat {
       return item instanceof UserMessage && item.id === messageId;
     });
 
+    const userMessage = this.messages[index] as UserMessage;
+
     this.messages.length = index + 1;
 
-    const userMessage = this.messages[index] as UserMessage;
-    userMessage.delivered = null;
-    userMessage.finished = false;
+    userMessage.delivered = false;
+    userMessage.finished = null;
 
-    let id = await resendMessage(this.id, userMessage.id);
-    userMessage.id = id;
+    userMessage.id = await resendMessage(this.id, userMessage.id);
 
     this.__receiveAssistantMessage(this, userMessage, params);
   }
 
   async exportMarkdown(path: string) {
-    saveAsMarkdown(this.id, path);
+    exportMarkdown(this.id, path);
   }
 
   async __receiveAssistantMessage(
@@ -134,7 +134,7 @@ export class Chat {
         case "error": {
           this.messages.pop();
           this.messages.push(new ErrorMessage(chunk.data));
-          userMessage.delivered = false;
+          userMessage.finished = false;
           this.busy.value = false;
           params?.onFinish?.();
           break;

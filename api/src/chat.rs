@@ -193,7 +193,7 @@ impl OpenAIApi {
     pub async fn create_chat(&self, params: &ChatParams) -> Result<reqwest::Response> {
         self.client
             .post_stream::<CreateChatResponseData>(
-                "https://api.openai.com/v1/chat/completions",
+                &format!("{}/v1/chat/completions", self.host),
                 params,
             )
             .await

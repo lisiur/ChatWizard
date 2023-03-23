@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use askai_api::{OpenAIApi, StreamContent};
+use askai_api::StreamContent;
 use serde_json::json;
 use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
@@ -12,7 +12,7 @@ use crate::error::Error;
 use crate::prompt::prompt_manager::PromptUpdatePayload;
 use crate::prompt::prompt_store::{PromptData, PromptIndex, PromptMetadata};
 use crate::result::Result;
-use crate::setting::{Settings, Theme};
+use crate::setting::{Settings, SettingsUpdatePayload, Theme};
 use crate::state::AppState;
 use crate::window::{self, WindowOptions};
 
@@ -78,7 +78,7 @@ pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()
 }
 
 #[tauri::command]
-pub async fn save_as_markdown(
+pub async fn export_markdown(
     chat_id: Uuid,
     path: PathBuf,
     state: State<'_, AppState>,
@@ -87,7 +87,7 @@ pub async fn save_as_markdown(
 
     let chat = chat_manager.load(chat_id).await?;
     let chat = chat.lock().await;
-    chat.save_as_markdown(path.as_path()).await?;
+    chat.export_markdown(path.as_path()).await?;
 
     Ok(())
 }
@@ -140,7 +140,7 @@ pub async fn resend_message(
     let api = setting.create_api().await?;
     let chat = chat_manager.lock().await.load(chat_id).await?;
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    let id = chat
+    let message_id = chat
         .lock()
         .await
         .resend_message(sender, message_id, api)
@@ -155,7 +155,7 @@ pub async fn resend_message(
         chat_manager.lock().await.save_data(chat_id).await.unwrap();
     });
 
-    Ok(id)
+    Ok(message_id)
 }
 
 // prompts
@@ -230,41 +230,37 @@ pub async fn get_theme(state: State<'_, AppState>) -> Result<Theme> {
 }
 
 #[tauri::command]
-pub async fn set_theme(theme: Theme, state: State<'_, AppState>, window: Window) -> Result<()> {
+pub async fn update_settings(
+    payload: SettingsUpdatePayload,
+    state: State<'_, AppState>,
+    window: Window,
+) -> Result<()> {
     let mut setting = state.setting.lock().await;
 
-    setting.set_theme(theme.clone()).await?;
+    setting.update(&payload).await?;
 
-    let windows = window.windows();
-    windows.values().for_each(|win| {
-        win.emit("theme-changed", theme.clone()).unwrap();
-    });
+    if let Some(theme) = &payload.theme {
+        let windows = window.windows();
+        windows.values().for_each(|win| {
+            win.emit("theme-changed", theme).unwrap();
+        });
+    }
+
+    if let Some(local) = &payload.locale {
+        let windows = window.windows();
+        windows.values().for_each(|win| {
+            win.emit("locale-changed", local).unwrap();
+        });
+    }
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn set_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-
-    setting.set_api_key(&api_key).await?;
-
-    OpenAIApi::check_api_key(&api_key).await?;
-
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn check_api_key(api_key: String) -> Result<()> {
-    OpenAIApi::check_api_key(&api_key).await?;
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn set_proxy(proxy: String, state: State<'_, AppState>) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-
-    setting.set_proxy(&proxy).await?;
+pub async fn check_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
+    let setting = state.setting.lock().await;
+    let api = setting.create_api().await?;
+    api.check_api_key(&api_key).await?;
 
     Ok(())
 }
@@ -288,20 +284,6 @@ pub async fn get_locale(state: State<'_, AppState>) -> Result<String> {
     let setting = state.setting.lock().await;
 
     Ok(setting.get_locale())
-}
-
-#[tauri::command]
-pub async fn set_locale(locale: String, state: State<'_, AppState>, window: Window) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-
-    setting.set_locale(&locale).await?;
-
-    let windows = window.windows();
-    windows.values().for_each(|win| {
-        win.emit("locale-changed", locale.clone()).unwrap();
-    });
-
-    Ok(())
 }
 
 // others

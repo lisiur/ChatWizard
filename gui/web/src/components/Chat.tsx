@@ -75,10 +75,6 @@ export default defineComponent({
       destroyAutoScroll();
     });
 
-    const { checkApiKey: check_api_key } = useConfig();
-
-    check_api_key();
-
     const prompt = ref("");
 
     function keydownHandler(e: KeyboardEvent) {
@@ -224,30 +220,18 @@ export default defineComponent({
             </div>
             <div class="absolute bottom-[-1.2rem] right-1 text-xs">
               {(() => {
-                switch (message.delivered) {
-                  case null: {
-                    break;
-                  }
-                  case true: {
-                    return (
-                      <span class="text-gray-600 whitespace-nowrap">
-                        {t("chat.delivered")}
-                      </span>
-                    );
-                  }
-                  case false: {
-                    return (
-                      <NButton
-                        type="error"
-                        text
-                        size="tiny"
-                        class="mr-2"
-                        onClick={() => resendMessage(message.id)}
-                      >
-                        resend
-                      </NButton>
-                    );
-                  }
+                if (message.finished === false) {
+                  return (
+                    <NButton
+                      type="error"
+                      text
+                      size="tiny"
+                      class="mr-2"
+                      onClick={() => resendMessage(message.id)}
+                    >
+                      resend
+                    </NButton>
+                  );
                 }
               })()}
             </div>
