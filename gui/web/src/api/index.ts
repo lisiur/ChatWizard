@@ -104,7 +104,7 @@ export function sendMessage(chatId: string, message: string) {
 }
 
 export function resendMessage(chatId: string, messageId: string) {
-  return invoke<void>("resend_message", { chatId, messageId });
+  return invoke<string>("resend_message", { chatId, messageId });
 }
 
 export function allPrompts() {

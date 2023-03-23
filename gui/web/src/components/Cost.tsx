@@ -1,15 +1,14 @@
-import { computed, defineComponent, PropType } from "vue";
-import { Chat } from "../models/chat";
+import { computed, defineComponent } from "vue";
 
 export default defineComponent({
   props: {
-    chat: {
-      type: Object as PropType<Chat>,
-      required: true,
+    value: {
+      type: Number,
+      default: 0,
     },
   },
   setup(props) {
-    const cost = computed(() => props.chat.cost.value.toFixed(6));
+    const cost = computed(() => props.value.toFixed(6));
     return () => <span>${cost.value}</span>;
   },
 });

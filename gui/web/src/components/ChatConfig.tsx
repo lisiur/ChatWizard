@@ -1,4 +1,12 @@
-import { computed, defineComponent, PropType, Ref, ref, watch } from "vue";
+import {
+  computed,
+  defineComponent,
+  PropType,
+  Ref,
+  ref,
+  toRefs,
+  watch,
+} from "vue";
 import {
   Settings as SettingIcon,
   InformationCircleOutline as InfoIcon,
@@ -29,18 +37,34 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
+    let unwatch: () => void;
     watch(
-      () => props.chat.config,
+      () => props.chat,
       () => {
-        debugLog(
-          `chat config changed: ${props.chat.id} ${JSON.stringify(props.chat.config, null, 2)}`
+        if (unwatch) {
+          unwatch();
+        }
+        unwatch = watch(
+          Object.values(toRefs(props.chat.config)),
+          (newValue, oldValue) => {
+            debugLog(
+              `chat config changed: ${props.chat.id} ${JSON.stringify(
+                props.chat.config,
+                null,
+                2
+              )}`
+            );
+            updateChat({
+              id: props.chat.id,
+              config: props.chat.config,
+            });
+          },
+          { deep: true }
         );
-        updateChat({
-          id: props.chat.id,
-          config: props.chat.config,
-        });
       },
-      { deep: true }
+      {
+        immediate: true,
+      }
     );
 
     const drawerShown = ref(false);

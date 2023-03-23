@@ -31,6 +31,7 @@ import { message } from "../utils/prompt";
 import Cost from "./Cost";
 
 export default defineComponent({
+  name: "Chat",
   props: {
     chat: {
       type: Object as PropType<Chat>,
@@ -42,7 +43,6 @@ export default defineComponent({
   },
   setup(props, { expose }) {
     const { t } = useI18n();
-    console.log(props.chat)
     const { prompt: chatPrompt } = usePrompt(
       computed(() => props.chat.config.promptId)
     );
@@ -83,12 +83,18 @@ export default defineComponent({
 
     function keydownHandler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
-        const message = prompt.value;
+        if (props.chat.busy.value) {
+          message.warning(t("chat.busy"));
+          e.preventDefault();
+          return;
+        }
 
-        props.onMessage?.(new UserMessage(message));
+        const msg = prompt.value;
+
+        props.onMessage?.(new UserMessage(msg));
 
         prompt.value = "";
-        sendMessage(message);
+        sendMessage(msg);
         e.preventDefault();
       }
     }
@@ -113,7 +119,7 @@ export default defineComponent({
 
     async function exportMarkdown() {
       const filePath = await save({
-        title: props.chat.title,
+        title: props.chat.title.value,
         filters: [
           {
             name: "Markdown",
@@ -216,7 +222,7 @@ export default defineComponent({
             >
               {message.content}
             </div>
-            <div class="absolute bottom-[-1.1rem] right-1 text-xs">
+            <div class="absolute bottom-[-1.2rem] right-1 text-xs">
               {(() => {
                 switch (message.delivered) {
                   case null: {
@@ -297,7 +303,7 @@ export default defineComponent({
             class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
             data-tauri-drag-region
           >
-            {props.chat.title || t("chat.new.defaultTitle")}
+            {props.chat.title.value || t("chat.new.defaultTitle")}
           </span>
           {chatPrompt.act.value ? (
             <NTooltip>
@@ -339,7 +345,7 @@ export default defineComponent({
               style={{
                 color: "var(--chat-btn-color)",
               }}
-              chat={props.chat}
+              value={props.chat.cost.value}
             ></Cost>
             <div class="flex-1 flex justify-end p-1">
               {renderButton({

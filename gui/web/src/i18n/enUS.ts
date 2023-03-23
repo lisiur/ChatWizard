@@ -12,6 +12,7 @@ export const messages = {
   "chat.delivered": "delivered",
   "chat.exportMarkdown": "Export Markdown",
   "chat.rename": "Rename",
+  "chat.busy": "Please wait for the previous response to complete.",
 
   "chat.config.model": "Model",
   "chat.config.model.hint": "ID of the model to use.",

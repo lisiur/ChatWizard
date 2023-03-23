@@ -14,6 +14,7 @@ const messages: Messages = {
   "chat.delivered": "已发送",
   "chat.exportMarkdown": "导出 Markdown",
   "chat.rename": "重命名",
+  "chat.busy": "请等待上一条响应完成",
 
   "chat.config.model": "模型",
   "chat.config.model.hint": "要使用的模型的ID。",

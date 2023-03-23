@@ -1,5 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
-import { reactive } from "vue";
+import { reactive, ref, Ref } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -18,21 +18,21 @@ import {
 } from "./message";
 
 export class Chat {
-  busy: boolean;
-  cost: { value: number };
+  busy: Ref<boolean>;
+  title: Ref<string>;
+  cost: Ref<number>;
   messages: Message[];
   config: ChatConfig;
   constructor(
     public id: string,
-    public title: string,
+    title: string,
     messages: Message[] = [],
     config: ChatConfig = {},
     cost = 0
   ) {
-    this.busy = false;
-    this.cost = reactive({
-      value: cost,
-    });
+    this.busy = ref(false);
+    this.title = ref(title);
+    this.cost = ref(cost);
     this.messages = reactive(messages);
     this.config = reactive(config);
   }
@@ -91,7 +91,8 @@ export class Chat {
     userMessage.delivered = null;
     userMessage.finished = false;
 
-    await resendMessage(this.id, userMessage.id);
+    let id = await resendMessage(this.id, userMessage.id);
+    userMessage.id = id;
 
     this.__receiveAssistantMessage(this, userMessage, params);
   }
@@ -117,7 +118,7 @@ export class Chat {
     startLoading();
     this.messages.push(assistantMessage);
 
-    this.busy = true;
+    this.busy.value = true;
     const unListenCost = await listen<{ cost: number }>(
       `${userMessageId}-cost`,
       (event) => {
@@ -134,7 +135,7 @@ export class Chat {
           this.messages.pop();
           this.messages.push(new ErrorMessage(chunk.data));
           userMessage.delivered = false;
-          this.busy = false;
+          this.busy.value = false;
           params?.onFinish?.();
           break;
         }
@@ -145,7 +146,7 @@ export class Chat {
         }
         case "done": {
           assistantMessage.markHistory();
-          this.busy = false;
+          this.busy.value = false;
           userMessage.finished = true;
           params?.onFinish?.();
           unListen();

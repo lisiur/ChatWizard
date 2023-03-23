@@ -1,4 +1,4 @@
-import { computed, defineComponent, reactive, ref } from "vue";
+import { computed, defineComponent, ref, shallowReactive } from "vue";
 import ChatComp from "../../components/Chat";
 import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";
@@ -18,12 +18,10 @@ export default defineComponent({
     const chatRef = ref<InstanceType<typeof ChatComp>>();
 
     const chatIndexList = ref<Array<api.ChatIndex>>([]);
-    const chats = new Map<string, Chat>();
 
-    const currentChatId = ref<string>();
-    const currentChat = computed(() => chats.get(currentChatId.value!));
+    const currentChat = ref<Chat>();
     const currentChatIndex = computed(
-      () => chatIndexList.value.find((m) => m.id === currentChatId.value)!
+      () => chatIndexList.value.find((m) => m.id === currentChat.value?.id)!
     );
 
     refreshChatMetaList().then(() => {
@@ -84,11 +82,10 @@ export default defineComponent({
     }
 
     async function deleteHandler(id: string) {
-      if (currentChatId.value === id) {
-        currentChatId.value = undefined;
+      if (currentChat.value?.id === id) {
+        currentChat.value = undefined;
       }
       await api.deleteChat(id);
-      chats.delete(id);
       refreshChatMetaList();
     }
 
@@ -96,8 +93,7 @@ export default defineComponent({
       const index = chatIndexList.value.find((m) => m.id === id)!;
       const [metadata, data] = await api.readChat(id);
       const chat = Chat.init(index, metadata, data);
-      chats.set(id, chat);
-      currentChatId.value = id;
+      currentChat.value = shallowReactive(chat);
 
       setTimeout(() => {
         chatRef.value?.focusInput();

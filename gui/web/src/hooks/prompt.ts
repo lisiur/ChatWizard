@@ -2,6 +2,10 @@ import { computed, Ref } from "vue";
 import { loadPrompt } from "../api";
 import { useAsyncData, useAsyncDataReactive } from "./asyncData";
 
+function a(urls: any[]) {
+  const ba = [...(urls || [])]
+}
+
 export function usePrompt(id: string | Ref<string | undefined>) {
   if (typeof id === "string") {
     const res = useAsyncData(async () => {

@@ -119,7 +119,7 @@ pub async fn send_message(
         // save message
         let chat_manager = chat_manager.lock().await;
         let chat = chat_manager.load(chat_id).await.unwrap();
-        let cost = chat.lock().await.get_cost();
+        let cost = chat.lock().await.get_cost().await;
         chat_manager.save_data(chat_id).await.unwrap();
         window.emit(&format!("{event_id}-cost"), json!({ "cost": cost }))
     });
@@ -133,14 +133,15 @@ pub async fn resend_message(
     message_id: Uuid,
     window: Window,
     state: State<'_, AppState>,
-) -> Result<()> {
+) -> Result<Uuid> {
     let setting = state.setting.lock().await;
     let chat_manager = state.chat_manager.clone();
 
     let api = setting.create_api().await?;
     let chat = chat_manager.lock().await.load(chat_id).await?;
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    chat.lock()
+    let id = chat
+        .lock()
         .await
         .resend_message(sender, message_id, api)
         .await?;
@@ -154,7 +155,7 @@ pub async fn resend_message(
         chat_manager.lock().await.save_data(chat_id).await.unwrap();
     });
 
-    Ok(())
+    Ok(id)
 }
 
 // prompts

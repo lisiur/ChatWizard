@@ -39,7 +39,7 @@ impl Default for ChatConfig {
         Self {
             model: "gpt-3.5-turbo".to_string(),
             prompt_id: None,
-            max_backtrack: 4,
+            max_backtrack: 2,
             temperature: Some(1.0),
             top_p: None,
             n: Some(1),

@@ -20,18 +20,17 @@ use self::chat_store::{ChatData, ChatIndex, ChatMetadata};
 
 #[derive(Clone, Debug)]
 pub struct ChatLogs {
-    logs: Arc<Mutex<Vec<ChatLog>>>,
+    cost: f32,
+    logs: Vec<ChatLog>,
 }
 
 impl ChatLogs {
-    fn new(logs: Vec<ChatLog>) -> Self {
-        Self {
-            logs: Arc::new(Mutex::new(logs)),
-        }
+    fn new(cost: f32, logs: Vec<ChatLog>) -> Self {
+        Self { cost, logs }
     }
 
     // Add user message
-    pub async fn add_user_message(&self, message: &str, model: &str) -> Uuid {
+    pub fn add_user_message(&mut self, message: &str, model: &str) -> Uuid {
         let message_id = Uuid::new_v4();
         let message = Message {
             role: Role::User,
@@ -45,7 +44,7 @@ impl ChatLogs {
             cost: 0.0,
             message,
         };
-        self.logs.lock().await.push(log);
+        self.logs.push(log);
         message_id
     }
 
@@ -74,7 +73,8 @@ impl ChatLogs {
             cost,
             message,
         };
-        self.logs.lock().await.push(log);
+        self.cost += cost;
+        self.logs.push(log);
         message_id
     }
 }
@@ -84,8 +84,7 @@ pub struct Chat {
     pub metadata: ChatMetadata,
 
     prompt: Option<String>,
-    cost: f32,
-    logs: ChatLogs,
+    logs: Arc<Mutex<ChatLogs>>,
 }
 
 impl Chat {
@@ -99,15 +98,14 @@ impl Chat {
             None
         };
 
-        let logs = ChatLogs::new(data.logs);
+        let logs = ChatLogs::new(data.cost, data.logs);
 
         Ok(Self {
             index,
             metadata,
 
-            cost: data.cost,
             prompt,
-            logs,
+            logs: Arc::new(Mutex::new(logs)),
         })
     }
 
@@ -117,14 +115,15 @@ impl Chat {
 
     // TODO: return ref
     pub async fn as_data(&self) -> ChatData {
+        let logs = self.logs.lock().await;
         ChatData {
-            cost: self.cost,
-            logs: self.logs.logs.lock().await.clone(),
+            cost: logs.cost,
+            logs: logs.logs.clone(),
         }
     }
 
-    pub fn get_cost(&self) -> f32 {
-        self.cost
+    pub async fn get_cost(&self) -> f32 {
+        self.logs.lock().await.cost
     }
 
     pub async fn send_message(
@@ -137,7 +136,7 @@ impl Chat {
 
         let params = self.chat_params().await;
         let context_tokens = self.calc_backtrack_messages_tokens().await;
-        let mut logs = self.logs.clone();
+        let logs = self.logs.clone();
         let model = self.metadata.config.model.clone();
         tokio::spawn(async move {
             let mut reply = String::new();
@@ -149,7 +148,9 @@ impl Chat {
                                 reply.push_str(data);
                             }
                             StreamContent::Done => {
-                                logs.add_assistant_message(&reply, &model, context_tokens)
+                                logs.lock()
+                                    .await
+                                    .add_assistant_message(&reply, &model, context_tokens)
                                     .await;
                             }
                             _ => {}
@@ -195,7 +196,7 @@ impl Chat {
             markdown.push_str(&format!("# {}\n\n", self.index.title));
         }
 
-        let logs = self.logs.logs.lock().await.clone();
+        let logs = self.logs.lock().await.logs.clone();
 
         for log in logs {
             match log.message.role {
@@ -219,9 +220,9 @@ impl Chat {
         }
         let mut tokens = self
             .logs
-            .logs
             .lock()
             .await
+            .logs
             .iter()
             .rev()
             .take(max_backtrack)
@@ -246,9 +247,9 @@ impl Chat {
         }
         let mut messages: Vec<Message> = self
             .logs
-            .logs
             .lock()
             .await
+            .logs
             .iter()
             .rev()
             .take(max_backtrack)
@@ -274,20 +275,23 @@ impl Chat {
     // Add user message
     pub async fn add_user_message(&self, message: &str) -> Uuid {
         self.logs
-            .add_user_message(message, &self.metadata.config.model)
+            .lock()
             .await
+            .add_user_message(message, &self.metadata.config.model)
     }
 
     async fn truncate_message_from(&self, id: Uuid) -> Result<Message> {
+        let mut logs = self.logs.lock().await;
+
         // find the message index
-        let Some(index) = self.logs.logs.lock().await.iter().position(|log| log.id == id) else {
+        let Some(index) = logs.logs.iter().position(|log| log.id == id) else {
             return Err(Error::NotFound("message".to_string()))
         };
 
-        let message = self.logs.logs.lock().await[index].message.clone();
+        let message = logs.logs[index].message.clone();
 
         // remove all messages after the message need to resend
-        self.logs.logs.lock().await.truncate(index);
+        logs.logs.truncate(index);
 
         Ok(message)
     }
