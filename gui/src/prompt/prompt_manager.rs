@@ -47,12 +47,12 @@ impl PromptManager {
         let data = prompt.as_data();
 
         // save to filesystem
-        self.store.write_index(&self.index_list).await?;
         self.store.write_metadata(&id, &metadata).await?;
         self.store.write_data(&id, &data).await?;
 
         // update index list
         self.index_list.insert(0, index);
+        self.store.write_index(&self.index_list).await?;
 
         // created prompt inserts to loaded prompts map directly
         self.loaded_prompts.lock().await.insert(id, prompt);

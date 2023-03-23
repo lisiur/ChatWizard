@@ -213,13 +213,23 @@ impl Chat {
 
         let stream = res.bytes_stream();
 
-        let mut left: Option<String> = None;
+        let mut left_chunk: Option<Vec<u8>> = None;
+        let mut left_line: Option<String> = None;
         let stream = stream
             .flat_map(move |chunk| {
                 if let Err(err) = chunk {
                     return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
-                let data = String::from_utf8(chunk.unwrap().to_vec()).unwrap();
+
+                let mut vec = chunk.unwrap().to_vec();
+                if let Some(left_chunk) = left_chunk.take() {
+                    vec = [left_chunk, vec].concat();
+                }
+
+                let Ok(data) = String::from_utf8(vec.clone()) else {
+                    left_chunk = Some(vec);
+                    return stream::iter(vec![]);
+                };
 
                 if data.starts_with("{\n    \"error\"") || data.starts_with("{\n  \"error\"") {
                     let res = serde_json::from_str::<ApiErrorResponse>(&data).unwrap();
@@ -238,11 +248,11 @@ impl Chat {
                         } else if line.starts_with("data: ") && line.ends_with("}]}") {
                             handle_line(line)
                         } else if line.ends_with("}]}") {
-                            let line = left.take().unwrap() + line;
+                            let line = left_line.take().unwrap() + line;
                             log::debug!("merged line: {}", line);
                             handle_line(&line)
                         } else {
-                            left = Some(line.to_string());
+                            left_line = Some(line.to_string());
                             None
                         }
                     })
