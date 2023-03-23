@@ -213,14 +213,13 @@ impl Chat {
 
         let stream = res.bytes_stream();
 
+        let mut left: Option<String> = None;
         let stream = stream
             .flat_map(move |chunk| {
                 if let Err(err) = chunk {
                     return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
                 let data = String::from_utf8(chunk.unwrap().to_vec()).unwrap();
-
-                log::debug!("data: {}", data);
 
                 if data.starts_with("{\n    \"error\"") || data.starts_with("{\n  \"error\"") {
                     let res = serde_json::from_str::<ApiErrorResponse>(&data).unwrap();
@@ -231,20 +230,20 @@ impl Chat {
                     .lines()
                     .filter_map(|line| {
                         let line = line.trim();
+                        log::debug!("receive line: {}", line);
                         if line.is_empty() {
                             None
                         } else if line.starts_with("data: [DONE]") {
                             Some(StreamContent::Done)
+                        } else if line.starts_with("data: ") && line.ends_with("}]}") {
+                            handle_line(line)
+                        } else if line.ends_with("}]}") {
+                            let line = left.take().unwrap() + line;
+                            log::debug!("merged line: {}", line);
+                            handle_line(&line)
                         } else {
-                            let json_data = &line[6..];
-                            let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
-                            json.choices.get(0).and_then(|choice| {
-                                choice
-                                    .delta
-                                    .content
-                                    .as_ref()
-                                    .map(|content| StreamContent::Data(content.to_string()))
-                            })
+                            left = Some(line.to_string());
+                            None
                         }
                     })
                     .collect::<Vec<StreamContent>>();
@@ -255,4 +254,16 @@ impl Chat {
 
         Ok(stream)
     }
+}
+
+fn handle_line(line: &str) -> Option<StreamContent> {
+    let json_data = &line[6..];
+    let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
+    json.choices.get(0).and_then(|choice| {
+        choice
+            .delta
+            .content
+            .as_ref()
+            .map(|content| StreamContent::Data(content.to_string()))
+    })
 }
