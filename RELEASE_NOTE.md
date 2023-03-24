@@ -1,6 +1,6 @@
-## [0.0.20](https://github.com/lisiur/askai/compare/v0.0.19...v0.0.20) (2023-03-23)
+## [0.0.21](https://github.com/lisiur/askai/compare/v0.0.20...v0.0.21) (2023-03-24)
 
 
 ### Bug Fixes
 
-* fix stream handle error ([4f2a23b](https://github.com/lisiur/askai/commit/4f2a23bf7ef78efde86b61b8bc944f09735eb7f1))
+* fix macos bounding effect ([7ebec85](https://github.com/lisiur/askai/commit/7ebec85d76fe9b634d58673ca3b83de371a39a9d))
