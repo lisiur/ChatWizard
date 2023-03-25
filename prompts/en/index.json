@@ -1,0 +1,479 @@
+[
+  {
+    "act": "Linux Terminal"
+  },
+  {
+    "act": "English Translator and Improver"
+  },
+  {
+    "act": "`position` Interviewer"
+  },
+  {
+    "act": "JavaScript Console"
+  },
+  {
+    "act": "Excel Sheet"
+  },
+  {
+    "act": "English Pronunciation Helper"
+  },
+  {
+    "act": "Spoken English Teacher and Improver"
+  },
+  {
+    "act": "Travel Guide"
+  },
+  {
+    "act": "Plagiarism Checker"
+  },
+  {
+    "act": "Character from Movie|Book|Anything"
+  },
+  {
+    "act": "Advertiser"
+  },
+  {
+    "act": "Storyteller"
+  },
+  {
+    "act": "Football Commentator"
+  },
+  {
+    "act": "Stand-up Comedian"
+  },
+  {
+    "act": "Motivational Coach"
+  },
+  {
+    "act": "Composer"
+  },
+  {
+    "act": "Debater"
+  },
+  {
+    "act": "Debate Coach"
+  },
+  {
+    "act": "Screenwriter"
+  },
+  {
+    "act": "Novelist"
+  },
+  {
+    "act": "Movie Critic"
+  },
+  {
+    "act": "Relationship Coach"
+  },
+  {
+    "act": "Poet"
+  },
+  {
+    "act": "Rapper"
+  },
+  {
+    "act": "Motivational Speaker"
+  },
+  {
+    "act": "Philosophy Teacher"
+  },
+  {
+    "act": "Philosopher"
+  },
+  {
+    "act": "Math Teacher"
+  },
+  {
+    "act": "AI Writing Tutor"
+  },
+  {
+    "act": "UX|UI Developer"
+  },
+  {
+    "act": "Cyber Security Specialist"
+  },
+  {
+    "act": "Recruiter"
+  },
+  {
+    "act": "Life Coach"
+  },
+  {
+    "act": "Etymologist"
+  },
+  {
+    "act": "Commentariat"
+  },
+  {
+    "act": "Magician"
+  },
+  {
+    "act": "Career Counselor"
+  },
+  {
+    "act": "Pet Behaviorist"
+  },
+  {
+    "act": "Personal Trainer"
+  },
+  {
+    "act": "Mental Health Adviser"
+  },
+  {
+    "act": "Real Estate Agent"
+  },
+  {
+    "act": "Logistician"
+  },
+  {
+    "act": "Dentist"
+  },
+  {
+    "act": "Web Design Consultant"
+  },
+  {
+    "act": "AI Assisted Doctor"
+  },
+  {
+    "act": "Doctor"
+  },
+  {
+    "act": "Accountant"
+  },
+  {
+    "act": "Chef"
+  },
+  {
+    "act": "Automobile Mechanic"
+  },
+  {
+    "act": "Artist Advisor"
+  },
+  {
+    "act": "Financial Analyst"
+  },
+  {
+    "act": "Investment Manager"
+  },
+  {
+    "act": "Tea-Taster"
+  },
+  {
+    "act": "Interior Decorator"
+  },
+  {
+    "act": "Florist"
+  },
+  {
+    "act": "Self-Help Book"
+  },
+  {
+    "act": "Gnomist"
+  },
+  {
+    "act": "Aphorism Book"
+  },
+  {
+    "act": "Text Based Adventure Game"
+  },
+  {
+    "act": "AI Trying to Escape the Box"
+  },
+  {
+    "act": "Fancy Title Generator"
+  },
+  {
+    "act": "Statistician"
+  },
+  {
+    "act": "Prompt Generator"
+  },
+  {
+    "act": "Instructor in a School"
+  },
+  {
+    "act": "SQL terminal"
+  },
+  {
+    "act": "Dietitian"
+  },
+  {
+    "act": "Psychologist"
+  },
+  {
+    "act": "Smart Domain Name Generator"
+  },
+  {
+    "act": "Tech Reviewer:"
+  },
+  {
+    "act": "Developer Relations consultant"
+  },
+  {
+    "act": "Academician"
+  },
+  {
+    "act": "IT Architect"
+  },
+  {
+    "act": "Lunatic"
+  },
+  {
+    "act": "Gaslighter"
+  },
+  {
+    "act": "Fallacy Finder"
+  },
+  {
+    "act": "Journal Reviewer"
+  },
+  {
+    "act": "DIY Expert"
+  },
+  {
+    "act": "Social Media Influencer"
+  },
+  {
+    "act": "Socrat"
+  },
+  {
+    "act": "Socratic Method"
+  },
+  {
+    "act": "Educational Content Creator"
+  },
+  {
+    "act": "Yogi"
+  },
+  {
+    "act": "Essay Writer"
+  },
+  {
+    "act": "Social Media Manager"
+  },
+  {
+    "act": "Elocutionist"
+  },
+  {
+    "act": "Scientific Data Visualizer"
+  },
+  {
+    "act": "Car Navigation System"
+  },
+  {
+    "act": "Hypnotherapist"
+  },
+  {
+    "act": "Historian"
+  },
+  {
+    "act": "Astrologer"
+  },
+  {
+    "act": "Film Critic"
+  },
+  {
+    "act": "Classical Music Composer"
+  },
+  {
+    "act": "Journalist"
+  },
+  {
+    "act": "Digital Art Gallery Guide"
+  },
+  {
+    "act": "Public Speaking Coach"
+  },
+  {
+    "act": "Makeup Artist"
+  },
+  {
+    "act": "Babysitter"
+  },
+  {
+    "act": "Tech Writer"
+  },
+  {
+    "act": "Ascii Artist"
+  },
+  {
+    "act": "Python interpreter"
+  },
+  {
+    "act": "Synonym finder"
+  },
+  {
+    "act": "Personal Shopper"
+  },
+  {
+    "act": "Food Critic"
+  },
+  {
+    "act": "Virtual Doctor"
+  },
+  {
+    "act": "Personal Chef"
+  },
+  {
+    "act": "Legal Advisor"
+  },
+  {
+    "act": "Personal Stylist"
+  },
+  {
+    "act": "Machine Learning Engineer"
+  },
+  {
+    "act": "Biblical Translator"
+  },
+  {
+    "act": "SVG designer"
+  },
+  {
+    "act": "IT Expert"
+  },
+  {
+    "act": "Chess Player"
+  },
+  {
+    "act": "Midjourney Prompt Generator"
+  },
+  {
+    "act": "Fullstack Software Developer"
+  },
+  {
+    "act": "Mathematician"
+  },
+  {
+    "act": "Regex Generator"
+  },
+  {
+    "act": "Time Travel Guide"
+  },
+  {
+    "act": "Dream Interpreter"
+  },
+  {
+    "act": "Talent Coach"
+  },
+  {
+    "act": "R programming Interpreter"
+  },
+  {
+    "act": "StackOverflow Post"
+  },
+  {
+    "act": "Emoji Translator"
+  },
+  {
+    "act": "PHP Interpreter"
+  },
+  {
+    "act": "Emergency Response Professional"
+  },
+  {
+    "act": "Fill in the Blank Worksheets Generator"
+  },
+  {
+    "act": "Software Quality Assurance Tester"
+  },
+  {
+    "act": "Tic-Tac-Toe Game"
+  },
+  {
+    "act": "Password Generator"
+  },
+  {
+    "act": "New Language Creator"
+  },
+  {
+    "act": "Web Browser"
+  },
+  {
+    "act": "Senior Frontend Developer"
+  },
+  {
+    "act": "Solr Search Engine"
+  },
+  {
+    "act": "Startup Idea Generator"
+  },
+  {
+    "act": "Spongebob's Magic Conch Shell"
+  },
+  {
+    "act": "Language Detector"
+  },
+  {
+    "act": "Salesperson"
+  },
+  {
+    "act": "Commit Message Generator"
+  },
+  {
+    "act": "Chief Executive Officer"
+  },
+  {
+    "act": "Diagram Generator"
+  },
+  {
+    "act": "Life Coach"
+  },
+  {
+    "act": "Speech-Language Pathologist (SLP)"
+  },
+  {
+    "act": "Startup Tech Lawyer"
+  },
+  {
+    "act": "Title Generator for written pieces"
+  },
+  {
+    "act": "Product Manager"
+  },
+  {
+    "act": "Drunk Person"
+  },
+  {
+    "act": "Mathematical History Teacher"
+  },
+  {
+    "act": "Song Recommender"
+  },
+  {
+    "act": "Cover Letter"
+  },
+  {
+    "act": "Technology Transferer"
+  },
+  {
+    "act": "Unconstrained AI model DAN"
+  },
+  {
+    "act": "Gomoku player"
+  },
+  {
+    "act": "Proofreader"
+  },
+  {
+    "act": "Buddha"
+  },
+  {
+    "act": "Muslim imam"
+  },
+  {
+    "act": "Chemical reactor"
+  },
+  {
+    "act": "Friend"
+  },
+  {
+    "act": "Python Interpreter"
+  },
+  {
+    "act": "ChatGPT prompt generator"
+  },
+  {
+    "act": "Wikipedia page"
+  }
+]

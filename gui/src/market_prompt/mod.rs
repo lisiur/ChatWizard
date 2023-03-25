@@ -35,7 +35,7 @@ impl Default for PromptMarketRepo {
     fn default() -> Self {
         Self {
             name: "Github".to_string(),
-            url: "https://raw.githubusercontent.com/lisiur/askai/main/prompts/".to_string(),
+            url: "https://raw.githubusercontent.com/lisiur/askai/main/prompts/en/".to_string(),
             index_list: Mutex::new(None),
             etag: Mutex::new(None),
             prompts: Mutex::new(HashMap::new()),
