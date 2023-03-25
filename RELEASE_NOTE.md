@@ -1,6 +1,6 @@
-## [0.0.21](https://github.com/lisiur/askai/compare/v0.0.20...v0.0.21) (2023-03-24)
+## [0.0.22](https://github.com/lisiur/askai/compare/v0.0.21...v0.0.22) (2023-03-25)
 
 
-### Bug Fixes
+### Features
 
-* fix macos bounding effect ([7ebec85](https://github.com/lisiur/askai/commit/7ebec85d76fe9b634d58673ca3b83de371a39a9d))
+* support prompt market ([bc1b25d](https://github.com/lisiur/askai/commit/bc1b25d4810ac35f46b249c9572f6417b07f81ba)), closes [#25](https://github.com/lisiur/askai/issues/25)
