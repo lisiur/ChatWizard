@@ -49,4 +49,5 @@ html, body, #app {
   background: var(--code-bg-color);
   padding: .5rem;
   border-radius: .5rem;
+  margin: .8rem 0;
 }

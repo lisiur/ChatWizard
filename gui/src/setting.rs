@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 use crate::utils::ensure_file_exists;
 use askai_api::OpenAIApi;
@@ -72,6 +75,23 @@ impl Setting {
             setting_path: setting_path.to_path_buf(),
             settings,
         })
+    }
+
+    pub fn create_client(&self) -> Result<reqwest::Client> {
+        let proxy = self
+            .settings
+            .proxy
+            .as_ref()
+            .map(|item| reqwest::Proxy::all(item).unwrap());
+
+        let mut client_builder = reqwest::ClientBuilder::new().timeout(Duration::from_secs(8));
+        if let Some(proxy) = proxy {
+            client_builder = client_builder.proxy(proxy);
+        }
+
+        let client = client_builder.build()?;
+
+        Ok(client)
     }
 
     pub async fn create_api(&self) -> Result<askai_api::OpenAIApi> {

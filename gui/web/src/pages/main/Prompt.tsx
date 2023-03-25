@@ -1,11 +1,12 @@
 import { computed, defineComponent, ref, watch } from "vue";
 import * as api from "../../api";
-import PromptExplorer from "../../components/PromptExplorer";
 import { message, prompt } from "../../utils/prompt";
 import { Plus as PlusIcon } from "@vicons/fa";
 import { NIcon, NScrollbar } from "naive-ui";
 import { useRouter } from "vue-router";
 import { useI18n } from "../../hooks/i18n";
+import Explorer, { ExplorerItem } from "../../components/Explorer";
+import DragBar from "../../components/DragBar";
 
 export default defineComponent({
   setup() {
@@ -16,6 +17,13 @@ export default defineComponent({
     const promptRef = ref<HTMLInputElement>();
 
     const promptIndexList = ref<Array<api.PromptIndex>>([]);
+    const explorerList = computed(() => {
+      return promptIndexList.value.map((m) => ({
+        id: m.id,
+        title: m.act,
+      }));
+    });
+
     const prompts = new Map<string, [api.PromptMetadata, api.PromptData]>();
 
     const currentId = ref<string>();
@@ -23,20 +31,24 @@ export default defineComponent({
     const currentPromptIndex = computed(() =>
       promptIndexList.value.find((m) => m.id === currentId.value)
     );
-    const currentPromptContent = ref<string>()
-    watch(currentPromptIndex, (value) => {
-      if (!value) {
-        currentPromptContent.value = "";
-        return
-      }
+    const currentPromptContent = ref<string>();
+    watch(
+      currentPromptIndex,
+      (value) => {
+        if (!value) {
+          currentPromptContent.value = "";
+          return;
+        }
 
-      if (prompts.has(value.id)) {
-        currentPromptContent.value = prompts.get(value.id)![1].prompt;
-        return;
+        if (prompts.has(value.id)) {
+          currentPromptContent.value = prompts.get(value.id)![1].prompt;
+          return;
+        }
+      },
+      {
+        immediate: true,
       }
-    }, {
-      immediate: true,
-    })
+    );
     const currentPromptInitialContent = ref<string>();
     refreshMetaList();
 
@@ -64,36 +76,33 @@ export default defineComponent({
       });
     }
 
-    async function explorerHandler(
-      action: "delete" | "select" | "newChat" | "rename",
-      prompt: api.PromptIndex
-    ) {
+    async function explorerHandler(action: string, item: ExplorerItem) {
       switch (action) {
         case "delete": {
-          await deleteHandler(prompt);
+          await deleteHandler(item.id);
           return;
         }
         case "select": {
-          await selectHandler(prompt);
+          await selectHandler(item.id);
           return;
         }
         case "newChat": {
-          await newChatHandler(prompt);
+          await newChatHandler(item.id, item.title);
           return;
         }
         case "rename": {
-          await renameHandler(prompt);
+          await renameHandler(item.id, item.title);
           return;
         }
       }
     }
 
-    async function renameHandler(data: api.PromptIndex) {
+    async function renameHandler(id: string, act: string) {
       prompt(t("prompt.inputNameHint"), {
-        defaultValue: data.act,
+        defaultValue: act,
         async okHandler(title) {
           await api.updatePrompt({
-            id: data.id,
+            id: id,
             act: title,
           });
           refreshMetaList();
@@ -101,10 +110,10 @@ export default defineComponent({
       });
     }
 
-    async function newChatHandler(prompt: api.PromptIndex) {
+    async function newChatHandler(id: string, act: string) {
       const chatId = await api.createChat({
-        promptId: prompt.id,
-        title: prompt.act,
+        promptId: id,
+        title: act,
       });
       router.push({
         name: "chat",
@@ -132,25 +141,23 @@ export default defineComponent({
       message.success(t("prompt.update.success"));
     }
 
-    async function deleteHandler(prompt: api.PromptIndex) {
-      if (currentPromptIndex.value?.id === prompt.id) {
+    async function deleteHandler(id: string) {
+      if (currentPromptIndex.value?.id === id) {
         currentId.value = undefined;
         currentPromptInitialContent.value = undefined;
       }
-      await api.deletePrompt(prompt.id);
-      prompts.delete(prompt.id);
+      await api.deletePrompt(id);
+      prompts.delete(id);
       refreshMetaList();
     }
 
-    async function selectHandler(prompt: api.PromptIndex) {
-      const [metadata, data] = await api.loadPrompt(prompt.id);
-      prompts.set(prompt.id, [metadata, data]);
-      currentId.value = prompt.id;
+    async function selectHandler(id: string) {
+      const [metadata, data] = await api.loadPrompt(id);
+      prompts.set(id, [metadata, data]);
+      currentId.value = id;
       currentPromptInitialContent.value = data.prompt;
 
-      const promptMetaData = promptIndexList.value.find(
-        (m) => m.id === prompt.id
-      )!;
+      const promptMetaData = promptIndexList.value.find((m) => m.id === id)!;
       currentId.value = promptMetaData.id;
 
       setTimeout(() => {
@@ -180,36 +187,58 @@ export default defineComponent({
             <span> {t("prompt.new")} </span>
           </div>
           <div class="p-2 text-gray-400">{t("prompt.prompts")}</div>
-          <PromptExplorer
+          <Explorer
             class="flex-1 overflow-auto"
             active={currentPromptIndex.value?.id}
-            list={promptIndexList.value}
+            menus={[
+              {
+                label: t("prompt.newChat"),
+                key: "newChat",
+              },
+              {
+                label: t("prompt.rename"),
+                key: "rename",
+              },
+              {
+                type: "divider",
+              },
+              {
+                label: t("common.delete"),
+                key: "delete",
+              },
+            ]}
+            list={explorerList.value}
             onAction={explorerHandler}
-          ></PromptExplorer>
+          ></Explorer>
         </div>
-        <div
-          class="flex-1 overflow-hidden p-4"
-          style="background-color: var(--body-color)"
-        >
-          {currentId.value ? (
-            <NScrollbar class="h-full">
-              <textarea
-                ref={promptRef}
-                v-model={currentPromptContent.value}
-                class="p-4 h-full resize-none w-full rounded-lg outline-none placeholder-slate-500"
-                style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
-                onFocusout={updateHandler}
-                onInput={(e) =>
-                  autoGrowHandler(e.target as HTMLTextAreaElement)
-                }
-                onFocus={(e) =>
-                  autoGrowHandler(e.target as HTMLTextAreaElement)
-                }
-              ></textarea>
-            </NScrollbar>
-          ) : (
-            <div class="h-full" data-tauri-drag-region></div>
-          )}
+        <div class="flex-1 overflow-hidden flex flex-col">
+          {currentPromptIndex.value ? (
+            <DragBar title={currentPromptIndex.value?.act}></DragBar>
+          ) : null}
+          <div
+            class="flex-1 overflow-hidden p-4"
+            style="background-color: var(--body-color)"
+          >
+            {currentId.value ? (
+              <NScrollbar class="h-full">
+                <textarea
+                  ref={promptRef}
+                  v-model={currentPromptContent.value}
+                  class="p-4 h-full resize-none w-full rounded-lg outline-none placeholder-slate-500"
+                  style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
+                  onFocusout={updateHandler}
+                  onInput={(e) =>
+                    autoGrowHandler(e.target as HTMLTextAreaElement)
+                  }
+                  onFocus={(e) =>
+                    autoGrowHandler(e.target as HTMLTextAreaElement)
+                  }
+                ></textarea>
+              </NScrollbar>
+            ) : (
+              <div class="h-full" data-tauri-drag-region></div>
+            )}
+          </div>
         </div>
       </div>
     );

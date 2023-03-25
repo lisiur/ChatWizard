@@ -8,9 +8,11 @@ use tauri::{WindowBuilder, WindowUrl};
 mod chat;
 mod commands;
 mod error;
+mod market_prompt;
 mod project;
 mod prompt;
 mod result;
+mod service;
 mod setting;
 mod state;
 mod store;
@@ -62,6 +64,9 @@ async fn main() {
             commands::update_prompt,
             commands::delete_prompt,
             commands::load_prompt,
+            commands::all_market_prompts,
+            commands::load_market_prompt,
+            commands::install_prompt,
             commands::show_window,
             commands::debug_log,
         ])

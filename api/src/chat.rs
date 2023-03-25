@@ -252,7 +252,7 @@ impl Chat {
                             log::debug!("merged line: {}", line);
                             handle_line(&line)
                         } else {
-                            left_line = Some(line.to_string());
+                            left_line = Some(left_line.take().unwrap_or_default() + line);
                             None
                         }
                     })

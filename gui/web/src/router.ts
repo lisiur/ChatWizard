@@ -22,6 +22,11 @@ export default createRouter({
               path: "prompt",
               component: () => import("./pages/main/Prompt"),
             },
+            {
+              name: "promptMarket",
+              path: "prompt-market",
+              component: () => import("./pages/main/PromptMarket"),
+            }
           ],
         },
         {

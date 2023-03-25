@@ -6,6 +6,7 @@ const messages: Messages = {
   "common.copy": "复制",
   "common.delete": "删除",
   "common.copy.success": "已复制到剪贴板",
+  "common.network.timeout": "网络超时",
 
   "chat.new": "新建对话",
   "chat.new.defaultTitle": "新对话",
@@ -35,12 +36,15 @@ const messages: Messages = {
   "chat.config.frequencyPenalty": "频率惩罚",
   "chat.config.frequencyPenalty.hint": "介于-2.0和2.0之间的数字。正值会根据新符号在文本中的现有频率来惩罚它们，从而降低模型逐字重复同一行的可能性。",
 
-  "prompt.new": "新建提示",
-  "prompt.prompts": "提示列表",
-  "prompt.inputNameHint": "请输入提示标题",
+  "prompt.new": "新建提示词",
+  "prompt.prompts": "提示词列表",
+  "prompt.inputNameHint": "请输入提示词标题",
   "prompt.newChat": "新建对话",
   "prompt.rename": "重命名",
   "prompt.update.success": "更新成功",
+
+  "prompt.market.prompts": "提示词市场",
+  "prompt.market.install.success": "提示词安装成功",
 
   "setting.locale": "语言",
   "setting.apiKey": "密钥",

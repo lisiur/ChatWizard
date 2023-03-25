@@ -1,7 +1,12 @@
 import { NDropdown, NScrollbar } from "naive-ui";
-import { computed, defineComponent, nextTick, PropType, ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { PromptIndex } from "../api";
+import { DropdownMixedOption } from "naive-ui/es/dropdown/src/interface";
+import { defineComponent, nextTick, PropType, ref } from "vue";
+
+export type ExplorerMenuItem = DropdownMixedOption;
+export interface ExplorerItem {
+  id: string;
+  title: string;
+}
 
 export default defineComponent({
   props: {
@@ -9,15 +14,16 @@ export default defineComponent({
       type: String,
     },
     list: {
-      type: Array as PropType<PromptIndex[]>,
+      type: Array as PropType<ExplorerItem[]>,
+      default: () => [],
+    },
+    menus: {
+      type: Array as PropType<ExplorerMenuItem[]>,
       default: () => [],
     },
     onAction: {
       type: Function as PropType<
-        (
-          action: "select" | "delete" | "newChat" | "rename",
-          prompt: PromptIndex
-        ) => void
+        (action: "select" | string, item: ExplorerItem) => void
       >,
     },
   },
@@ -28,7 +34,8 @@ export default defineComponent({
           {props.list?.map((item) => (
             <Column
               active={props.active}
-              prompt={item}
+              item={item}
+              menus={props.menus}
               onAction={(e) => props.onAction?.(e, item)}
             ></Column>
           ))}
@@ -41,47 +48,28 @@ export default defineComponent({
 const Column = defineComponent({
   props: {
     active: String,
-    prompt: {
-      type: Object as PropType<{ act: string }>,
+    item: {
+      type: Object as PropType<ExplorerItem>,
       required: true,
     },
+    menus: {
+      type: Array as PropType<ExplorerMenuItem[]>,
+      default: () => [],
+    },
     onAction: {
-      type: Function as PropType<
-        (action: "select" | "delete" | "newChat" | "rename") => void
-      >,
+      type: Function as PropType<(action: string) => void>,
     },
   },
   setup(props) {
-    const { t } = useI18n();
-
     const x = ref(0);
     const y = ref(0);
     const showDropdown = ref(false);
-    const options = computed(() => {
-      return [
-        {
-          label: t("prompt.newChat"),
-          key: "newChat",
-        },
-        {
-          label: t("prompt.rename"),
-          key: "rename",
-        },
-        {
-          type: "divider"
-        },
-        {
-          label: t("common.delete"),
-          key: "delete",
-        },
-      ];
-    });
 
     function clickOutsideHandler() {
       showDropdown.value = false;
     }
 
-    function dropdownHandler(key: "select" | "delete") {
+    function dropdownHandler(key: string) {
       showDropdown.value = false;
       props.onAction?.(key);
     }
@@ -101,26 +89,28 @@ const Column = defineComponent({
         class="flex items-center py-2 px-4"
         style={{
           color:
-            props.active === props.prompt.act
+            props.active === props.item.id
               ? "var(--explorer-active-color)"
               : "",
           backgroundColor:
-            props.active === props.prompt.act
+            props.active === props.item.id
               ? "var(--explorer-active-bg-color)"
               : "",
         }}
         onClick={() => props.onAction?.("select")}
         onContextmenu={contextMenuHandler}
       >
-        <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">
-          {props.prompt.act}
+        <div class="flex-1 overflow-hidden flex items-center cursor-default">
+          <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap ">
+            {props.item.title}
+          </div>
         </div>
         <NDropdown
           trigger="manual"
           placement="bottom-start"
           x={x.value}
           y={y.value}
-          options={options.value}
+          options={props.menus}
           show={showDropdown.value}
           onClickoutside={clickOutsideHandler}
           onSelect={dropdownHandler}

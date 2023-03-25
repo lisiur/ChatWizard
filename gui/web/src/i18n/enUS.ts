@@ -4,6 +4,7 @@ export const messages = {
   "common.copy": "copy",
   "common.delete": "Delete",
   "common.copy.success": "Copied to clipboard",
+  "common.network.timeout": "Network Timeout",
 
   "chat.new": "New Chat",
   "chat.new.defaultTitle": "New Chat",
@@ -39,6 +40,9 @@ export const messages = {
   "prompt.newChat": "New Chat",
   "prompt.rename": "Rename",
   "prompt.update.success": "Prompt updated successfully",
+
+  "prompt.market.prompts": "Prompts Market",
+  "prompt.market.install.success": "Prompt installed successfully",
 
   "setting.locale": "Language",
   "setting.apiKey": "Api Key",

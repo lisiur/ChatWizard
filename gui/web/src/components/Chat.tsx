@@ -16,7 +16,6 @@ import {
   Message,
   UserMessage,
 } from "../models/message";
-import { useConfig } from "../hooks/config";
 import { NButton, NIcon, NScrollbar, NTag, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
@@ -29,6 +28,7 @@ import { usePrompt } from "../hooks/prompt";
 import ChatConfig from "./ChatConfig";
 import { message } from "../utils/prompt";
 import Cost from "./Cost";
+import DragBar from "./DragBar";
 
 export default defineComponent({
   name: "Chat",
@@ -279,30 +279,27 @@ export default defineComponent({
         style="background-color: var(--body-color)"
       >
         {/* title */}
-        <div
-          class="px-4 py-3 border-b border-color flex items-center"
-          data-tauri-drag-region
-        >
-          <span
-            class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-            data-tauri-drag-region
-          >
-            {props.chat.title.value || t("chat.new.defaultTitle")}
-          </span>
-          {chatPrompt.act.value ? (
-            <NTooltip>
-              {{
-                trigger: () => (
-                  <NTag size="small" round type="primary">
-                    {chatPrompt.act.value}
-                  </NTag>
-                ),
-                default: () => chatPrompt.prompt.value,
-              }}
-            </NTooltip>
-          ) : null}
-          <ChatConfig class="ml-2" chat={props.chat}></ChatConfig>
-        </div>
+        <DragBar title={props.chat.title.value || t("chat.new.defaultTitle")}>
+          {{
+            "right-panel": () => (
+              <>
+                {chatPrompt.act.value ? (
+                  <NTooltip>
+                    {{
+                      trigger: () => (
+                        <NTag size="small" round type="primary">
+                          {chatPrompt.act.value}
+                        </NTag>
+                      ),
+                      default: () => chatPrompt.prompt.value,
+                    }}
+                  </NTooltip>
+                ) : null}
+                <ChatConfig class="ml-2" chat={props.chat}></ChatConfig>
+              </>
+            ),
+          }}
+        </DragBar>
 
         {/* history */}
         <div class="flex-1 flex flex-col overflow-hidden">

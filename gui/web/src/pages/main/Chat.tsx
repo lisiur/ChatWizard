@@ -1,6 +1,5 @@
 import { computed, defineComponent, ref, shallowReactive } from "vue";
 import ChatComp from "../../components/Chat";
-import ExplorerComp from "../../components/ChatExplorer";
 import * as api from "../../api";
 import { Chat } from "../../models/chat";
 import { Message, UserMessage } from "../../models/message";
@@ -9,6 +8,7 @@ import { NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 import { useI18n } from "../../hooks/i18n";
 import { prompt } from "../../utils/prompt";
+import Explorer, { ExplorerItem } from "../../components/Explorer";
 
 export default defineComponent({
   setup() {
@@ -18,6 +18,12 @@ export default defineComponent({
     const chatRef = ref<InstanceType<typeof ChatComp>>();
 
     const chatIndexList = ref<Array<api.ChatIndex>>([]);
+    const explorerList = computed(() => {
+      return chatIndexList.value.map((m) => ({
+        id: m.id,
+        title: m.title,
+      }));
+    });
 
     const currentChat = ref<Chat>();
     const currentChatIndex = computed(
@@ -50,33 +56,33 @@ export default defineComponent({
     }
 
     async function explorerHandler(
-      action: "delete" | "select" | "rename",
-      index: api.ChatIndex
+      action: string,
+      item: ExplorerItem
     ) {
       switch (action) {
         case "delete": {
-          await deleteHandler(index.id);
+          await deleteHandler(item.id);
           return;
         }
         case "select": {
-          await selectHandler(index.id);
+          await selectHandler(item.id);
           return;
         }
         case "rename": {
-          await renameHandler(index);
+          await renameHandler(item.id, item.title);
         }
       }
     }
 
-    async function renameHandler(index: api.ChatIndex) {
+    async function renameHandler(id: string, title: string) {
       prompt(t("chat.inputNameHint"), {
-        defaultValue: index.title,
+        defaultValue: title,
         async okHandler(title) {
           await api.updateChat({
-            id: index.id,
+            id,
             title,
           });
-          if (currentChat.value && currentChat.value.id === index.id) {
+          if (currentChat.value && currentChat.value.id === id) {
             currentChat.value.title.value = title;
           }
           await refreshChatMetaList();
@@ -139,12 +145,25 @@ export default defineComponent({
             <span> {t("chat.new")} </span>
           </div>
           <div class="p-2 text-gray-400">{t("chat.conversations")}</div>
-          <ExplorerComp
+          <Explorer
             class="flex-1 overflow-auto"
             active={currentChat.value?.id}
-            list={chatIndexList.value}
+            menus={[
+              {
+                label: t("chat.rename"),
+                key: "rename",
+              },
+              {
+                type: "divider",
+              },
+              {
+                label: t("common.delete"),
+                key: "delete",
+              },
+            ]}
+            list={explorerList.value}
             onAction={explorerHandler}
-          ></ExplorerComp>
+          ></Explorer>
         </div>
         <div
           class="flex-1 overflow-hidden"

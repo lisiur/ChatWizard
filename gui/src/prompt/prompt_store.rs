@@ -13,7 +13,7 @@ pub struct PromptStore {
 impl Default for PromptStore {
     fn default() -> Self {
         Self {
-            root_dir: Project::prompt_root_dir(),
+            root_dir: Project::default().prompt_root_dir(),
         }
     }
 }

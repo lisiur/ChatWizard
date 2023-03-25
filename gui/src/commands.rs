@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::chat::chat_manager::ChatUpdatePayload;
 use crate::chat::chat_store::{ChatData, ChatIndex, ChatMetadata};
 use crate::error::Error;
+use crate::market_prompt::{MarketPrompt, MarketPromptIndex};
 use crate::prompt::prompt_manager::PromptUpdatePayload;
 use crate::prompt::prompt_store::{PromptData, PromptIndex, PromptMetadata};
 use crate::result::Result;
@@ -209,6 +210,35 @@ pub async fn delete_prompt(id: Uuid, state: State<'_, AppState>) -> Result<()> {
     let mut prompt_manager = state.prompt_manager.lock().await;
 
     prompt_manager.delete(id).await?;
+
+    Ok(())
+}
+
+// market
+
+#[tauri::command]
+pub async fn all_market_prompts(state: State<'_, AppState>) -> Result<Vec<MarketPromptIndex>> {
+    let prompt_market_service = state.prompt_market_service.lock().await;
+
+    let market_prompt_list = prompt_market_service.index_list().await?;
+
+    Ok(market_prompt_list)
+}
+
+#[tauri::command]
+pub async fn load_market_prompt(act: String, state: State<'_, AppState>) -> Result<MarketPrompt> {
+    let prompt_market_service = state.prompt_market_service.lock().await;
+
+    let market_prompt = prompt_market_service.load(&act).await?;
+
+    Ok(market_prompt)
+}
+
+#[tauri::command]
+pub async fn install_prompt(prompt: MarketPrompt, state: State<'_, AppState>) -> Result<()> {
+    let mut prompt_market_service = state.prompt_market_service.lock().await;
+
+    prompt_market_service.install(&prompt).await?;
 
     Ok(())
 }

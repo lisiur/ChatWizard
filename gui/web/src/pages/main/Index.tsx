@@ -4,9 +4,11 @@ import {
   ChatbubbleEllipsesOutline as InactiveChatIcon,
   ChatbubbleEllipses as ActiveChatIcon,
   Settings as SettingIcon,
+  TerminalOutline as PromptIcon,
+  Terminal as PromptActiveIcon,
+  StorefrontOutline as StoreIcon,
+  Storefront as StoreActiveIcon,
 } from "@vicons/ionicons5";
-
-import { Prompt as PromptIcon } from "@vicons/tabler";
 import { NBadge, NDropdown, NIcon } from "naive-ui";
 import { showWindow } from "../../api";
 import { os } from "@tauri-apps/api";
@@ -22,16 +24,22 @@ export default defineComponent({
 
     const topMenus = [
       {
-        name: "chat",
-        url: router.resolve({ name: "chat" }).path,
+        routeName: "chat",
         icon: InactiveChatIcon,
         activeIcon: ActiveChatIcon,
+        size: '2rem',
       },
       {
-        name: "prompt",
-        url: router.resolve({ name: "prompt" }).path,
+        routeName: "prompt",
         icon: PromptIcon,
-        activeIcon: PromptIcon,
+        activeIcon: PromptActiveIcon,
+        size: '1.7rem',
+      },
+      {
+        routeName: "promptMarket",
+        icon: StoreIcon,
+        activeIcon: StoreActiveIcon,
+        size: '1.7rem',
       },
     ];
 
@@ -76,14 +84,17 @@ export default defineComponent({
         >
           <div class="grid gap-1 place-content-center">
             {topMenus.map((m) => {
-              const isActive = route.name === m.name;
+              const isActive = route.name === m.routeName;
               const color = isActive
                 ? "var(--primary-color)"
                 : "var(--switcher-color)";
               const Icon = isActive ? m.activeIcon : m.icon;
               return (
-                <div class="mt-4" onClick={() => router.push({ name: m.name })}>
-                  <NIcon size="2rem" color={color}>
+                <div
+                  class="mt-6 flex justify-center"
+                  onClick={() => router.push({ name: m.routeName })}
+                >
+                  <NIcon size={m.size} color={color}>
                     <Icon></Icon>
                   </NIcon>
                 </div>

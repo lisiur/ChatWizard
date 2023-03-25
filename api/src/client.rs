@@ -9,7 +9,7 @@ pub struct ClientOpts {
 
 pub struct Client {
     opt: ClientOpts,
-    client: reqwest::Client,
+    pub client: reqwest::Client,
 }
 
 impl Client {

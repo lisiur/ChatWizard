@@ -12,7 +12,7 @@ pub struct ChatStore {
 impl Default for ChatStore {
     fn default() -> Self {
         Self {
-            root_dir: Project::chat_root_dir(),
+            root_dir: Project::default().chat_root_dir(),
         }
     }
 }
