@@ -27,7 +27,7 @@ impl AppState {
         let prompt_manager = PromptManager::init().await?;
         let prompt_manager = Arc::new(Mutex::new(prompt_manager));
 
-        let market_prompt_manager = Arc::new(Mutex::new(MarketPromptManager::init().await?));
+        let market_prompt_manager = Arc::new(Mutex::new(MarketPromptManager::default()));
 
         // Init chat manager
         let chat_manager = ChatManager::init().await?;

@@ -135,7 +135,7 @@ export default defineComponent({
           style="border-color: var(--border-color); background-color: var(--explorer-bg-color); color: var(--explorer-color)"
         >
           <div
-            class="border-b flex justify-center m-2 mt-3 items-center p-2 bg-primary cursor-pointer"
+            class="h-10 border-b flex justify-center m-2 mt-3 items-center bg-primary cursor-pointer"
             style="color: var(--base-color);border-color: var(--border-color)"
             onClick={createChat}
           >

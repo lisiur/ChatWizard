@@ -2,12 +2,11 @@ import { message } from "../utils/prompt";
 import { invoke as _invoke } from "@tauri-apps/api";
 import { i18n } from "../hooks/i18n";
 
-
 const { t } = i18n.global;
 
 const invoke = async <T>(...args: Parameters<typeof _invoke>) => {
   return _invoke<T>(...args).catch((err) => {
-    const msg: string = err.toString()
+    const msg: string = err.toString();
     if (msg.includes("timed out")) {
       message.error(t("common.network.timeout"));
     }
@@ -68,7 +67,13 @@ export interface PromptData {
   prompt: string;
 }
 
+export interface PromptMarketRepo {
+  name: string;
+  url: string;
+}
+
 export interface MarketPromptIndex {
+  id: string;
   act: string;
 }
 
@@ -157,12 +162,16 @@ export function loadPrompt(id: string) {
   return invoke<[PromptMetadata, PromptData]>("load_prompt", { id });
 }
 
-export function allMarketPrompts() {
-  return invoke<Array<MarketPromptIndex>>("all_market_prompts");
+export function allRepos() {
+  return invoke<Array<PromptMarketRepo>>("all_repos");
 }
 
-export function loadMarketPrompt(act: string) {
-  return invoke<MarketPrompt>("load_market_prompt", { act });
+export function repoIndexList(name: string) {
+  return invoke<Array<MarketPromptIndex>>("repo_index_list", { name });
+}
+
+export function loadMarketPrompt(id: string, name: string) {
+  return invoke<MarketPrompt>("load_market_prompt", { id, name });
 }
 
 export function installPrompt(prompt: MarketPrompt) {

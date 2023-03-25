@@ -1,6 +1,6 @@
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import * as api from "../../api";
-import { NIcon, NScrollbar, NSpin } from "naive-ui";
+import { NIcon, NScrollbar, NSelect, NSpin } from "naive-ui";
 import { useI18n } from "../../hooks/i18n";
 import Explorer, { ExplorerItem } from "../../components/Explorer";
 import DragBar from "../../components/DragBar";
@@ -12,39 +12,71 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
 
-    const marketPromptIndexList = ref<Array<api.MarketPromptIndex>>([]);
+    const repos = ref<Array<api.PromptMarketRepo>>([]);
+    const currentRepo = ref<string>();
+    const repoOptions = computed(() => {
+      return repos.value.map((item) => {
+        return {
+          value: item.name,
+          label: item.name,
+        };
+      });
+    });
 
-    const currentAct = ref<string>();
-
-    const currentMarketPromptIndex = computed(() =>
-      marketPromptIndexList.value.find((m) => m.act === currentAct.value)
+    const indexList = ref<Array<api.MarketPromptIndex>>([]);
+    const currentId = ref<string>();
+    const currentIndex = computed(() =>
+      indexList.value.find((m) => m.id === currentId.value)
     );
-    const currentMarketPrompt = ref<api.MarketPrompt>();
+    const currentPrompt = ref<api.MarketPrompt>();
+
     const explorerList = computed(() => {
-      return marketPromptIndexList.value.map((m) => ({
-        id: m.act,
+      return indexList.value.map((m) => ({
+        id: m.id,
         title: m.act,
       }));
     });
 
-    const loadListTask = useTask(async () => {
-      await api.allMarketPrompts().then((list) => {
-        marketPromptIndexList.value = list;
+    const loadReposTask = useTask(async () => {
+      await api.allRepos().then((list) => {
+        repos.value = list;
+        if (!currentRepo.value && list.length > 0) {
+          currentRepo.value = list[0].name;
+        }
       });
     });
 
-    const loadDataTask = useTask(async (act: string) => {
-      currentMarketPrompt.value = undefined;
-      const marketPrompt = await api.loadMarketPrompt(act);
-      currentMarketPrompt.value = marketPrompt;
+    const loadIndexTask = useTask(async () => {
+      await api.repoIndexList(currentRepo.value!).then((list) => {
+        indexList.value = list;
+      });
     });
 
-    loadListTask.exec();
+    const loadDataTask = useTask(async (id: string) => {
+      currentPrompt.value = undefined;
+      const marketPrompt = await api.loadMarketPrompt(id, currentRepo.value!);
+      currentPrompt.value = marketPrompt;
+    });
+
+    watch(
+      currentRepo,
+      () => {
+        if (currentRepo.value) {
+          loadIndexTask.exec();
+        }
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    loadReposTask.exec();
 
     function explorerHandler(action: string, item: ExplorerItem) {
       if (action === "select") {
         selectHandler({
-          act: item.id,
+          id: item.id,
+          act: item.title,
         });
       }
     }
@@ -55,8 +87,8 @@ export default defineComponent({
     }
 
     async function selectHandler(prompt: api.MarketPromptIndex) {
-      currentAct.value = prompt.act;
-      loadDataTask.exec(prompt.act);
+      currentId.value = prompt.id;
+      loadDataTask.exec(prompt.id);
     }
 
     return () => (
@@ -65,27 +97,34 @@ export default defineComponent({
           class="w-48 border-r h-full flex flex-col"
           style="border-color: var(--border-color); background-color: var(--explorer-bg-color); color: var(--explorer-color)"
         >
+          <div
+            class="h-10 m-2 mt-3"
+            style="color: var(--base-color);border-color: var(--border-color)"
+          >
+            <NSelect
+              v-model:value={currentRepo.value}
+              options={repoOptions.value}
+            ></NSelect>
+          </div>
           <div class="p-2 text-gray-400">{t("prompt.market.prompts")}</div>
-          {loadListTask.running ? (
+          {loadIndexTask.running ? (
             <NSpin class="mt-4"></NSpin>
           ) : (
             <Explorer
               class="flex-1 overflow-auto"
-              active={currentMarketPromptIndex.value?.act}
+              active={currentIndex.value?.id}
               list={explorerList.value}
               onAction={explorerHandler}
             ></Explorer>
           )}
         </div>
         <div class="flex-1 overflow-hidden flex flex-col">
-          {currentAct.value ? (
-            <DragBar title={currentAct.value}>
+          {currentPrompt.value ? (
+            <DragBar title={currentPrompt.value?.act}>
               {{
                 "right-panel": () =>
-                  currentMarketPrompt.value ? (
-                    <span
-                      onClick={() => installHandler(currentMarketPrompt.value!)}
-                    >
+                  currentPrompt.value ? (
+                    <span onClick={() => installHandler(currentPrompt.value!)}>
                       <NIcon size="1.4rem" color="var(--primary-color)">
                         <InstallIcon></InstallIcon>
                       </NIcon>
@@ -98,14 +137,14 @@ export default defineComponent({
             class="flex-1 overflow-hidden p-4"
             style="background-color: var(--body-color)"
           >
-            {currentAct.value ? (
+            {currentId.value ? (
               loadDataTask.running ? (
                 <div class="flex justify-center">
                   <NSpin class="mt-4"></NSpin>
                 </div>
               ) : (
                 <NScrollbar class="h-full">
-                  {currentMarketPrompt.value?.prompt}
+                  {currentPrompt.value?.prompt}
                 </NScrollbar>
               )
             ) : (
