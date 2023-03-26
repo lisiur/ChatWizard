@@ -247,10 +247,16 @@ impl Chat {
                             Some(StreamContent::Done)
                         } else if line.starts_with("data: ") && line.ends_with("}]}") {
                             handle_line(line)
-                        } else if line.ends_with("}]}") {
+                        } else if line.ends_with('}') {
                             let line = left_line.take().unwrap() + line;
                             log::debug!("merged line: {}", line);
-                            handle_line(&line)
+                            match handle_line(&line) {
+                                Some(content) => Some(content),
+                                None => {
+                                    left_line = Some(line);
+                                    None
+                                }
+                            }
                         } else {
                             left_line = Some(left_line.take().unwrap_or_default() + line);
                             None
@@ -267,6 +273,9 @@ impl Chat {
 }
 
 fn handle_line(line: &str) -> Option<StreamContent> {
+    if !line.starts_with("data:") || !line.ends_with("}]}") {
+        return None;
+    }
     let json_data = if line.starts_with("data: {") {
         &line[6..]
     } else if line.starts_with("data:{") {
