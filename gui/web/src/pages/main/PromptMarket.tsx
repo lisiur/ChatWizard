@@ -104,6 +104,7 @@ export default defineComponent({
             <NSelect
               v-model:value={currentRepo.value}
               options={repoOptions.value}
+              loading={loadReposTask.running}
             ></NSelect>
           </div>
           <div class="p-2 text-gray-400">{t("prompt.market.prompts")}</div>
