@@ -1,6 +1,6 @@
-## [0.0.27](https://github.com/lisiur/askai/compare/v0.0.26...v0.0.27) (2023-03-26)
+## [0.0.28](https://github.com/lisiur/askai/compare/v0.0.27...v0.0.28) (2023-03-26)
 
 
 ### Bug Fixes
 
-* fix chunk handler ([c457c18](https://github.com/lisiur/askai/commit/c457c18449c8c004489ccfe1ae08e35da3628ef4))
+* fix chunk handler ([7cde0e1](https://github.com/lisiur/askai/commit/7cde0e1a6cbce91746f89c7600c3c3a20168ede2))
