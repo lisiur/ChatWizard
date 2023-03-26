@@ -130,6 +130,8 @@ impl PromptManager {
         self.store.delete(&id).await?;
 
         self.index_list.retain(|item| item.id != id);
+
+        self.store.write_index(&self.index_list).await?;
         Ok(())
     }
 }
