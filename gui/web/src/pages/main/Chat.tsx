@@ -21,7 +21,7 @@ export default defineComponent({
     const explorerList = computed(() => {
       return chatIndexList.value.map((m) => ({
         id: m.id,
-        title: m.title,
+        title: m.title || t('chat.new.defaultTitle'),
       }));
     });
 
@@ -124,6 +124,7 @@ export default defineComponent({
           title: message.content,
         });
         currentChatIndex.value!.title = message.content;
+        currentChat.value!.title.value = message.content;
         await refreshChatMetaList();
       }
     }
