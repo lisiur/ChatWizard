@@ -267,7 +267,13 @@ impl Chat {
 }
 
 fn handle_line(line: &str) -> Option<StreamContent> {
-    let json_data = &line[6..];
+    let json_data = if line.starts_with("data: {") {
+        &line[6..]
+    } else if line.starts_with("data:{") {
+        &line[5..]
+    } else {
+        return None;
+    };
     let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
     json.choices.get(0).and_then(|choice| {
         choice
