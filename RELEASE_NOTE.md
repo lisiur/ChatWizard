@@ -1,6 +1,6 @@
-## [0.0.24](https://github.com/lisiur/askai/compare/v0.0.23...v0.0.24) (2023-03-25)
+## [0.0.25](https://github.com/lisiur/askai/compare/v0.0.24...v0.0.25) (2023-03-26)
 
 
-### Features
+### Bug Fixes
 
-* support multi repo ([4e47905](https://github.com/lisiur/askai/commit/4e479050571bf1dae0f8dbb673e57c90cf1ca200))
+* fix prompt delete bug ([da11de4](https://github.com/lisiur/askai/commit/da11de447c8081f4e26c583afbc81a88002ccd58))
