@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use diesel::{Connection, SqliteConnection};
+
+#[derive(Clone)]
 pub struct DbConn(pub Arc<Mutex<diesel::sqlite::SqliteConnection>>);
 
 impl DbConn {

@@ -10,7 +10,7 @@ CREATE TABLE chats (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TRIGGER update_chats_updated_at
+CREATE TRIGGER auto_update_chats_updated_at
   AFTER UPDATE ON chats
   FOR EACH ROW
   BEGIN

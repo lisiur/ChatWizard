@@ -1,14 +1,14 @@
 -- Your SQL goes here
 CREATE TABLE users (
   id BINARY PRIMARY KEY NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  password TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TRIGGER update_users_updated_at
+CREATE TRIGGER auto_update_users_updated_at
   AFTER UPDATE ON users
   FOR EACH ROW
   BEGIN

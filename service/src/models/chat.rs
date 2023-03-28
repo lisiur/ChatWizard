@@ -5,6 +5,17 @@ use crate::result::Result;
 use crate::schema::chats;
 use crate::{conn::DbConn, types::Id};
 
+#[derive(Insertable)]
+#[diesel(table_name = chats)]
+pub struct NewChat {
+    pub id: Id,
+    pub user_id: Id,
+    pub title: String,
+    pub prompt_id: Option<Id>,
+    pub config: String,
+    pub cost: f32,
+}
+
 #[derive(Queryable, Selectable)]
 pub struct Chat {
     pub id: Id,
@@ -17,18 +28,12 @@ pub struct Chat {
     pub updated_at: NaiveDateTime,
 }
 
-struct ChatRepo(DbConn);
-
-impl ChatRepo {
-    pub fn new(conn: DbConn) -> Self {
-        Self(conn)
-    }
-
-    pub fn select(&self, chat_id: Id) -> Result<Chat> {
-        use crate::schema::chats::dsl::*;
-        chats
-            .filter(id.eq(chat_id))
-            .first::<Chat>(&mut *self.0.conn())
-            .map_err(|e| e.into())
-    }
+#[derive(AsChangeset)]
+#[diesel(table_name = chats)]
+pub struct PatchChat {
+    pub id: Id,
+    pub title: Option<String>,
+    pub prompt_id: Option<Id>,
+    pub config: Option<String>,
+    pub cost: Option<f32>,
 }
