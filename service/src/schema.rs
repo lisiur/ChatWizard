@@ -35,6 +35,7 @@ diesel::table! {
         prompt_id -> Nullable<Binary>,
         config -> Text,
         cost -> Float,
+        vendor -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

@@ -1,5 +1,3 @@
-use std::fmt::{Display, Write};
-
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
@@ -53,5 +51,27 @@ impl From<crate::api::openai::response::OpenAIErrorResponse> for Error {
             Some("invalid_api_key") => Error::Api(ApiError::InvalidKey),
             _ => Error::Api(ApiError::Unknown(err.error.message)),
         }
+    }
+}
+
+#[derive(thiserror::Error, serde::Serialize, Clone, Debug)]
+pub enum StreamError {
+    #[error(transparent)]
+    Api(ApiError),
+
+    #[error(transparent)]
+    Network(NetworkError),
+
+    #[error("unknown error: {0}")]
+    Unknown(String),
+}
+
+impl From<reqwest::Error> for StreamError {
+    fn from(err: reqwest::Error) -> Self {
+        StreamError::Network(if err.is_timeout() {
+            NetworkError::Timeout(err.to_string())
+        } else {
+            NetworkError::Unknown(err.to_string())
+        })
     }
 }

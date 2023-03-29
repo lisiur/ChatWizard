@@ -16,6 +16,12 @@ pub struct ChatModel {
     pub updated_at: NaiveDateTime,
 }
 
+impl ChatModel {
+    pub fn calc_cost(&self, tokens: usize) -> f32 {
+        self.price * tokens as f32 / 1000.0
+    }
+}
+
 #[derive(Insertable, AsChangeset)]
 #[diesel(table_name = chat_models)]
 

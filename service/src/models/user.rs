@@ -1,10 +1,6 @@
 use chrono::NaiveDateTime;
-use diesel::{
-    AsChangeset, ExpressionMethods, Insertable, QueryDsl, Queryable, RunQueryDsl, Selectable,
-};
+use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 
-use crate::database::DbConn;
-use crate::result::Result;
 use crate::schema::users;
 use crate::types::Id;
 
@@ -34,11 +30,4 @@ pub struct User {
     pub password: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
-}
-
-impl User {
-    pub fn with_id(id: Id) {
-        use crate::schema::users::dsl::*;
-        todo!()
-    }
 }

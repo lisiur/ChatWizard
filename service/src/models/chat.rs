@@ -1,18 +1,11 @@
-use std::backtrace;
-
 use chrono::NaiveDateTime;
-use diesel::deserialize::FromSql;
-use diesel::serialize::ToSql;
-use diesel::sql_types::Text;
-use diesel::sqlite::Sqlite;
-use diesel::{prelude::*, AsExpression, FromSqlRow};
+use diesel::prelude::*;
 
-use crate::result::Result;
 use crate::schema::chats;
+use crate::types::Id;
 use crate::types::JsonWrapper;
-use crate::{database::DbConn, types::Id};
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[diesel(table_name = chats)]
 pub struct NewChat {
     pub id: Id,
@@ -21,9 +14,10 @@ pub struct NewChat {
     pub prompt_id: Option<Id>,
     pub config: JsonWrapper<ChatConfig>,
     pub cost: f32,
+    pub vendor: String,
 }
 
-#[derive(Queryable, Selectable, Identifiable)]
+#[derive(Queryable, Selectable, Identifiable, Debug)]
 pub struct Chat {
     pub id: Id,
     pub user_id: Id,
@@ -31,11 +25,12 @@ pub struct Chat {
     pub prompt_id: Option<Id>,
     pub config: JsonWrapper<ChatConfig>,
     pub cost: f32,
+    pub vendor: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(AsChangeset)]
+#[derive(AsChangeset, Default)]
 #[diesel(table_name = chats)]
 pub struct PatchChat {
     pub id: Id,
@@ -43,45 +38,33 @@ pub struct PatchChat {
     pub prompt_id: Option<Id>,
     pub config: Option<JsonWrapper<ChatConfig>>,
     pub cost: Option<f32>,
+    pub vendor: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct ChatConfig {
-    backtrack: usize,
-    params: ChatParams,
+    pub backtrack: usize,
+    pub params: ChatParams,
 }
 
 impl Default for ChatConfig {
     fn default() -> Self {
         Self {
             backtrack: 3,
-            params: ChatParams::OpenAI(OpenAIChatParams {
+            params: ChatParams {
                 model: "gpt-3.5-turbo".to_string(),
                 temperature: None,
                 stop: None,
                 presence_penalty: None,
                 frequency_penalty: None,
-            }),
+            },
         }
     }
 }
 
-impl From<ChatConfig> for JsonWrapper<ChatConfig> {
-    fn from(val: ChatConfig) -> Self {
-        JsonWrapper(val)
-    }
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-#[serde(tag = "type")]
-pub enum ChatParams {
-    #[serde(rename = "openai")]
-    OpenAI(OpenAIChatParams),
-}
-
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct OpenAIChatParams {
+pub struct ChatParams {
     pub model: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]

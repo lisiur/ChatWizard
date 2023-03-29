@@ -1,5 +1,4 @@
 use crate::result::Result;
-use serde::de::DeserializeOwned;
 
 #[derive(Default, Clone)]
 pub struct Client {

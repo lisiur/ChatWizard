@@ -1,5 +1,6 @@
-use crate::models::setting::NewSetting;
+use crate::models::setting::{NewSetting, PatchSetting};
 use crate::result::Result;
+use crate::schema::settings;
 use crate::{database::DbConn, models::setting::Setting, types::Id};
 use diesel::prelude::*;
 
@@ -11,8 +12,6 @@ impl SettingRepo {
     }
 
     pub fn insert(&self, setting: &NewSetting) -> Result<usize> {
-        use crate::schema::settings;
-
         let size = diesel::insert_into(settings::table)
             .values(setting)
             .execute(&mut *self.0.conn())?;
@@ -20,8 +19,6 @@ impl SettingRepo {
     }
 
     pub fn insert_if_not_exist(&self, setting: &NewSetting) -> Result<usize> {
-        use crate::schema::settings;
-
         let size = diesel::insert_into(settings::table)
             .values(setting)
             .on_conflict(settings::columns::id)
@@ -31,11 +28,18 @@ impl SettingRepo {
     }
 
     pub fn select_by_user_id(&self, user_id: Id) -> Result<Setting> {
-        use crate::schema::settings;
-
         settings::table
             .filter(settings::columns::user_id.eq(user_id))
             .first::<Setting>(&mut *self.0.conn())
             .map_err(|e| e.into())
+    }
+
+    pub fn update(&self, setting: &PatchSetting) -> Result<usize> {
+        let size = diesel::update(settings::table)
+            .filter(settings::user_id.eq(setting.user_id))
+            .set(setting)
+            .execute(&mut *self.0.conn())?;
+
+        Ok(size)
     }
 }

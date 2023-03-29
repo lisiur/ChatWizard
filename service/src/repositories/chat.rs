@@ -1,6 +1,7 @@
 use crate::database::pagination::*;
-use crate::models::chat::NewChat;
+use crate::models::chat::{NewChat, PatchChat};
 use crate::result::Result;
+use crate::schema::chats;
 use crate::types::PageQueryParams;
 use crate::{database::DbConn, models::chat::Chat, types::Id};
 use diesel::query_builder::AsQuery;
@@ -45,10 +46,8 @@ impl ChatRepo {
     }
 
     pub fn select_by_user_id(&self, user_id: Id) -> Result<Vec<Chat>> {
-        use crate::schema::chats::dsl::*;
-
-        chats
-            .filter(user_id.eq(user_id))
+        chats::table
+            .filter(chats::user_id.eq(user_id))
             .load::<Chat>(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
@@ -62,10 +61,20 @@ impl ChatRepo {
         Ok(size)
     }
 
-    pub fn delete_by_id(&self, id: Id) -> Result<usize> {
+    pub fn update(&self, chat: &PatchChat) -> Result<usize> {
         use crate::schema::chats::dsl::*;
 
-        diesel::delete(chats.filter(id.eq(id)))
+        let size = diesel::update(chats)
+            .filter(id.eq(chat.id))
+            .set(chat)
+            .execute(&mut *self.0.conn())?;
+        Ok(size)
+    }
+
+    pub fn delete_by_id(&self, chat_id: Id) -> Result<usize> {
+        use crate::schema::chats::dsl::*;
+
+        diesel::delete(chats.filter(id.eq(chat_id)))
             .execute(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
@@ -73,14 +82,10 @@ impl ChatRepo {
 
 #[cfg(test)]
 mod tests {
-    use diesel::{Connection, SqliteConnection};
     use once_cell::sync::OnceCell;
-    use uuid::Uuid;
 
     use crate::{
-        database::DbConn,
-        models::chat::{ChatConfig, NewChat},
-        result::Result,
+        models::chat::{ChatConfig, NewChat, PatchChat},
         test::establish_connection,
         types::Id,
     };
@@ -104,6 +109,7 @@ mod tests {
             prompt_id: None,
             config: ChatConfig::default().into(),
             cost: 0.0,
+            vendor: "openai".to_string(),
         }
     }
 
@@ -114,7 +120,7 @@ mod tests {
         let chat = new_chat("test");
         let id = chat.id;
 
-        repo.insert(&new_chat("test")).unwrap();
+        repo.insert(&chat).unwrap();
 
         assert!(repo.select_by_id(id).is_ok());
 
@@ -125,8 +131,29 @@ mod tests {
     fn test_select_chats() {
         let repo = create_chat_repo();
 
-        let chats = repo.select_by_user_id(Id::local()).unwrap();
+        assert!(repo.select_by_user_id(Id::local()).is_ok());
+    }
 
-        assert!(true)
+    #[test]
+    fn update_chat() {
+        let repo = create_chat_repo();
+        let chat = new_chat("test");
+        repo.insert(&chat).unwrap();
+
+        let patch_chat = PatchChat {
+            id: chat.id,
+            title: Some("test2".to_string()),
+            config: None,
+            cost: None,
+            prompt_id: None,
+            vendor: None,
+        };
+
+        repo.update(&patch_chat).unwrap();
+
+        let chat = repo.select_by_id(chat.id).unwrap();
+        assert_eq!(chat.title, "test2");
+
+        repo.delete_by_id(chat.id).unwrap();
     }
 }

@@ -1,12 +1,12 @@
 use crate::error::Error;
-use crate::models::chat_model::{ChatModel, NewChatModel};
+use crate::models::chat_model::NewChatModel;
 use crate::models::setting::{NewSetting, Theme};
 use crate::repositories::chat_model::ChatModelRepo;
 use crate::repositories::setting::SettingRepo;
 use crate::result::Result;
 use crate::{database::DbConn, models::user::NewUser, repositories::user::UserRepo, types::Id};
 use diesel::sqlite::Sqlite;
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationError, MigrationHarness};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
@@ -88,7 +88,7 @@ mod tests {
     fn test_init() {
         let conn = establish_connection();
 
-        init(conn.clone());
+        init(conn.clone()).unwrap();
 
         let user_repo = UserRepo::new(conn.clone());
         let setting_repo = SettingRepo::new(conn);

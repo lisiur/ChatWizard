@@ -1,13 +1,15 @@
-use diesel::backend::{Backend, RawValue};
+use diesel::backend::RawValue;
 use diesel::deserialize::{self, FromSql};
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types::{Binary, Text};
 use diesel::sqlite::Sqlite;
-use diesel::{AsExpression, Expression, FromSqlRow};
+use diesel::{AsExpression, FromSqlRow};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use uuid::{self, Uuid};
+
+use crate::error::StreamError;
 
 #[derive(
     Debug,
@@ -23,6 +25,12 @@ use uuid::{self, Uuid};
 )]
 #[diesel(sql_type = Binary)]
 pub struct Id(pub uuid::Uuid);
+
+impl Default for Id {
+    fn default() -> Self {
+        Self::local()
+    }
+}
 
 impl Id {
     pub fn local() -> Self {
@@ -75,9 +83,21 @@ impl ToSql<Binary, Sqlite> for Id {
 
 #[derive(AsExpression, FromSqlRow, Debug)]
 #[diesel(sql_type = Text)]
-pub struct TextWrapper<T: FromStr + AsRef<str> + fmt::Debug>(pub T);
+pub struct TextWrapper<T>(pub T);
 
-impl<T: FromStr + AsRef<str> + fmt::Debug> FromSql<Text, Sqlite> for TextWrapper<T> {
+impl<T> AsRef<T> for TextWrapper<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> From<T> for TextWrapper<T> {
+    fn from(inner: T) -> Self {
+        Self(inner)
+    }
+}
+
+impl<T: FromStr> FromSql<Text, Sqlite> for TextWrapper<T> {
     fn from_sql(bytes: diesel::backend::RawValue<'_, Sqlite>) -> diesel::deserialize::Result<Self> {
         let bytes = <Vec<u8>>::from_sql(bytes)?;
         let string = String::from_utf8(bytes)?;
@@ -86,7 +106,7 @@ impl<T: FromStr + AsRef<str> + fmt::Debug> FromSql<Text, Sqlite> for TextWrapper
     }
 }
 
-impl<T: FromStr + AsRef<str> + fmt::Debug> ToSql<Text, Sqlite> for TextWrapper<T> {
+impl<T: AsRef<str> + fmt::Debug> ToSql<Text, Sqlite> for TextWrapper<T> {
     fn to_sql<'b>(
         &'b self,
         out: &mut diesel::serialize::Output<'b, '_, Sqlite>,
@@ -99,11 +119,21 @@ impl<T: FromStr + AsRef<str> + fmt::Debug> ToSql<Text, Sqlite> for TextWrapper<T
 
 #[derive(AsExpression, FromSqlRow, serde::Serialize, serde::Deserialize, Debug)]
 #[diesel(sql_type = Text)]
-pub struct JsonWrapper<T: fmt::Debug>(pub T);
+pub struct JsonWrapper<T>(pub T);
 
-impl<T: serde::de::DeserializeOwned + serde::Serialize + fmt::Debug> FromSql<Text, Sqlite>
-    for JsonWrapper<T>
-{
+impl<T> AsRef<T> for JsonWrapper<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> From<T> for JsonWrapper<T> {
+    fn from(inner: T) -> Self {
+        Self(inner)
+    }
+}
+
+impl<T: serde::de::DeserializeOwned + fmt::Debug> FromSql<Text, Sqlite> for JsonWrapper<T> {
     fn from_sql(bytes: diesel::backend::RawValue<'_, Sqlite>) -> diesel::deserialize::Result<Self> {
         let bytes = <Vec<u8>>::from_sql(bytes)?;
         let inner = serde_json::from_slice::<T>(&bytes)?;
@@ -111,9 +141,7 @@ impl<T: serde::de::DeserializeOwned + serde::Serialize + fmt::Debug> FromSql<Tex
     }
 }
 
-impl<T: serde::de::DeserializeOwned + serde::Serialize + fmt::Debug> ToSql<Text, Sqlite>
-    for JsonWrapper<T>
-{
+impl<T: serde::Serialize + fmt::Debug> ToSql<Text, Sqlite> for JsonWrapper<T> {
     fn to_sql<'b>(
         &'b self,
         out: &mut diesel::serialize::Output<'b, '_, Sqlite>,
@@ -136,7 +164,7 @@ impl Default for PageQueryParams {
     fn default() -> Self {
         Self {
             page: 1,
-            per_page: 10,
+            per_page: i64::MAX,
             query: None,
             sort: None,
         }
@@ -155,12 +183,20 @@ pub enum QueryExpr {}
 
 #[derive(serde::Deserialize, Debug)]
 pub struct SortParams {
-    column: String,
-    order: Order,
+    _column: String,
+    _order: Order,
 }
 
 #[derive(serde::Deserialize, Debug)]
 pub enum Order {
     Asc,
     Desc,
+}
+
+#[derive(serde::Serialize, Clone, Debug)]
+#[serde(tag = "type", content = "data", rename_all = "camelCase")]
+pub enum StreamContent {
+    Error(StreamError),
+    Data(String),
+    Done,
 }

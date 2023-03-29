@@ -1,12 +1,12 @@
 use std::pin::Pin;
 
-use chrono::format::Item;
 use futures::{stream, Stream, StreamExt};
 
 use crate::{
     api::client::Client,
-    error::{ApiError, Error, NetworkError},
+    error::{ApiError, StreamError},
     result::Result,
+    types::StreamContent,
 };
 
 use self::params::{OpenAIChatParams, OpenAIChatRole};
@@ -15,21 +15,21 @@ use super::response::OpenAIErrorResponse;
 
 pub mod params;
 
-pub struct OpenAIChat {
+pub struct OpenAIChatApi {
     client: Client,
-    host: Option<String>,
+    host: String,
 }
 
-impl OpenAIChat {
-    pub fn new(client: Client, host: Option<String>) -> Self {
+impl OpenAIChatApi {
+    pub fn new(client: Client, host: String) -> Self {
         Self { client, host }
     }
 
-    async fn send_message(
+    pub async fn send_message(
         &self,
-        params: &OpenAIChatParams,
-    ) -> Result<Pin<Box<dyn Stream<Item = OpenAIStreamContent> + Send + '_>>> {
-        let url = self.host.clone().unwrap_or_default() + "/v1/chat/completions";
+        params: OpenAIChatParams,
+    ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
+        let url = self.host.clone() + "/v1/chat/completions";
         let res = self.client.post(&url, params).await?;
 
         let stream = res.bytes_stream();
@@ -39,7 +39,7 @@ impl OpenAIChat {
         let stream = stream
             .flat_map(move |chunk| {
                 if let Err(err) = chunk {
-                    return stream::iter(vec![OpenAIStreamContent::Error(err.into())]);
+                    return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
 
                 let mut vec = chunk.unwrap().to_vec();
@@ -54,7 +54,7 @@ impl OpenAIChat {
 
                 if data.starts_with("{\n    \"error\"") || data.starts_with("{\n  \"error\"") {
                     let res = serde_json::from_str::<OpenAIErrorResponse>(&data).unwrap();
-                    return stream::iter(vec![OpenAIStreamContent::Error(res.into())]);
+                    return stream::iter(vec![StreamContent::Error(res.into())]);
                 }
 
                 let chunks = data
@@ -64,7 +64,7 @@ impl OpenAIChat {
                         if line.is_empty() {
                             None
                         } else if line.starts_with("data: [DONE]") {
-                            Some(OpenAIStreamContent::Done)
+                            Some(StreamContent::Done)
                         } else if line.starts_with("data: ") && line.ends_with("}]}") {
                             handle_line(line)
                         } else if line.ends_with('}') {
@@ -81,7 +81,7 @@ impl OpenAIChat {
                             None
                         }
                     })
-                    .collect::<Vec<OpenAIStreamContent>>();
+                    .collect::<Vec<StreamContent>>();
 
                 stream::iter(chunks)
             })
@@ -91,37 +91,7 @@ impl OpenAIChat {
     }
 }
 
-#[derive(serde::Serialize, Clone, Debug)]
-#[serde(tag = "type", content = "data", rename_all = "camelCase")]
-pub enum OpenAIStreamContent {
-    Error(OpenAIStreamError),
-    Data(String),
-    Done,
-}
-
-#[derive(thiserror::Error, serde::Serialize, Clone, Debug)]
-pub enum OpenAIStreamError {
-    #[error(transparent)]
-    Api(ApiError),
-
-    #[error(transparent)]
-    Network(NetworkError),
-
-    #[error("unknown error: {0}")]
-    Unknown(String),
-}
-
-impl From<reqwest::Error> for OpenAIStreamError {
-    fn from(err: reqwest::Error) -> Self {
-        OpenAIStreamError::Network(if err.is_timeout() {
-            NetworkError::Timeout(err.to_string())
-        } else {
-            NetworkError::Unknown(err.to_string())
-        })
-    }
-}
-
-impl From<OpenAIErrorResponse> for OpenAIStreamError {
+impl From<OpenAIErrorResponse> for StreamError {
     fn from(err: OpenAIErrorResponse) -> Self {
         match err.error.code.as_deref() {
             Some("invalid_api_key") => Self::Api(ApiError::InvalidKey),
@@ -131,7 +101,7 @@ impl From<OpenAIErrorResponse> for OpenAIStreamError {
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub struct StreamChunk {
+pub struct OpenAIStreamChunk {
     pub id: String,
     pub object: String,
     pub created: u32,
@@ -160,7 +130,7 @@ pub struct OpenAIStreamChunkChoiceDelta {
     pub content: Option<String>,
 }
 
-fn handle_line(line: &str) -> Option<OpenAIStreamContent> {
+fn handle_line(line: &str) -> Option<StreamContent> {
     if !line.starts_with("data:") || !line.ends_with("}]}") {
         return None;
     }
@@ -171,12 +141,12 @@ fn handle_line(line: &str) -> Option<OpenAIStreamContent> {
     } else {
         return None;
     };
-    let json = serde_json::from_str::<StreamChunk>(json_data).unwrap();
+    let json = serde_json::from_str::<OpenAIStreamChunk>(json_data).unwrap();
     json.choices.get(0).and_then(|choice| {
         choice
             .delta
             .content
             .as_ref()
-            .map(|content| OpenAIStreamContent::Data(content.to_string()))
+            .map(|content| StreamContent::Data(content.to_string()))
     })
 }

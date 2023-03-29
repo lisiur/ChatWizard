@@ -1,12 +1,10 @@
 use std::str::FromStr;
 
 use chrono::NaiveDateTime;
-use diesel::deserialize::FromSql;
-use diesel::serialize::ToSql;
 use diesel::sql_types::Text;
-use diesel::sqlite::Sqlite;
 use diesel::*;
 
+use crate::api::openai::chat::params::OpenAIChatRole;
 use crate::schema::chat_logs;
 use crate::types::{Id, TextWrapper};
 
@@ -54,6 +52,16 @@ impl FromStr for Role {
     }
 }
 
+impl From<Role> for OpenAIChatRole {
+    fn from(role: Role) -> Self {
+        match role {
+            Role::System => OpenAIChatRole::System,
+            Role::Assistant => OpenAIChatRole::Assistant,
+            Role::User => OpenAIChatRole::User,
+        }
+    }
+}
+
 #[derive(AsChangeset)]
 #[diesel(table_name = chat_logs)]
 pub struct PatchChatLog {
@@ -64,4 +72,16 @@ pub struct PatchChatLog {
     pub model: Option<String>,
     pub tokens: Option<i32>,
     pub cost: Option<f32>,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = chat_logs)]
+pub struct NewChatLog {
+    pub id: Id,
+    pub chat_id: Id,
+    pub role: TextWrapper<Role>,
+    pub message: String,
+    pub model: String,
+    pub tokens: i32,
+    pub cost: f32,
 }

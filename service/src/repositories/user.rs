@@ -74,14 +74,9 @@ impl UserRepo {
 
 #[cfg(test)]
 mod test {
-    use diesel::{Connection, SqliteConnection};
     use once_cell::sync::OnceCell;
-    use uuid::Uuid;
 
-    use crate::{
-        database::DbConn, models::user::NewUser, result::Result, test::establish_connection,
-        types::Id,
-    };
+    use crate::{models::user::NewUser, test::establish_connection, types::Id};
 
     use super::UserRepo;
 

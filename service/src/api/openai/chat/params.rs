@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use tiktoken_rs::{self, cl100k_base, model::get_context_size};
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Default, Clone, Debug)]
 pub struct OpenAIChatParams {
     /// ID of the model to use.
     pub model: String,
@@ -71,7 +71,7 @@ impl OpenAIChatParams {
         let context_size = get_context_size(&self.model);
         let mut tokens = 0;
         for message in &self.messages {
-            tokens += message.calc_tokens();
+            tokens += message.tokens();
         }
 
         context_size.saturating_sub(tokens)
@@ -85,13 +85,17 @@ pub struct OpenAIChatMessage {
 }
 
 impl OpenAIChatMessage {
-    pub fn calc_tokens(&self) -> usize {
+    pub fn tokens(&self) -> usize {
+        Self::calc_tokens(&self.role, &self.content)
+    }
+
+    pub fn calc_tokens(role: &OpenAIChatRole, content: &str) -> usize {
         let bpe = cl100k_base().unwrap();
 
         let mut num_tokens = 0;
         num_tokens += 4; // every message follows <im_start>{role/name}\n{content}<im_end>\n
-        num_tokens += bpe.encode_with_special_tokens(&self.role.to_string()).len();
-        num_tokens += bpe.encode_with_special_tokens(&self.content).len();
+        num_tokens += bpe.encode_with_special_tokens(&role.to_string()).len();
+        num_tokens += bpe.encode_with_special_tokens(content).len();
 
         num_tokens
     }
