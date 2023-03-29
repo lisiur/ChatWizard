@@ -5,7 +5,7 @@ use crate::schema::prompts;
 use crate::types::Id;
 
 #[derive(Queryable)]
-struct Prompt {
+pub struct Prompt {
     pub id: Id,
     pub name: String,
     pub content: String,
@@ -16,7 +16,7 @@ struct Prompt {
 
 #[derive(Insertable)]
 #[diesel(table_name = prompts)]
-struct NewPrompt {
+pub struct NewPrompt {
     pub id: Id,
     pub name: String,
     pub content: String,

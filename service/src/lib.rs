@@ -2,7 +2,7 @@
 #![recursion_limit = "256"]
 
 pub mod api;
-pub mod conn;
+pub mod database;
 pub mod error;
 pub mod init;
 pub mod models;

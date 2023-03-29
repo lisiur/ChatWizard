@@ -1,6 +1,6 @@
 use crate::models::chat_model::NewChatModel;
 use crate::result::Result;
-use crate::{conn::DbConn, models::chat_model::ChatModel, types::Id};
+use crate::{database::DbConn, models::chat_model::ChatModel, types::Id};
 use diesel::*;
 
 pub struct ChatModelRepo(DbConn);

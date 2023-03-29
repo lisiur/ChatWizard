@@ -14,6 +14,9 @@ pub enum Error {
     #[error(transparent)]
     Network(NetworkError),
 
+    #[error(transparent)]
+    Serde(#[from] serde_json::Error),
+
     #[error("unknown error: {0}")]
     Unknown(String),
 }

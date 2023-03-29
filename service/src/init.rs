@@ -4,7 +4,7 @@ use crate::models::setting::{NewSetting, Theme};
 use crate::repositories::chat_model::ChatModelRepo;
 use crate::repositories::setting::SettingRepo;
 use crate::result::Result;
-use crate::{conn::DbConn, models::user::NewUser, repositories::user::UserRepo, types::Id};
+use crate::{database::DbConn, models::user::NewUser, repositories::user::UserRepo, types::Id};
 use diesel::sqlite::Sqlite;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationError, MigrationHarness};
 
@@ -37,7 +37,7 @@ pub fn init(conn: DbConn) -> Result<()> {
         id: Id::local(),
         user_id: Id::local(),
         language: "enUS".to_string(),
-        theme: Theme::System,
+        theme: Theme::System.into(),
         api_key: None,
         proxy: None,
         forward_url: None,

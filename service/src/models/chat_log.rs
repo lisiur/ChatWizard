@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::NaiveDateTime;
 use diesel::deserialize::FromSql;
 use diesel::serialize::ToSql;
@@ -6,13 +8,13 @@ use diesel::sqlite::Sqlite;
 use diesel::*;
 
 use crate::schema::chat_logs;
-use crate::types::Id;
+use crate::types::{Id, TextWrapper};
 
 #[derive(Queryable)]
 pub struct ChatLog {
     pub id: Id,
     pub chat_id: Id,
-    pub role: Role,
+    pub role: TextWrapper<Role>,
     pub message: String,
     pub model: String,
     pub tokens: i32,
@@ -39,25 +41,16 @@ impl AsRef<str> for Role {
     }
 }
 
-impl FromSql<Text, Sqlite> for Role {
-    fn from_sql(bytes: diesel::backend::RawValue<'_, Sqlite>) -> diesel::deserialize::Result<Self> {
-        let bytes = <Vec<u8>>::from_sql(bytes)?;
-        let string = String::from_utf8(bytes)?;
-        match string.as_ref() {
+impl FromStr for Role {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
             "system" => Ok(Role::System),
             "assistant" => Ok(Role::Assistant),
             "user" => Ok(Role::User),
             _ => Err("Invalid role".into()),
         }
-    }
-}
-
-impl ToSql<Text, Sqlite> for Role {
-    fn to_sql<'b>(
-        &'b self,
-        out: &mut diesel::serialize::Output<'b, '_, Sqlite>,
-    ) -> diesel::serialize::Result {
-        <str as ToSql<Text, Sqlite>>::to_sql(self.as_ref(), out)
     }
 }
 

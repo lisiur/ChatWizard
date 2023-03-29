@@ -1,7 +1,7 @@
 use crate::result::Result;
 use serde::de::DeserializeOwned;
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct Client {
     headers: Option<reqwest::header::HeaderMap>,
     proxy: Option<reqwest::Proxy>,
@@ -9,10 +9,7 @@ pub struct Client {
 
 impl Client {
     pub fn new() -> Self {
-        Self {
-            headers: None,
-            proxy: None,
-        }
+        Self::default()
     }
 
     pub fn headers(&mut self, headers: Option<reqwest::header::HeaderMap>) -> &mut Self {

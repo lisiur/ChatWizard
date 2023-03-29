@@ -1,6 +1,6 @@
 use crate::models::setting::NewSetting;
 use crate::result::Result;
-use crate::{conn::DbConn, models::setting::Setting, types::Id};
+use crate::{database::DbConn, models::setting::Setting, types::Id};
 use diesel::prelude::*;
 
 pub struct SettingRepo(DbConn);
@@ -24,8 +24,8 @@ impl SettingRepo {
 
         let size = diesel::insert_into(settings::table)
             .values(setting)
-            // .on_conflict(settings::columns::user_id)
-            // .do_nothing()
+            .on_conflict(settings::columns::id)
+            .do_nothing()
             .execute(&mut *self.0.conn())?;
         Ok(size)
     }

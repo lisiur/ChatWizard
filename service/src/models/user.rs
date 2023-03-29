@@ -3,7 +3,7 @@ use diesel::{
     AsChangeset, ExpressionMethods, Insertable, QueryDsl, Queryable, RunQueryDsl, Selectable,
 };
 
-use crate::conn::DbConn;
+use crate::database::DbConn;
 use crate::result::Result;
 use crate::schema::users;
 use crate::types::Id;

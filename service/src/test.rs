@@ -2,7 +2,7 @@ use diesel::{Connection, SqliteConnection};
 use once_cell::sync::OnceCell;
 use uuid::Uuid;
 
-use crate::{conn::DbConn, init, models::user::NewUser, result::Result, types::Id};
+use crate::{database::DbConn, init, models::user::NewUser, result::Result, types::Id};
 
 static DB_CONN: OnceCell<DbConn> = OnceCell::new();
 

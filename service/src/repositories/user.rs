@@ -1,6 +1,6 @@
 use crate::models::user::{NewUser, PatchUser};
 use crate::result::Result;
-use crate::{conn::DbConn, models::user::User, types::Id};
+use crate::{database::DbConn, models::user::User, types::Id};
 use diesel::*;
 
 pub struct UserRepo(DbConn);
@@ -79,7 +79,8 @@ mod test {
     use uuid::Uuid;
 
     use crate::{
-        conn::DbConn, models::user::NewUser, result::Result, test::establish_connection, types::Id,
+        database::DbConn, models::user::NewUser, result::Result, test::establish_connection,
+        types::Id,
     };
 
     use super::UserRepo;
