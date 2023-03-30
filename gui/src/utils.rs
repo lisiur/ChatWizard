@@ -12,6 +12,7 @@ pub async fn ensure_directory_exists(path: &Path) -> Result<()> {
     Ok(())
 }
 
+#[allow(unused)]
 pub async fn ensure_file_exists(path: &Path, initial: impl Fn() -> String) -> Result<()> {
     if !path.exists() {
         let parent = path.parent().unwrap();

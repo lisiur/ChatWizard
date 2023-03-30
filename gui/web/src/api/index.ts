@@ -17,54 +17,57 @@ const invoke = async <T>(...args: Parameters<typeof _invoke>) => {
 export interface ChatIndex {
   id: string;
   title: string;
-}
-
-export interface ChatMetadata {
+  promptId?: string;
   config: ChatConfig;
+  cost: number;
+  vendor: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface ChatData {
-  logs: Array<{
-    id: string;
-    message: {
-      role: "system" | "user" | "assistant";
-      content: string;
-    };
-  }>;
+export interface ChatLog {
+  id: string;
+  chatId: string;
+  role: "system" | "user" | "assistant";
+  message: string;
+  model: string;
+  tokens: number;
   cost: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatUpdatePayload {
   id: string;
   title?: string;
+  promptId?: string;
   config?: ChatConfig;
 }
 
 export interface ChatConfig {
-  model?: string;
-  promptId?: string;
-  maxBacktrack?: number;
-  temperature?: number;
-  topP?: number;
-  n?: number;
-  stop?: Array<string>;
-  maxTokens?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
-  user?: string;
+  backtrack: number;
+  params: {
+    model?: string;
+    temperature?: number;
+    stop?: Array<string>;
+    presencePenalty?: number;
+    frequencyPenalty?: number;
+  };
 }
 
 export interface PromptIndex {
   id: string;
-  act: string;
-}
-
-export interface PromptMetadata {
-  act: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PromptData {
-  prompt: string;
+  id: string;
+  name: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PromptMarketRepo {
@@ -83,14 +86,17 @@ export interface MarketPrompt {
   author?: string;
 }
 
-export type PromptUpdatePayload = { id: string; act?: string; prompt?: string };
+export type PromptUpdatePayload = {
+  id: string;
+  name?: string;
+  content?: string;
+};
 
 export interface Settings {
   apiKey?: string;
-  orgId?: string;
   proxy?: string;
   theme?: Theme;
-  locale?: string;
+  language?: string;
   forwardUrl?: string;
   forwardApiKey?: boolean;
 }
@@ -108,12 +114,16 @@ export interface WindowOptions {
   height: number;
 }
 
+export async function getChat(id: string) {
+  return invoke<ChatIndex>("get_chat", { id });
+}
+
 export async function allChats() {
   return invoke<Array<ChatIndex>>("all_chats");
 }
 
-export async function readChat(chatId: string) {
-  return invoke<[ChatMetadata, ChatData]>("load_chat", { chatId });
+export async function loadChat(chatId: string) {
+  return invoke<Array<ChatLog>>("load_chat", { chatId });
 }
 
 export async function updateChat(payload: ChatUpdatePayload) {
@@ -135,19 +145,16 @@ export function sendMessage(chatId: string, message: string) {
   return invoke<string>("send_message", { chatId, message });
 }
 
-export function resendMessage(chatId: string, messageId: string) {
-  return invoke<string>("resend_message", { chatId, messageId });
+export function resendMessage(messageId: string) {
+  return invoke<string>("resend_message", { messageId });
 }
 
 export function allPrompts() {
   return invoke<Array<PromptIndex>>("all_prompts");
 }
 
-export function createPrompt(prompt: { act: string; prompt: string }) {
-  return invoke<string>("create_prompt", {
-    act: prompt.act,
-    prompt: prompt.prompt,
-  });
+export function createPrompt(prompt: { name: string; content: string }) {
+  return invoke<string>("create_prompt", prompt);
 }
 
 export function updatePrompt(payload: PromptUpdatePayload) {
@@ -159,7 +166,7 @@ export function deletePrompt(id: string) {
 }
 
 export function loadPrompt(id: string) {
-  return invoke<[PromptMetadata, PromptData]>("load_prompt", { id });
+  return invoke<PromptData>("load_prompt", { id });
 }
 
 export function allRepos() {

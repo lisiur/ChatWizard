@@ -4,6 +4,7 @@ use crate::schema::settings;
 use crate::{database::DbConn, models::setting::Setting, types::Id};
 use diesel::prelude::*;
 
+#[derive(Clone)]
 pub struct SettingRepo(DbConn);
 
 impl SettingRepo {

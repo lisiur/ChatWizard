@@ -8,6 +8,7 @@ use diesel::query_builder::AsQuery;
 use diesel::QueryDsl;
 use diesel::*;
 
+#[derive(Clone)]
 pub struct ChatRepo(DbConn);
 
 impl ChatRepo {
@@ -16,19 +17,16 @@ impl ChatRepo {
     }
 
     pub fn count(&self) -> Result<i64> {
-        use crate::schema::chats::dsl::*;
-
-        chats
+        chats::table
             .count()
             .get_result(&mut *self.0.conn())
             .map_err(Into::into)
     }
 
-    pub fn select(&self, params: PageQueryParams) -> Result<PaginatedRecords<Chat>> {
-        use crate::schema::chats::dsl::*;
-
-        let result = chats
+    pub fn select_index(&self, params: PageQueryParams<(), ()>) -> Result<PaginatedRecords<Chat>> {
+        let result = chats::table
             .as_query()
+            .filter(chats::user_id.eq(params.user_id))
             .paginate(params.page)
             .per_page(params.per_page)
             .load_and_count_pages::<Chat>(&mut self.0.conn())?;
@@ -36,11 +34,9 @@ impl ChatRepo {
         Ok(result)
     }
 
-    pub fn select_by_id(&self, chat_id: Id) -> Result<Chat> {
-        use crate::schema::chats::dsl::*;
-
-        chats
-            .filter(id.eq(chat_id))
+    pub fn select_by_id(&self, id: Id) -> Result<Chat> {
+        chats::table
+            .filter(chats::id.eq(id))
             .first::<Chat>(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
@@ -53,30 +49,40 @@ impl ChatRepo {
     }
 
     pub fn insert(&self, chat: &NewChat) -> Result<usize> {
-        use crate::schema::chats::dsl::*;
-
-        let size = diesel::insert_into(chats)
+        let size = diesel::insert_into(chats::table)
             .values(chat)
             .execute(&mut *self.0.conn())?;
         Ok(size)
     }
 
     pub fn update(&self, chat: &PatchChat) -> Result<usize> {
-        use crate::schema::chats::dsl::*;
-
-        let size = diesel::update(chats)
-            .filter(id.eq(chat.id))
+        let size = diesel::update(chats::table)
+            .filter(chats::id.eq(chat.id))
             .set(chat)
             .execute(&mut *self.0.conn())?;
         Ok(size)
     }
 
-    pub fn delete_by_id(&self, chat_id: Id) -> Result<usize> {
-        use crate::schema::chats::dsl::*;
+    pub fn add_cost_and_update(&self, id: Id, cost: f32) -> Result<usize> {
+        let size = diesel::update(chats::table)
+            .filter(chats::id.eq(id))
+            .set(chats::cost.eq(chats::cost + cost))
+            .execute(&mut *self.0.conn())?;
+        Ok(size)
+    }
 
-        diesel::delete(chats.filter(id.eq(chat_id)))
+    pub fn delete_by_id(&self, id: Id) -> Result<usize> {
+        diesel::delete(chats::table.filter(chats::id.eq(id)))
             .execute(&mut *self.0.conn())
             .map_err(|e| e.into())
+    }
+
+    pub fn update_deleted_prompt(&self, prompt_id: Id) -> Result<usize> {
+        let size = diesel::update(chats::table)
+            .filter(chats::prompt_id.eq(prompt_id))
+            .set(chats::prompt_id.eq(None::<Id>))
+            .execute(&mut *self.0.conn())?;
+        Ok(size)
     }
 }
 

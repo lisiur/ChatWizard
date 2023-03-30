@@ -2,12 +2,7 @@ use std::pin::Pin;
 
 use futures::{stream, Stream, StreamExt};
 
-use crate::{
-    api::client::Client,
-    error::{ApiError, StreamError},
-    result::Result,
-    types::StreamContent,
-};
+use crate::{api::client::Client, result::Result, types::StreamContent, Error};
 
 use self::params::{OpenAIChatParams, OpenAIChatRole};
 
@@ -30,6 +25,10 @@ impl OpenAIChatApi {
         params: OpenAIChatParams,
     ) -> Result<Pin<Box<dyn Stream<Item = StreamContent> + Send + '_>>> {
         let url = self.host.clone() + "/v1/chat/completions";
+
+        log::debug!("url: {}", url);
+        log::debug!("params: {:?}", params);
+
         let res = self.client.post(&url, params).await?;
 
         let stream = res.bytes_stream();
@@ -39,6 +38,7 @@ impl OpenAIChatApi {
         let stream = stream
             .flat_map(move |chunk| {
                 if let Err(err) = chunk {
+                    let err: Error = err.into();
                     return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
 
@@ -54,8 +54,11 @@ impl OpenAIChatApi {
 
                 if data.starts_with("{\n    \"error\"") || data.starts_with("{\n  \"error\"") {
                     let res = serde_json::from_str::<OpenAIErrorResponse>(&data).unwrap();
-                    return stream::iter(vec![StreamContent::Error(res.into())]);
+                    let err: Error = res.into();
+                    return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
+
+                log::debug!("data: {:?}", data);
 
                 let chunks = data
                     .lines()
@@ -88,15 +91,6 @@ impl OpenAIChatApi {
             .boxed();
 
         Ok(stream)
-    }
-}
-
-impl From<OpenAIErrorResponse> for StreamError {
-    fn from(err: OpenAIErrorResponse) -> Self {
-        match err.error.code.as_deref() {
-            Some("invalid_api_key") => Self::Api(ApiError::InvalidKey),
-            _ => Self::Api(ApiError::Unknown(err.error.message)),
-        }
     }
 }
 

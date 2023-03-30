@@ -22,7 +22,7 @@ export default defineComponent({
 
     async function changeLocaleHandler() {
       nextTick().then(async () => {
-        await updateSettings({ locale: model.value.locale });
+        await updateSettings({ language: model.value.language });
       });
     }
 
@@ -60,7 +60,7 @@ export default defineComponent({
             <NForm model={model.value} labelPlacement="left" labelWidth="8rem">
               <NFormItem label={t("setting.locale")}>
                 <NSelect
-                  v-model:value={model.value.locale}
+                  v-model:value={model.value.language}
                   placeholder="Locale"
                   onUpdateValue={changeLocaleHandler}
                   options={[

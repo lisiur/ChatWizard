@@ -1,5 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::schema::chats;
 use crate::types::Id;
@@ -17,7 +19,8 @@ pub struct NewChat {
     pub vendor: String,
 }
 
-#[derive(Queryable, Selectable, Identifiable, Debug)]
+#[derive(Queryable, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Chat {
     pub id: Id,
     pub user_id: Id,
@@ -30,7 +33,7 @@ pub struct Chat {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(AsChangeset, Default)]
+#[derive(AsChangeset, Deserialize, Default)]
 #[diesel(table_name = chats)]
 pub struct PatchChat {
     pub id: Id,
@@ -42,6 +45,7 @@ pub struct PatchChat {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ChatConfig {
     pub backtrack: usize,
     pub params: ChatParams,

@@ -4,6 +4,7 @@ use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types::{Binary, Text};
 use diesel::sqlite::Sqlite;
 use diesel::{AsExpression, FromSqlRow};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -81,7 +82,7 @@ impl ToSql<Binary, Sqlite> for Id {
 
 // TextWrapper
 
-#[derive(AsExpression, FromSqlRow, Debug)]
+#[derive(AsExpression, FromSqlRow, Serialize, Deserialize, Debug)]
 #[diesel(sql_type = Text)]
 pub struct TextWrapper<T>(pub T);
 
@@ -153,44 +154,24 @@ impl<T: serde::Serialize + fmt::Debug> ToSql<Text, Sqlite> for JsonWrapper<T> {
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub struct PageQueryParams {
+pub struct PageQueryParams<T, U> {
     pub page: i64,
     pub per_page: i64,
-    pub query: Option<QueryParams>,
-    pub sort: Option<Vec<Order>>,
+    pub user_id: Id,
+    pub query: T,
+    pub sort: U,
 }
 
-impl Default for PageQueryParams {
+impl<T: Default, U: Default> Default for PageQueryParams<T, U> {
     fn default() -> Self {
         Self {
             page: 1,
             per_page: i64::MAX,
-            query: None,
-            sort: None,
+            user_id: Id::local(),
+            query: Default::default(),
+            sort: Default::default(),
         }
     }
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub enum QueryParams {
-    And(Box<QueryParams>, Box<QueryParams>),
-    Or(Box<QueryParams>, Box<QueryParams>),
-    Expr(QueryExpr),
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub enum QueryExpr {}
-
-#[derive(serde::Deserialize, Debug)]
-pub struct SortParams {
-    _column: String,
-    _order: Order,
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub enum Order {
-    Asc,
-    Desc,
 }
 
 #[derive(serde::Serialize, Clone, Debug)]

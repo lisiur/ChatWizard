@@ -18,7 +18,9 @@ fn run_migrations(connection: &mut impl MigrationHarness<Sqlite>) -> Result<()> 
     Ok(())
 }
 
-pub fn init(conn: DbConn) -> Result<()> {
+pub fn init(db_url: &str) -> Result<DbConn> {
+    let conn = DbConn::new(db_url);
+
     run_migrations(&mut *conn.conn())?;
 
     // Create local user
@@ -70,15 +72,12 @@ pub fn init(conn: DbConn) -> Result<()> {
         chat_model_repo.insert_or_update(&chat_model)?;
     }
 
-    drop(conn);
-
-    Ok(())
+    Ok(conn)
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        init,
         repositories::{setting::SettingRepo, user::UserRepo},
         test::establish_connection,
         types::Id,
@@ -87,8 +86,6 @@ mod tests {
     #[test]
     fn test_init() {
         let conn = establish_connection();
-
-        init(conn.clone()).unwrap();
 
         let user_repo = UserRepo::new(conn.clone());
         let setting_repo = SettingRepo::new(conn);

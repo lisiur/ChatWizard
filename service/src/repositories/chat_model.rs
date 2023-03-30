@@ -4,6 +4,7 @@ use crate::schema::chat_models;
 use crate::{database::DbConn, models::chat_model::ChatModel, types::Id};
 use diesel::*;
 
+#[derive(Clone)]
 pub struct ChatModelRepo(DbConn);
 
 impl ChatModelRepo {

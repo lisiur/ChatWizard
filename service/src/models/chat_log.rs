@@ -3,12 +3,13 @@ use std::str::FromStr;
 use chrono::NaiveDateTime;
 use diesel::sql_types::Text;
 use diesel::*;
+use serde::Serialize;
 
 use crate::api::openai::chat::params::OpenAIChatRole;
 use crate::schema::chat_logs;
 use crate::types::{Id, TextWrapper};
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct ChatLog {
     pub id: Id,
     pub chat_id: Id,
@@ -21,8 +22,9 @@ pub struct ChatLog {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(AsExpression, Hash, PartialEq, Eq, Clone, Debug)]
+#[derive(AsExpression, Hash, PartialEq, Eq, Clone, Serialize, Debug)]
 #[diesel(sql_type = Text)]
+#[serde(rename_all = "camelCase")]
 pub enum Role {
     System,
     Assistant,

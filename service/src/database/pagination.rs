@@ -83,8 +83,8 @@ where
 
 #[derive(serde::Serialize)]
 pub struct PaginatedRecords<T> {
-    records: Vec<T>,
-    total: i64,
-    total_pages: i64,
-    per_page: i64,
+    pub records: Vec<T>,
+    pub total: i64,
+    pub total_pages: i64,
+    pub per_page: i64,
 }

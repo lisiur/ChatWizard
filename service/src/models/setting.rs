@@ -1,4 +1,5 @@
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 use crate::api::client::Client;
@@ -6,7 +7,7 @@ use crate::api::openai::chat::OpenAIChatApi;
 use crate::schema::settings;
 use crate::types::{Id, TextWrapper};
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct Setting {
     pub id: Id,
     pub user_id: Id,
@@ -50,7 +51,8 @@ impl Setting {
     }
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub enum Theme {
     System,
     Light,
@@ -93,7 +95,7 @@ pub struct NewSetting {
     pub forward_api_key: bool,
 }
 
-#[derive(AsChangeset, Default)]
+#[derive(AsChangeset, Deserialize, Default)]
 #[diesel(table_name = settings)]
 pub struct PatchSetting {
     pub user_id: Id,
