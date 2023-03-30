@@ -4,10 +4,9 @@ import {
   resendMessage,
   sendMessage,
   exportMarkdown,
-  ChatData,
-  ChatConfig,
-  ChatMetadata,
   ChatIndex,
+  ChatLog,
+  getChat,
 } from "../api";
 import {
   AssistantMessage,
@@ -19,39 +18,29 @@ import {
 
 export class Chat {
   busy: Ref<boolean>;
-  title: Ref<string>;
-  cost: Ref<number>;
-  messages: Message[];
-  config: ChatConfig;
-  constructor(
-    public id: string,
-    title: string,
-    messages: Message[] = [],
-    config: ChatConfig = {},
-    cost = 0
-  ) {
+  index: ChatIndex;
+  messages: Array<Message>;
+  constructor(index: ChatIndex, messages: Message[] = []) {
     this.busy = ref(false);
-    this.title = ref(title);
-    this.cost = ref(cost);
+    this.index = reactive(index);
     this.messages = reactive(messages);
-    this.config = reactive(config);
   }
 
-  static init(index: ChatIndex, metadata: ChatMetadata, data: ChatData) {
+  static init(chat: ChatIndex, logs: Array<ChatLog>) {
     const messages: Message[] = [];
-    for (let i = 0; i < data.logs.length; i++) {
-      const log = data.logs[i];
-      switch (log.message.role) {
+    for (let i = 0; i < logs.length; i++) {
+      const log = logs[i];
+      switch (log.role) {
         case "user": {
-          const msg = new UserMessage(log.message.content);
+          const msg = new UserMessage(log.message);
           msg.setId(log.id);
-          msg.finished = data.logs[i + 1]?.message.role === "assistant";
+          msg.finished = logs[i + 1]?.role === "assistant";
           msg.markHistory();
           messages.push(msg);
           break;
         }
         case "assistant": {
-          const msg = new AssistantMessage(log.message.content);
+          const msg = new AssistantMessage(log.message);
           msg.markHistory();
           messages.push(msg);
           break;
@@ -59,20 +48,14 @@ export class Chat {
       }
     }
 
-    return new Chat(
-      index.id,
-      index.title,
-      messages,
-      metadata.config,
-      data.cost
-    );
+    return new Chat(chat, messages);
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {
     const userMessage = reactive(new UserMessage(message));
     this.messages.push(userMessage);
 
-    const messageId = await sendMessage(this.id, message);
+    const messageId = await sendMessage(this.index.id, message);
     userMessage.setId(messageId);
 
     this.__receiveAssistantMessage(this, userMessage, params);
@@ -92,13 +75,13 @@ export class Chat {
     userMessage.delivered = false;
     userMessage.finished = null;
 
-    userMessage.id = await resendMessage(this.id, userMessage.id);
+    userMessage.id = await resendMessage(userMessage.id);
 
     this.__receiveAssistantMessage(this, userMessage, params);
   }
 
   async exportMarkdown(path: string) {
-    exportMarkdown(this.id, path);
+    exportMarkdown(this.index.id, path);
   }
 
   async __receiveAssistantMessage(
@@ -119,13 +102,6 @@ export class Chat {
     this.messages.push(assistantMessage);
 
     this.busy.value = true;
-    const unListenCost = await listen<{ cost: number }>(
-      `${userMessageId}-cost`,
-      (event) => {
-        chat.cost.value = event.payload.cost;
-        unListenCost();
-      }
-    );
     const unListen = await listen(userMessageId, (event) => {
       endLoading();
       const chunk = event.payload as MessageChunk;
@@ -150,6 +126,11 @@ export class Chat {
           userMessage.finished = true;
           params?.onFinish?.();
           unListen();
+
+          getChat(chat.index.id).then((newChat) => {
+            console.log(newChat)
+            Object.assign(chat.index, newChat);
+          });
           break;
         }
       }

@@ -1,0 +1,16 @@
+-- Your SQL goes here
+CREATE TABLE prompts (
+  id BINARY PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  user_id BINARY NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER auto_update_prompts_updated_at
+  AFTER UPDATE ON prompts
+  FOR EACH ROW
+  BEGIN
+    UPDATE prompts SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+  END;

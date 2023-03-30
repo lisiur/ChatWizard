@@ -1,32 +1,19 @@
-use std::path::PathBuf;
-
+use crate::{result::Result, utils::ensure_directory_exists};
 use directories::ProjectDirs;
 
 pub struct Project {
-    config_dir: PathBuf,
-    data_dir: PathBuf,
-}
-
-impl Default for Project {
-    fn default() -> Self {
-        let project_dirs = ProjectDirs::from("com", "lisiur", "askai").unwrap();
-        Self {
-            config_dir: project_dirs.config_dir().to_path_buf(),
-            data_dir: project_dirs.data_dir().to_path_buf(),
-        }
-    }
+    pub db_url: String,
 }
 
 impl Project {
-    pub fn setting_path(&self) -> PathBuf {
-        self.config_dir.join("setting.json")
-    }
+    pub async fn init() -> Result<Self> {
+        let project_dirs = ProjectDirs::from("com", "lisiur", "askai").unwrap();
+        let data_dir = project_dirs.data_dir();
 
-    pub fn chat_root_dir(&self) -> PathBuf {
-        self.data_dir.join("chats")
-    }
+        ensure_directory_exists(data_dir).await?;
 
-    pub fn prompt_root_dir(&self) -> PathBuf {
-        self.data_dir.join("prompts")
+        let db_url = "sqlite://".to_string() + data_dir.join("askai.db").to_str().unwrap();
+
+        Ok(Self { db_url })
     }
 }

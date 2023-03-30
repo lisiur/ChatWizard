@@ -43,8 +43,8 @@ export default defineComponent({
   },
   setup(props, { expose }) {
     const { t } = useI18n();
-    const { prompt: chatPrompt } = usePrompt(
-      computed(() => props.chat.config.promptId)
+    const prompt = usePrompt(
+      computed(() => props.chat.index.promptId)
     );
 
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
@@ -75,7 +75,7 @@ export default defineComponent({
       destroyAutoScroll();
     });
 
-    const prompt = ref("");
+    const userMessage = ref("");
 
     function keydownHandler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
@@ -85,11 +85,11 @@ export default defineComponent({
           return;
         }
 
-        const msg = prompt.value;
+        const msg = userMessage.value;
 
         props.onMessage?.(new UserMessage(msg));
 
-        prompt.value = "";
+        userMessage.value = "";
         sendMessage(msg);
         e.preventDefault();
       }
@@ -115,7 +115,7 @@ export default defineComponent({
 
     async function exportMarkdown() {
       const filePath = await save({
-        title: props.chat.title.value,
+        title: props.chat.index.title,
         filters: [
           {
             name: "Markdown",
@@ -279,19 +279,19 @@ export default defineComponent({
         style="background-color: var(--body-color)"
       >
         {/* title */}
-        <DragBar title={props.chat.title.value || t("chat.new.defaultTitle")}>
+        <DragBar title={props.chat.index.title || t("chat.new.defaultTitle")}>
           {{
             "right-panel": () => (
               <>
-                {chatPrompt.act.value ? (
+                {prompt.value?.name ? (
                   <NTooltip>
                     {{
                       trigger: () => (
                         <NTag size="small" round type="primary">
-                          {chatPrompt.act.value}
+                          {prompt.value?.name}
                         </NTag>
                       ),
-                      default: () => chatPrompt.prompt.value,
+                      default: () => prompt.value?.content,
                     }}
                   </NTooltip>
                 ) : null}
@@ -326,7 +326,7 @@ export default defineComponent({
               style={{
                 color: "var(--chat-btn-color)",
               }}
-              value={props.chat.cost.value}
+              value={props.chat.index.cost}
             ></Cost>
             <div class="flex-1 flex justify-end p-1">
               {renderButton({
@@ -338,7 +338,7 @@ export default defineComponent({
           </div>
           <textarea
             ref={inputRef}
-            v-model={prompt.value}
+            v-model={userMessage.value}
             class="p-2 resize-none w-full bg-transparent outline-none placeholder-slate-500"
             style="color: var(--input-msg-color)"
             rows="5"

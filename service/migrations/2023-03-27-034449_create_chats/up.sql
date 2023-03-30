@@ -1,0 +1,19 @@
+-- Your SQL goes here
+CREATE TABLE chats (
+  id BINARY PRIMARY KEY NOT NULL,
+  user_id BINARY NOT NULL,
+  title TEXT NOT NULL,
+  prompt_id BINARY,
+  config TEXT NOT NULL,
+  cost FLOAT NOT NULL,
+  vendor TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER auto_update_chats_updated_at
+  AFTER UPDATE ON chats
+  FOR EACH ROW
+  BEGIN
+    UPDATE chats SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+  END;

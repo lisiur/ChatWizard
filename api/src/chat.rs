@@ -248,7 +248,7 @@ impl Chat {
                         } else if line.starts_with("data: ") && line.ends_with("}]}") {
                             handle_line(line)
                         } else if line.ends_with('}') {
-                            let line = left_line.take().unwrap() + line;
+                            let line = left_line.take().unwrap_or_default() + line;
                             log::debug!("merged line: {}", line);
                             match handle_line(&line) {
                                 Some(content) => Some(content),

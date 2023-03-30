@@ -20,11 +20,11 @@ export default defineComponent({
     const explorerList = computed(() => {
       return promptIndexList.value.map((m) => ({
         id: m.id,
-        title: m.act,
+        title: m.name,
       }));
     });
 
-    const prompts = new Map<string, [api.PromptMetadata, api.PromptData]>();
+    const prompts = new Map<string, api.PromptData>();
 
     const currentId = ref<string>();
 
@@ -41,7 +41,7 @@ export default defineComponent({
         }
 
         if (prompts.has(value.id)) {
-          currentPromptContent.value = prompts.get(value.id)![1].prompt;
+          currentPromptContent.value = prompts.get(value.id)?.content ?? "";
           return;
         }
       },
@@ -62,8 +62,8 @@ export default defineComponent({
       prompt(t("prompt.inputNameHint"), {
         async okHandler(title) {
           const id = await api.createPrompt({
-            act: title,
-            prompt: "",
+            name: title,
+            content: "",
           });
           refreshMetaList();
           currentId.value = id;
@@ -103,7 +103,7 @@ export default defineComponent({
         async okHandler(title) {
           await api.updatePrompt({
             id: id,
-            act: title,
+            name: title,
           });
           refreshMetaList();
         },
@@ -134,7 +134,7 @@ export default defineComponent({
 
       await api.updatePrompt({
         id: currentPromptIndex.value!.id,
-        prompt: currentPromptContent.value ?? "",
+        content: currentPromptContent.value ?? "",
       });
       currentPromptInitialContent.value = currentPromptContent.value;
 
@@ -152,10 +152,10 @@ export default defineComponent({
     }
 
     async function selectHandler(id: string) {
-      const [metadata, data] = await api.loadPrompt(id);
-      prompts.set(id, [metadata, data]);
+      const promptData = await api.loadPrompt(id);
+      prompts.set(id, promptData);
       currentId.value = id;
-      currentPromptInitialContent.value = data.prompt;
+      currentPromptInitialContent.value = promptData.content;
 
       const promptMetaData = promptIndexList.value.find((m) => m.id === id)!;
       currentId.value = promptMetaData.id;
@@ -213,7 +213,7 @@ export default defineComponent({
         </div>
         <div class="flex-1 overflow-hidden flex flex-col">
           {currentPromptIndex.value ? (
-            <DragBar title={currentPromptIndex.value?.act}></DragBar>
+            <DragBar title={currentPromptIndex.value?.name}></DragBar>
           ) : null}
           <div
             class="flex-1 overflow-hidden p-4"

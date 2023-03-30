@@ -1,21 +1,13 @@
-use askai_api::StreamContent;
-
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    Api(#[from] askai_api::Error),
+    Service(#[from] askai_service::Error),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    Send(#[from] tokio::sync::mpsc::error::SendError<StreamContent>),
-
-    #[error(transparent)]
     Request(#[from] reqwest::Error),
-
-    #[error("{0} not found")]
-    NotFound(String),
 }
 
 impl serde::Serialize for Error {

@@ -21,13 +21,14 @@ export default defineComponent({
     const explorerList = computed(() => {
       return chatIndexList.value.map((m) => ({
         id: m.id,
-        title: m.title || t('chat.new.defaultTitle'),
+        title: m.title || t("chat.new.defaultTitle"),
       }));
     });
 
     const currentChat = ref<Chat>();
     const currentChatIndex = computed(
-      () => chatIndexList.value.find((m) => m.id === currentChat.value?.id)!
+      () =>
+        chatIndexList.value.find((m) => m.id === currentChat.value?.index.id)!
     );
 
     refreshChatMetaList().then(() => {
@@ -55,10 +56,7 @@ export default defineComponent({
       });
     }
 
-    async function explorerHandler(
-      action: string,
-      item: ExplorerItem
-    ) {
+    async function explorerHandler(action: string, item: ExplorerItem) {
       switch (action) {
         case "delete": {
           await deleteHandler(item.id);
@@ -82,8 +80,8 @@ export default defineComponent({
             id,
             title,
           });
-          if (currentChat.value && currentChat.value.id === id) {
-            currentChat.value.title.value = title;
+          if (currentChat.value && currentChat.value.index.id === id) {
+            currentChat.value.index.title = title;
           }
           await refreshChatMetaList();
         },
@@ -91,7 +89,7 @@ export default defineComponent({
     }
 
     async function deleteHandler(id: string) {
-      if (currentChat.value?.id === id) {
+      if (currentChat.value?.index.id === id) {
         currentChat.value = undefined;
       }
       await api.deleteChat(id);
@@ -100,8 +98,8 @@ export default defineComponent({
 
     async function selectHandler(id: string) {
       const index = chatIndexList.value.find((m) => m.id === id)!;
-      const [metadata, data] = await api.readChat(id);
-      const chat = Chat.init(index, metadata, data);
+      const logs = await api.loadChat(id);
+      const chat = Chat.init(index, logs);
       currentChat.value = shallowReactive(chat);
 
       setTimeout(() => {
@@ -124,7 +122,7 @@ export default defineComponent({
           title: message.content,
         });
         currentChatIndex.value!.title = message.content;
-        currentChat.value!.title.value = message.content;
+        currentChat.value!.index.title = message.content;
         await refreshChatMetaList();
       }
     }
@@ -148,7 +146,7 @@ export default defineComponent({
           <div class="p-2 text-gray-400">{t("chat.conversations")}</div>
           <Explorer
             class="flex-1 overflow-auto"
-            active={currentChat.value?.id}
+            active={currentChat.value?.index.id}
             menus={[
               {
                 label: t("chat.rename"),

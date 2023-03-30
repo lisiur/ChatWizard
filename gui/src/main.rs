@@ -3,27 +3,26 @@
     windows_subsystem = "windows"
 )]
 
+use askai_service::{ChatService, PromptService, SettingService};
+use project::Project;
 use tauri::{WindowBuilder, WindowUrl};
 
-mod chat;
 mod commands;
 mod error;
-mod market_prompt;
 mod project;
-mod prompt;
 mod result;
-mod service;
-mod setting;
-mod state;
-mod store;
 mod utils;
 mod window;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
+    let project = Project::init().await.unwrap();
+    let conn = askai_service::init(&project.db_url).unwrap();
     tauri::Builder::default()
-        .manage(state::AppState::init().await.unwrap())
+        .manage(SettingService::new(conn.clone()))
+        .manage(ChatService::new(conn.clone()))
+        .manage(PromptService::new(conn))
         .setup(|app| {
             let mut main_window_builder =
                 WindowBuilder::new(app, "main", WindowUrl::App("index.html".into()))
@@ -44,6 +43,7 @@ async fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::get_chat,
             commands::all_chats,
             commands::load_chat,
             commands::new_chat,
@@ -51,7 +51,6 @@ async fn main() {
             commands::delete_chat,
             commands::send_message,
             commands::resend_message,
-            commands::check_api_key,
             commands::get_settings,
             commands::update_settings,
             commands::get_theme,
@@ -64,10 +63,6 @@ async fn main() {
             commands::update_prompt,
             commands::delete_prompt,
             commands::load_prompt,
-            commands::all_repos,
-            commands::repo_index_list,
-            commands::load_market_prompt,
-            commands::install_prompt,
             commands::show_window,
             commands::debug_log,
         ])

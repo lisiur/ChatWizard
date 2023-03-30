@@ -45,11 +45,11 @@ export default defineComponent({
           unwatch();
         }
         unwatch = watch(
-          Object.values(toRefs(props.chat.config)),
+          Object.values(toRefs(props.chat.index.config)),
           () => {
             updateChat({
-              id: props.chat.id,
-              config: props.chat.config,
+              id: props.chat.index.id,
+              config: props.chat.index.config,
             });
           },
           { deep: true }
@@ -66,7 +66,7 @@ export default defineComponent({
       Array<{
         type: "number" | "select" | "input" | "dynamicTags";
         label: string;
-        path: keyof typeof props.chat.config;
+        path: keyof typeof props.chat.index.config.params;
         tooltip: string;
         options?: Ref<{ label?: string; value: string }[]>;
         precision?: number;
@@ -91,15 +91,6 @@ export default defineComponent({
       },
       {
         type: "number",
-        label: t("chat.config.maxBacktrack"),
-        path: "maxBacktrack",
-        tooltip: t("chat.config.maxBacktrack.hint"),
-        min: 0,
-        precision: 0,
-        step: 1,
-      },
-      {
-        type: "number",
         label: t("chat.config.temperature"),
         path: "temperature",
         tooltip: t("chat.config.temperature.hint"),
@@ -107,42 +98,6 @@ export default defineComponent({
         max: 2,
         precision: 1,
         step: 0.1,
-      },
-      // {
-      //   type: "number",
-      //   label: t("chat.config.topP"),
-      //   path: "topP",
-      //   tooltip: t("chat.config.topP.hint"),
-      //   min: 0,
-      //   max: 1,
-      //   precision: 1,
-      //   step: 0.1,
-      // },
-      // {
-      //   type: "number",
-      //   label: t("chat.config.n"),
-      //   path: "n",
-      //   tooltip: t("chat.config.n.hint"),
-      //   min: 0,
-      //   max: 1,
-      //   precision: 1,
-      //   step: 0.1,
-      // },
-      // {
-      //   type: "dynamicTags",
-      //   label: t("chat.config.stop"),
-      //   path: "stop",
-      //   tooltip: t("chat.config.stop.hint"),
-      //   max: 4,
-      // },
-      {
-        type: "number",
-        label: t("chat.config.maxTokens"),
-        path: "maxTokens",
-        tooltip: t("chat.config.maxTokens.hint"),
-        min: 0,
-        precision: 0,
-        step: 100,
       },
       {
         type: "number",
@@ -179,7 +134,7 @@ export default defineComponent({
         </span>
         <NDrawer v-model:show={drawerShown.value}>
           <NScrollbar>
-            <NForm class="p-4" model={props.chat.config}>
+            <NForm class="p-4" model={props.chat.index.config}>
               {configs.value.map((config) => (
                 <NFormItem>
                   {{
@@ -203,7 +158,7 @@ export default defineComponent({
                         case "number": {
                           return (
                             <NInputNumber
-                              v-model:value={props.chat.config[config.path]}
+                              v-model:value={props.chat.index.config.params[config.path]}
                               min={config.min}
                               max={config.max}
                               step={config.step}
@@ -214,14 +169,14 @@ export default defineComponent({
                         case "input": {
                           return (
                             <NInput
-                              v-model:value={props.chat.config[config.path]}
+                              v-model:value={props.chat.index.config.params[config.path]}
                             ></NInput>
                           );
                         }
                         case "select": {
                           return (
                             <NSelect
-                              v-model:value={props.chat.config[config.path]}
+                              v-model:value={props.chat.index.config.params[config.path]}
                               options={config.options!.value.map((item) => {
                                 return {
                                   key: item.value,
@@ -235,7 +190,7 @@ export default defineComponent({
                         case "dynamicTags": {
                           return (
                             <NDynamicTags
-                              v-model:value={props.chat.config[config.path]}
+                              v-model:value={props.chat.index.config.params[config.path]}
                             ></NDynamicTags>
                           );
                         }

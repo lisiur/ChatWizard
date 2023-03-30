@@ -1,21 +1,20 @@
+#![allow(unused)]
 use std::path::PathBuf;
 
-use askai_api::StreamContent;
-use serde_json::json;
+use askai_service::models::chat::ChatConfig;
+use askai_service::models::chat_log::ChatLog;
+use askai_service::models::setting::Setting;
+use askai_service::{
+    Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id, PatchSetting,
+    Prompt, PromptIndex, PromptService, ResendMessagePayload, SearchChatLogPayload,
+    SearchChatPayload, SearchPromptPayload, SendMessagePayload, SettingService, StreamContent,
+    Theme, UpdateChatPayload, UpdatePromptPayload, UpdateSettingPayload,
+};
 use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-use crate::chat::chat_manager::ChatUpdatePayload;
-use crate::chat::chat_store::{ChatData, ChatIndex, ChatMetadata};
-use crate::error::Error;
-use crate::market_prompt::market_prompt_repo::PromptMarketRepo;
-use crate::market_prompt::{MarketPrompt, MarketPromptIndex};
-use crate::prompt::prompt_manager::PromptUpdatePayload;
-use crate::prompt::prompt_store::{PromptData, PromptIndex, PromptMetadata};
 use crate::result::Result;
-use crate::setting::{Settings, SettingsUpdatePayload, Theme};
-use crate::state::AppState;
 use crate::window::{self, WindowOptions};
 
 // chats
@@ -23,58 +22,59 @@ use crate::window::{self, WindowOptions};
 #[tauri::command]
 pub async fn new_chat(
     title: Option<String>,
-    prompt_id: Option<Uuid>,
-    state: State<'_, AppState>,
-) -> Result<Uuid> {
-    let mut chat_manager = state.chat_manager.lock().await;
-
+    prompt_id: Option<Id>,
+    chat_service: State<'_, ChatService>,
+) -> Result<Id> {
     let title = title.as_deref().unwrap_or("New Chat");
-    let chat_id = chat_manager.create(title, prompt_id).await?;
+    let chat_id = chat_service.create_chat(CreateChatPayload {
+        title: title.to_string(),
+        user_id: Id::local(),
+        prompt_id,
+        vendor: "openai".to_string(),
+        config: ChatConfig::default(),
+    })?;
 
     Ok(chat_id)
 }
 
 #[tauri::command]
-pub async fn all_chats(state: State<'_, AppState>) -> Result<Vec<ChatIndex>> {
-    let chat_manager = state.chat_manager.lock().await;
+pub async fn get_chat(id: Id, chat_service: State<'_, ChatService>) -> Result<Chat> {
+    let chat = chat_service.get_chat(id)?;
 
-    let index_list = chat_manager.list();
-
-    Ok(index_list)
+    Ok(chat)
 }
 
 #[tauri::command]
-pub async fn update_chat(payload: ChatUpdatePayload, state: State<'_, AppState>) -> Result<()> {
-    let mut chat_manager = state.chat_manager.lock().await;
+pub async fn all_chats(chat_service: State<'_, ChatService>) -> Result<Vec<Chat>> {
+    let records = chat_service.search_chats(SearchChatPayload::default())?;
 
-    log::debug!("Updating chat: {:?}", payload);
+    Ok(records.records)
+}
 
-    chat_manager.update(&payload).await?;
+#[tauri::command]
+pub async fn update_chat(
+    payload: UpdateChatPayload,
+    chat_service: State<'_, ChatService>,
+) -> Result<()> {
+    chat_service.update_chat(payload)?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn load_chat(
-    chat_id: Uuid,
-    state: State<'_, AppState>,
-) -> Result<(ChatMetadata, ChatData)> {
-    let chat_manager = state.chat_manager.lock().await;
+pub fn load_chat(chat_id: Id, chat_service: State<'_, ChatService>) -> Result<Vec<ChatLog>> {
+    let chat = chat_service.search_chat_logs(SearchChatLogPayload {
+        chat_id: Some(chat_id),
+        user_id: Id::local(),
+        ..Default::default()
+    })?;
 
-    let chat = chat_manager.load(chat_id).await?;
-    let chat = chat.lock().await;
-
-    let metadata = chat.as_metadata();
-    let data = chat.as_data().await;
-
-    Ok((metadata, data))
+    Ok(chat.records)
 }
 
 #[tauri::command]
-pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()> {
-    let mut chat_manager = state.chat_manager.lock().await;
-
-    chat_manager.delete(chat_id).await?;
+pub async fn delete_chat(chat_id: Id, chat_service: State<'_, ChatService>) -> Result<()> {
+    chat_service.delete_chat(DeleteChatPayload { id: chat_id })?;
 
     Ok(())
 }
@@ -83,47 +83,29 @@ pub async fn delete_chat(chat_id: Uuid, state: State<'_, AppState>) -> Result<()
 pub async fn export_markdown(
     chat_id: Uuid,
     path: PathBuf,
-    state: State<'_, AppState>,
+    chat_service: State<'_, ChatService>,
 ) -> Result<()> {
-    let chat_manager = state.chat_manager.lock().await;
-
-    let chat = chat_manager.load(chat_id).await?;
-    let chat = chat.lock().await;
-    chat.export_markdown(path.as_path()).await?;
-
-    Ok(())
+    todo!();
 }
 
 #[tauri::command]
 pub async fn send_message(
-    chat_id: Uuid,
+    chat_id: Id,
     message: String,
     window: Window,
-    state: State<'_, AppState>,
-) -> Result<Uuid> {
-    let setting = state.setting.lock().await;
-    let chat_manager = state.chat_manager.lock().await;
-
-    let api = setting.create_api().await?;
-    let chat = chat_manager.load(chat_id).await?;
-    let chat = chat.lock().await;
+    chat_service: State<'_, ChatService>,
+) -> Result<Id> {
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    let message_id = chat.send_message(sender, &message, api).await?;
 
-    let chat_id = chat.index.id;
-    let chat_manager = state.chat_manager.clone();
+    let (message_id, reply_id, _) = chat_service
+        .send_message(SendMessagePayload { chat_id, message }, sender)
+        .await?;
 
     tokio::spawn(async move {
         let event_id = message_id.to_string();
         while let Some(content) = receiver.recv().await {
             window.emit(&event_id, content).unwrap();
         }
-        // save message
-        let chat_manager = chat_manager.lock().await;
-        let chat = chat_manager.load(chat_id).await.unwrap();
-        let cost = chat.lock().await.get_cost().await;
-        chat_manager.save_data(chat_id).await.unwrap();
-        window.emit(&format!("{event_id}-cost"), json!({ "cost": cost }))
     });
 
     Ok(message_id)
@@ -131,30 +113,21 @@ pub async fn send_message(
 
 #[tauri::command]
 pub async fn resend_message(
-    chat_id: Uuid,
-    message_id: Uuid,
+    message_id: Id,
     window: Window,
-    state: State<'_, AppState>,
-) -> Result<Uuid> {
-    let setting = state.setting.lock().await;
-    let chat_manager = state.chat_manager.clone();
-
-    let api = setting.create_api().await?;
-    let chat = chat_manager.lock().await.load(chat_id).await?;
+    chat_service: State<'_, ChatService>,
+) -> Result<Id> {
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
-    let message_id = chat
-        .lock()
-        .await
-        .resend_message(sender, message_id, api)
+
+    let (message_id, reply_id, _) = chat_service
+        .resend_message(ResendMessagePayload { id: message_id }, sender)
         .await?;
 
-    let chat_id = chat.lock().await.index.id;
     tokio::spawn(async move {
         let event_id = message_id.to_string();
         while let Some(content) = receiver.recv().await {
             window.emit(&event_id, content).unwrap();
         }
-        chat_manager.lock().await.save_data(chat_id).await.unwrap();
     });
 
     Ok(message_id)
@@ -163,99 +136,47 @@ pub async fn resend_message(
 // prompts
 
 #[tauri::command]
-pub async fn all_prompts(state: State<'_, AppState>) -> Result<Vec<PromptIndex>> {
-    let prompt_manager = state.prompt_manager.lock().await;
+pub async fn all_prompts(prompt_service: State<'_, PromptService>) -> Result<Vec<PromptIndex>> {
+    let res = prompt_service.search_prompts(SearchPromptPayload::default())?;
 
-    let prompt_list = prompt_manager.list();
-
-    Ok(prompt_list)
+    Ok(res.records)
 }
 
 #[tauri::command]
-pub async fn load_prompt(
-    id: Uuid,
-    state: State<'_, AppState>,
-) -> Result<(PromptMetadata, PromptData)> {
-    let mut prompt_manager = state.prompt_manager.lock().await;
+pub async fn load_prompt(id: Id, prompt_service: State<'_, PromptService>) -> Result<Prompt> {
+    let prompt = prompt_service.get_prompt(id)?;
 
-    let prompt = prompt_manager
-        .load(id)
-        .await?
-        .ok_or(Error::NotFound("prompt".to_string()))?;
-
-    Ok((prompt.as_metadata(), prompt.as_data()))
+    Ok(prompt)
 }
 
 #[tauri::command]
 pub async fn create_prompt(
-    act: String,
-    prompt: String,
-    state: State<'_, AppState>,
-) -> Result<Uuid> {
-    let mut prompt_manager = state.prompt_manager.lock().await;
+    name: String,
+    content: String,
+    prompt_service: State<'_, PromptService>,
+) -> Result<Id> {
+    let id = prompt_service.create_prompt(CreatePromptPayload {
+        name,
+        content,
+        user_id: Id::local(),
+    })?;
 
-    prompt_manager.create(&act, &prompt).await
+    Ok(id)
 }
 
 #[tauri::command]
-pub async fn update_prompt(payload: PromptUpdatePayload, state: State<'_, AppState>) -> Result<()> {
-    let mut prompt_manager = state.prompt_manager.lock().await;
-
-    prompt_manager.update(&payload).await?;
+pub async fn update_prompt(
+    payload: UpdatePromptPayload,
+    prompt_service: State<'_, PromptService>,
+) -> Result<()> {
+    prompt_service.update_prompt(payload)?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn delete_prompt(id: Uuid, state: State<'_, AppState>) -> Result<()> {
-    let mut prompt_manager = state.prompt_manager.lock().await;
-
-    prompt_manager.delete(id).await?;
-
-    Ok(())
-}
-
-// market
-
-#[tauri::command]
-pub async fn all_repos(state: State<'_, AppState>) -> Result<Vec<PromptMarketRepo>> {
-    let prompt_market_service = state.prompt_market_service.lock().await;
-
-    let market_repo_list = prompt_market_service.repos().await?;
-
-    Ok(market_repo_list)
-}
-
-#[tauri::command]
-pub async fn repo_index_list(
-    name: String,
-    state: State<'_, AppState>,
-) -> Result<Vec<MarketPromptIndex>> {
-    let prompt_market_service = state.prompt_market_service.lock().await;
-
-    let market_prompt_list = prompt_market_service.index_list(&name).await?;
-
-    Ok(market_prompt_list)
-}
-
-#[tauri::command]
-pub async fn load_market_prompt(
-    id: Uuid,
-    name: String,
-    state: State<'_, AppState>,
-) -> Result<MarketPrompt> {
-    let prompt_market_service = state.prompt_market_service.lock().await;
-
-    let market_prompt = prompt_market_service.load(&name, id).await?;
-
-    Ok(market_prompt)
-}
-
-#[tauri::command]
-pub async fn install_prompt(prompt: MarketPrompt, state: State<'_, AppState>) -> Result<()> {
-    let mut prompt_market_service = state.prompt_market_service.lock().await;
-
-    prompt_market_service.install(&prompt).await?;
+pub async fn delete_prompt(id: Id, prompt_service: State<'_, PromptService>) -> Result<()> {
+    prompt_service.delete_prompt(id)?;
 
     Ok(())
 }
@@ -263,29 +184,24 @@ pub async fn install_prompt(prompt: MarketPrompt, state: State<'_, AppState>) ->
 // settings
 
 #[tauri::command]
-pub async fn get_settings(state: State<'_, AppState>) -> Result<Settings> {
-    let setting = state.setting.lock().await;
-
-    Ok(setting.settings.clone())
+pub fn get_settings(setting_service: State<'_, SettingService>) -> Result<Setting> {
+    let setting = setting_service.get_setting(Id::local())?;
+    Ok(setting)
 }
 
 #[tauri::command]
-pub async fn get_theme(state: State<'_, AppState>) -> Result<Theme> {
-    let setting = state.setting.lock().await;
+pub fn get_theme(setting_service: State<'_, SettingService>) -> Result<Theme> {
+    let setting = setting_service.get_setting(Id::local())?;
 
-    Ok(setting.get_theme())
+    Ok(setting.theme.0)
 }
 
 #[tauri::command]
 pub async fn update_settings(
-    payload: SettingsUpdatePayload,
-    state: State<'_, AppState>,
+    mut payload: UpdateSettingPayload,
+    setting_service: State<'_, SettingService>,
     window: Window,
 ) -> Result<()> {
-    let mut setting = state.setting.lock().await;
-
-    setting.update(&payload).await?;
-
     if let Some(theme) = &payload.theme {
         let windows = window.windows();
         windows.values().for_each(|win| {
@@ -293,44 +209,38 @@ pub async fn update_settings(
         });
     }
 
-    if let Some(local) = &payload.locale {
+    if let Some(local) = &payload.language {
         let windows = window.windows();
         windows.values().for_each(|win| {
             win.emit("locale-changed", local).unwrap();
         });
     }
 
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn check_api_key(api_key: String, state: State<'_, AppState>) -> Result<()> {
-    let setting = state.setting.lock().await;
-    let api = setting.create_api().await?;
-    api.check_api_key(&api_key).await?;
+    payload.user_id = Some(Id::local());
+    setting_service.update_setting(payload)?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn get_proxy(state: State<'_, AppState>) -> Result<Option<String>> {
-    let mut setting = state.setting.lock().await;
+pub async fn get_proxy(setting_service: State<'_, SettingService>) -> Result<Option<String>> {
+    let setting = setting_service.get_setting(Id::local())?;
 
-    Ok(setting.get_proxy().clone())
+    Ok(setting.proxy)
 }
 
 #[tauri::command]
-pub async fn has_api_key(state: State<'_, AppState>) -> Result<bool> {
-    let setting = state.setting.lock().await;
+pub async fn has_api_key(setting_service: State<'_, SettingService>) -> Result<bool> {
+    let setting = setting_service.get_setting(Id::local())?;
 
-    Ok(setting.has_api_key())
+    Ok(setting.api_key.is_some())
 }
 
 #[tauri::command]
-pub async fn get_locale(state: State<'_, AppState>) -> Result<String> {
-    let setting = state.setting.lock().await;
+pub async fn get_locale(setting_service: State<'_, SettingService>) -> Result<String> {
+    let setting = setting_service.get_setting(Id::local())?;
 
-    Ok(setting.get_locale())
+    Ok(setting.language)
 }
 
 // others
