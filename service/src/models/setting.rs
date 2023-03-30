@@ -8,6 +8,7 @@ use crate::schema::settings;
 use crate::types::{Id, TextWrapper};
 
 #[derive(Queryable, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Setting {
     pub id: Id,
     pub user_id: Id,
