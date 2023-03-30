@@ -1,6 +1,6 @@
-## [0.0.32](https://github.com/lisiur/askai/compare/v0.0.31...v0.0.32) (2023-03-30)
+## [0.0.33](https://github.com/lisiur/askai/compare/v0.0.32...v0.0.33) (2023-03-30)
 
 
-### Features
+### Bug Fixes
 
-* add market ([4a854ac](https://github.com/lisiur/askai/commit/4a854acefc40124826fce4c198964418cc20986c))
+* fix setting bugs ([6517761](https://github.com/lisiur/askai/commit/65177614907ca3044393b52e9646af93679679e3))
