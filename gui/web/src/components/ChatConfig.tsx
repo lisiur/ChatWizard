@@ -25,7 +25,8 @@ import {
 } from "naive-ui";
 import { Chat } from "../models/chat";
 import { useI18n } from "../hooks/i18n";
-import { updateChat } from "../api";
+import { getChatModels, updateChat } from "../api";
+import { useAsyncData } from "../hooks/asyncData";
 
 export default defineComponent({
   props: {
@@ -80,14 +81,12 @@ export default defineComponent({
         label: t("chat.config.model"),
         path: "model",
         tooltip: t("chat.config.model.hint"),
-        options: computed(() => [
-          { value: "gpt-4" },
-          { value: "gpt-4-0314" },
-          { value: "gpt-4-32k" },
-          { value: "gpt-4-32k-0314" },
-          { value: "gpt-3.5-turbo" },
-          { value: "gpt-3.5-turbo-0301" },
-        ]),
+        options: useAsyncData(async () => {
+          const models = await getChatModels()
+          return models.map(model => ({
+            value: model.name,
+          }))
+        }, []), 
       },
       {
         type: "number",

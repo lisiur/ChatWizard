@@ -17,6 +17,9 @@ pub enum Error {
     #[error(transparent)]
     Serde(#[from] serde_json::Error),
 
+    #[error(transparent)]
+    ParseCsv(#[from] csv::Error),
+
     #[error("unknown error: {0}")]
     Unknown(String),
 }
@@ -44,6 +47,12 @@ impl serde::ser::Serialize for Error {
             Error::Serde(err) => {
                 let mut map = serializer.serialize_map(Some(2))?;
                 map.serialize_entry("type", "serde")?;
+                map.serialize_entry("message", &err.to_string())?;
+                map.end()
+            }
+            Error::ParseCsv(err) => {
+                let mut map = serializer.serialize_map(Some(2))?;
+                map.serialize_entry("type", "parse_csv")?;
                 map.serialize_entry("message", &err.to_string())?;
                 map.end()
             }
@@ -90,6 +99,8 @@ impl From<crate::api::openai::response::OpenAIErrorResponse> for Error {
 }
 
 #[derive(thiserror::Error, serde::Serialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "type", content = "error")]
 pub enum StreamError {
     #[error(transparent)]
     Api(ApiError),

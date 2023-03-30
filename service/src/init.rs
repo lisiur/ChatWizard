@@ -1,7 +1,9 @@
 use crate::error::Error;
 use crate::models::chat_model::NewChatModel;
+use crate::models::prompt_source::NewPromptSource;
 use crate::models::setting::{NewSetting, Theme};
 use crate::repositories::chat_model::ChatModelRepo;
+use crate::repositories::prompt_source::PromptSourceRepo;
 use crate::repositories::setting::SettingRepo;
 use crate::result::Result;
 use crate::{database::DbConn, models::user::NewUser, repositories::user::UserRepo, types::Id};
@@ -66,10 +68,31 @@ pub fn init(db_url: &str) -> Result<DbConn> {
             vendor: "OpenAI".to_string(),
         },
     ];
-
     let chat_model_repo = ChatModelRepo::new(conn.clone());
     for chat_model in chat_models {
         chat_model_repo.insert_or_update(&chat_model)?;
+    }
+
+    // Create prompt sources
+    let prompt_sources = vec![
+        NewPromptSource {
+            id: Id::from("b46134f1-26d4-4644-aba5-02b2796f088a"),
+            name: "awesome-chatgpt-prompts".to_string(),
+            description: "https://github.com/f/awesome-chatgpt-prompts".to_string(),
+            url: "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv".to_string(),
+            r#type: "csv".to_string(),
+        },
+        NewPromptSource {
+            id: Id::from("7af1f226-5a10-492d-b466-8eff82931b57"),
+            name: "awesome-chatgpt-prompts-zh".to_string(),
+            description: "https://github.com/PlexPt/awesome-chatgpt-prompts-zh".to_string(),
+            url: "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json".to_string(),
+            r#type: "json".to_string(),
+        }
+    ];
+    let prompt_source_repo = PromptSourceRepo::new(conn.clone());
+    for prompt_source in prompt_sources {
+        prompt_source_repo.insert_or_update(&prompt_source)?;
     }
 
     Ok(conn)

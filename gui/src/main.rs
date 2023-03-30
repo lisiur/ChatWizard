@@ -3,7 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-use askai_service::{ChatService, PromptService, SettingService};
+use askai_service::{
+    services::prompt_market::PromptMarketService, ChatService, PromptService, SettingService,
+};
 use project::Project;
 use tauri::{WindowBuilder, WindowUrl};
 
@@ -22,7 +24,8 @@ async fn main() {
     tauri::Builder::default()
         .manage(SettingService::new(conn.clone()))
         .manage(ChatService::new(conn.clone()))
-        .manage(PromptService::new(conn))
+        .manage(PromptService::new(conn.clone()))
+        .manage(PromptMarketService::new(conn))
         .setup(|app| {
             let mut main_window_builder =
                 WindowBuilder::new(app, "main", WindowUrl::App("index.html".into()))
@@ -51,6 +54,7 @@ async fn main() {
             commands::delete_chat,
             commands::send_message,
             commands::resend_message,
+            commands::get_chat_models,
             commands::get_settings,
             commands::update_settings,
             commands::get_theme,
@@ -63,6 +67,10 @@ async fn main() {
             commands::update_prompt,
             commands::delete_prompt,
             commands::load_prompt,
+            commands::get_prompt_sources,
+            commands::get_prompt_source_prompts,
+            commands::install_market_prompt,
+            commands::install_market_prompt_and_create_chat,
             commands::show_window,
             commands::debug_log,
         ])

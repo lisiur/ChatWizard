@@ -6,6 +6,7 @@ use crate::api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, Open
 use crate::database::pagination::PaginatedRecords;
 use crate::models::chat::{Chat, NewChat, PatchChat};
 use crate::models::chat_log::{ChatLog, NewChatLog, Role};
+use crate::models::chat_model::ChatModel;
 use crate::repositories::chat::ChatRepo;
 use crate::repositories::chat_log::{ChatLogQueryParams, ChatLogRepo};
 use crate::repositories::chat_model::ChatModelRepo;
@@ -274,6 +275,10 @@ impl ChatService {
         });
 
         Ok((user_log_id, reply_log_id, handle))
+    }
+
+    pub fn get_chat_models(&self) -> Result<Vec<ChatModel>> {
+        self.chat_model_repo.select()
     }
 }
 

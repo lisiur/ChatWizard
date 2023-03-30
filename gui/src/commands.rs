@@ -3,7 +3,12 @@ use std::path::PathBuf;
 
 use askai_service::models::chat::ChatConfig;
 use askai_service::models::chat_log::ChatLog;
+use askai_service::models::chat_model::ChatModel;
+use askai_service::models::prompt_source::PromptSource;
 use askai_service::models::setting::Setting;
+use askai_service::services::prompt_market::{
+    InstallMarketPromptPayload, MarketPrompt, PromptMarketService,
+};
 use askai_service::{
     Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id, PatchSetting,
     Prompt, PromptIndex, PromptService, ResendMessagePayload, SearchChatLogPayload,
@@ -133,6 +138,13 @@ pub async fn resend_message(
     Ok(message_id)
 }
 
+#[tauri::command]
+pub async fn get_chat_models(chat_service: State<'_, ChatService>) -> Result<Vec<ChatModel>> {
+    let models = chat_service.get_chat_models()?;
+
+    Ok(models)
+}
+
 // prompts
 
 #[tauri::command]
@@ -177,6 +189,57 @@ pub async fn update_prompt(
 #[tauri::command]
 pub async fn delete_prompt(id: Id, prompt_service: State<'_, PromptService>) -> Result<()> {
     prompt_service.delete_prompt(id)?;
+
+    Ok(())
+}
+
+// market
+
+#[tauri::command]
+pub async fn get_prompt_sources(
+    prompt_market_service: State<'_, PromptMarketService>,
+) -> Result<Vec<PromptSource>> {
+    let sources = prompt_market_service.get_prompt_sources()?;
+
+    Ok(sources)
+}
+
+#[tauri::command]
+pub async fn get_prompt_source_prompts(
+    source_id: Id,
+    prompt_market_service: State<'_, PromptMarketService>,
+) -> Result<Vec<MarketPrompt>> {
+    let prompts = prompt_market_service
+        .get_prompt_source_prompts(source_id)
+        .await?;
+
+    Ok(prompts)
+}
+
+#[tauri::command]
+pub async fn install_market_prompt(
+    name: String,
+    content: String,
+    prompt_market_service: State<'_, PromptMarketService>,
+) -> Result<()> {
+    prompt_market_service.install_market_prompt(InstallMarketPromptPayload {
+        prompt: MarketPrompt { name, content },
+        user_id: Id::local(),
+    })?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn install_market_prompt_and_create_chat(
+    name: String,
+    content: String,
+    prompt_market_service: State<'_, PromptMarketService>,
+) -> Result<()> {
+    prompt_market_service.install_market_prompt_and_create_chat(InstallMarketPromptPayload {
+        prompt: MarketPrompt { name, content },
+        user_id: Id::local(),
+    })?;
 
     Ok(())
 }

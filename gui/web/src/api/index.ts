@@ -55,6 +55,15 @@ export interface ChatConfig {
   };
 }
 
+export interface ChatModel {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  unit: string;
+  vendor: string;
+}
+
 export interface PromptIndex {
   id: string;
   name: string;
@@ -70,20 +79,17 @@ export interface PromptData {
   updatedAt: string;
 }
 
-export interface PromptMarketRepo {
-  name: string;
-  url: string;
-}
-
-export interface MarketPromptIndex {
+export interface PromptMarketSource {
   id: string;
-  act: string;
+  name: string;
+  description: string;
+  url: string;
+  type: string;
 }
 
 export interface MarketPrompt {
-  act: string;
-  prompt: string;
-  author?: string;
+  name: string;
+  content: string;
 }
 
 export type PromptUpdatePayload = {
@@ -149,6 +155,10 @@ export function resendMessage(messageId: string) {
   return invoke<string>("resend_message", { messageId });
 }
 
+export function getChatModels() {
+  return invoke<Array<ChatModel>>("get_chat_models");
+}
+
 export function allPrompts() {
   return invoke<Array<PromptIndex>>("all_prompts");
 }
@@ -169,20 +179,22 @@ export function loadPrompt(id: string) {
   return invoke<PromptData>("load_prompt", { id });
 }
 
-export function allRepos() {
-  return invoke<Array<PromptMarketRepo>>("all_repos");
+export function getPromptSources() {
+  return invoke<Array<PromptMarketSource>>("get_prompt_sources");
 }
 
-export function repoIndexList(name: string) {
-  return invoke<Array<MarketPromptIndex>>("repo_index_list", { name });
+export function getPromptSourcePrompts(sourceId: string) {
+  return invoke<Array<MarketPrompt>>("get_prompt_source_prompts", {
+    sourceId,
+  });
 }
 
-export function loadMarketPrompt(id: string, name: string) {
-  return invoke<MarketPrompt>("load_market_prompt", { id, name });
+export function installMarketPrompt(prompt: MarketPrompt) {
+  return invoke("install_market_prompt", { ...prompt });
 }
 
-export function installPrompt(prompt: MarketPrompt) {
-  return invoke("install_prompt", { prompt });
+export function installMarketPromptAndCreateChat(prompt: MarketPrompt) {
+  return invoke("install_market_prompt_and_create_chat", { ...prompt });
 }
 
 export function getSettings() {

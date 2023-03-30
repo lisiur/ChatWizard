@@ -20,6 +20,18 @@ pub struct Setting {
 }
 
 impl Setting {
+    pub fn create_client(&self) -> Client {
+        let proxy = self
+            .proxy
+            .as_ref()
+            .map(|item| reqwest::Proxy::all(item).unwrap());
+
+        let mut client = Client::new();
+        client.proxy(proxy);
+
+        client
+    }
+
     pub fn create_openai_chat(&self) -> OpenAIChatApi {
         let mut headers = reqwest::header::HeaderMap::new();
 
@@ -97,6 +109,7 @@ pub struct NewSetting {
 
 #[derive(AsChangeset, Deserialize, Default)]
 #[diesel(table_name = settings)]
+#[serde(rename_all = "camelCase")]
 pub struct PatchSetting {
     pub user_id: Id,
     pub language: Option<String>,

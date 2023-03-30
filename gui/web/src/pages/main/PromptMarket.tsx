@@ -12,83 +12,74 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
 
-    const repos = ref<Array<api.PromptMarketRepo>>([]);
-    const currentRepo = ref<string>();
-    const repoOptions = computed(() => {
-      return repos.value.map((item) => {
+    const sources = ref<Array<api.PromptMarketSource>>([]);
+    const currentSourceId = ref<string>();
+    const sourceOptions = computed(() => {
+      return sources.value.map((item) => {
         return {
-          value: item.name,
+          value: item.id,
           label: item.name,
         };
       });
     });
 
-    const indexList = ref<Array<api.MarketPromptIndex>>([]);
-    const currentId = ref<string>();
-    const currentIndex = computed(() =>
-      indexList.value.find((m) => m.id === currentId.value)
+    const marketPrompts = ref<Array<api.MarketPrompt>>([]);
+    const currentPromptName = ref<string>();
+    const currentPrompt = computed(() =>
+      marketPrompts.value.find((m) => m.name === currentPromptName.value)
     );
-    const currentPrompt = ref<api.MarketPrompt>();
 
     const explorerList = computed(() => {
-      return indexList.value.map((m) => ({
-        id: m.id,
-        title: m.act,
+      return marketPrompts.value.map((m) => ({
+        id: m.name,
+        title: m.name,
       }));
     });
 
-    const loadReposTask = useTask(async () => {
-      await api.allRepos().then((list) => {
-        repos.value = list;
-        if (!currentRepo.value && list.length > 0) {
-          currentRepo.value = list[0].name;
+    const loadSourcesTask = useTask(async () => {
+      await api.getPromptSources().then((list) => {
+        sources.value = list;
+        if (!currentSourceId.value && list.length > 0) {
+          currentSourceId.value = list[0].id;
         }
       });
     });
 
-    const loadIndexTask = useTask(async () => {
-      await api.repoIndexList(currentRepo.value!).then((list) => {
-        indexList.value = list;
+    const loadMarketPromptsTask = useTask(async () => {
+      await api.getPromptSourcePrompts(currentSourceId.value!).then((list) => {
+        marketPrompts.value = list;
       });
-    });
-
-    const loadDataTask = useTask(async (id: string) => {
-      currentPrompt.value = undefined;
-      const marketPrompt = await api.loadMarketPrompt(id, currentRepo.value!);
-      currentPrompt.value = marketPrompt;
     });
 
     watch(
-      currentRepo,
+      currentSourceId,
       () => {
-        if (currentRepo.value) {
-          loadIndexTask.exec();
+        if (currentSourceId.value) {
+          loadMarketPromptsTask.exec();
         }
+        currentPromptName.value = undefined;
       },
       {
         immediate: true,
       }
     );
 
-    loadReposTask.exec();
+    loadSourcesTask.exec();
 
     function explorerHandler(action: string, item: ExplorerItem) {
+      let prompt = marketPrompts.value.find((m) => m.name === item.id);
       if (action === "select") {
-        selectHandler({
-          id: item.id,
-          act: item.title,
-        });
+        selectHandler(prompt!);
       }
     }
 
     async function installHandler(prompt: api.MarketPrompt) {
-      await api.installPrompt(prompt);
+      await api.installMarketPrompt(prompt);
       message.success(t("prompt.market.install.success"));
     }
 
-    async function selectHandler(prompt: api.MarketPromptIndex) {
-      currentId.value = prompt.id;
-      loadDataTask.exec(prompt.id);
+    async function selectHandler(prompt: api.MarketPrompt) {
+      currentPromptName.value = prompt.name;
     }
 
     return () => (
@@ -102,18 +93,18 @@ export default defineComponent({
             style="color: var(--base-color);border-color: var(--border-color)"
           >
             <NSelect
-              v-model:value={currentRepo.value}
-              options={repoOptions.value}
-              loading={loadReposTask.running}
+              v-model:value={currentSourceId.value}
+              options={sourceOptions.value}
+              loading={loadSourcesTask.running}
             ></NSelect>
           </div>
           <div class="p-2 text-gray-400">{t("prompt.market.prompts")}</div>
-          {loadIndexTask.running ? (
+          {loadMarketPromptsTask.running ? (
             <NSpin class="mt-4"></NSpin>
           ) : (
             <Explorer
               class="flex-1 overflow-auto"
-              active={currentIndex.value?.id}
+              active={currentPrompt.value?.name}
               list={explorerList.value}
               onAction={explorerHandler}
             ></Explorer>
@@ -121,7 +112,7 @@ export default defineComponent({
         </div>
         <div class="flex-1 overflow-hidden flex flex-col">
           {currentPrompt.value ? (
-            <DragBar title={currentPrompt.value?.act}>
+            <DragBar title={currentPrompt.value?.name}>
               {{
                 "right-panel": () =>
                   currentPrompt.value ? (
@@ -138,16 +129,10 @@ export default defineComponent({
             class="flex-1 overflow-hidden p-4"
             style="background-color: var(--body-color)"
           >
-            {currentId.value ? (
-              loadDataTask.running ? (
-                <div class="flex justify-center">
-                  <NSpin class="mt-4"></NSpin>
-                </div>
-              ) : (
-                <NScrollbar class="h-full">
-                  {currentPrompt.value?.prompt}
-                </NScrollbar>
-              )
+            {currentPromptName.value ? (
+              <NScrollbar class="h-full">
+                {currentPrompt.value?.content}
+              </NScrollbar>
             ) : (
               <div class="h-full" data-tauri-drag-region></div>
             )}

@@ -247,7 +247,7 @@ export default defineComponent({
             {(() => {
               switch (message.error.type) {
                 case "network": {
-                  const error = message.error.data;
+                  const error = message.error.error;
                   switch (error.type) {
                     case "timeout": {
                       return "Timeout";
@@ -258,7 +258,7 @@ export default defineComponent({
                   }
                 }
                 case "api": {
-                  const error = message.error.data;
+                  const error = message.error.error;
                   return error.message;
                 }
               }

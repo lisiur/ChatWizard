@@ -12,6 +12,12 @@ impl ChatModelRepo {
         Self(conn)
     }
 
+    pub fn select(&self) -> Result<Vec<ChatModel>> {
+        let chat_models = chat_models::table.load::<ChatModel>(&mut *self.0.conn())?;
+
+        Ok(chat_models)
+    }
+
     pub fn select_by_id(&self, id: Id) -> Result<ChatModel> {
         chat_models::table
             .filter(chat_models::id.eq(id))

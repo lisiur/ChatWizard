@@ -1,10 +1,12 @@
 use chrono::NaiveDateTime;
+use serde::Serialize;
 
 use crate::schema::chat_models;
 use crate::types::Id;
 use diesel::*;
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ChatModel {
     pub id: Id,
     pub name: String,

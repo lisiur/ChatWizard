@@ -67,18 +67,17 @@ export type MessageChunk =
       type: "done";
     };
 
-export type ErrorData =
+export type ErrorData = 
   | {
       type: "network";
-      data: {
+      error: {
         type: "timeout" | "unknown";
         message: string;
       };
     }
   | {
       type: "api";
-      data: {
-        code: string;
+      error: {
         type: string;
         message: string;
       };

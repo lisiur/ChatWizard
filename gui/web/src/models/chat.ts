@@ -108,6 +108,7 @@ export class Chat {
 
       switch (chunk.type) {
         case "error": {
+          console.log(chunk)
           this.messages.pop();
           this.messages.push(new ErrorMessage(chunk.data));
           userMessage.finished = false;
