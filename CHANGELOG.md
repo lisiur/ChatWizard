@@ -1,3 +1,7 @@
+## [0.0.31](https://github.com/lisiur/askai/compare/v0.0.30...v0.0.31) (2023-03-30)
+
+
+
 ## [0.0.30](https://github.com/lisiur/askai/compare/v0.0.29...v0.0.30) (2023-03-30)
 
 
