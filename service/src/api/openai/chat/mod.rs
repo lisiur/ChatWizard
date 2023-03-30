@@ -58,12 +58,11 @@ impl OpenAIChatApi {
                     return stream::iter(vec![StreamContent::Error(err.into())]);
                 }
 
-                log::debug!("data: {:?}", data);
-
                 let chunks = data
                     .lines()
                     .filter_map(|line| {
                         let line = line.trim();
+                        log::debug!("line: {}", line);
                         if line.is_empty() {
                             None
                         } else if line.starts_with("data: [DONE]") {
