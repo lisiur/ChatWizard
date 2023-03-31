@@ -13,6 +13,7 @@ mod commands;
 mod error;
 mod project;
 mod result;
+mod tray;
 mod utils;
 mod window;
 
@@ -21,7 +22,10 @@ async fn main() {
     env_logger::init();
     let project = Project::init().await.unwrap();
     let conn = askai_service::init(&project.db_url).unwrap();
+
     tauri::Builder::default()
+        .system_tray(tray::system_tray())
+        .on_system_tray_event(tray::on_system_tray_event)
         .manage(SettingService::new(conn.clone()))
         .manage(ChatService::new(conn.clone()))
         .manage(PromptService::new(conn.clone()))
@@ -72,6 +76,17 @@ async fn main() {
             commands::create_window,
             commands::debug_log,
         ])
+        .on_window_event(move |event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
+                let win = event.window();
+                if win.label() == "main" {
+                    win.hide().unwrap();
+                    api.prevent_close();
+                } else {
+                    win.close().unwrap();
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

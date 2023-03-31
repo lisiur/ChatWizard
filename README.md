@@ -37,3 +37,11 @@ Download [latest release](https://github.com/lisiur/askai/releases)
     ```shell
     xattr -cr /Applications/askai.app
     ```
+
+## Dev
+
+1. generate icons
+
+    ```bash
+    cd gui && cargo tauri icon icons/app-icon.png
+    ```

@@ -105,6 +105,10 @@
         "timestampUrl": ""
       }
     },
+    "systemTray": {
+      "iconPath": "icons/tray-icon.png",
+      "iconAsTemplate": true
+    },
     "security": {
       "csp": null
     },
