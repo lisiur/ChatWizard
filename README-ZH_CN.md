@@ -8,6 +8,10 @@
 ![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.askai)
 [![downloads](https://img.shields.io/github/downloads/lisiur/askai/total.svg?style=flat-square)](https://github.com/lisiur/askai/releases)
 
+## 声明
+
+目前该项目正在积极开发中，且只在MacOS M1上进行了测试。如果您遇到任何问题，请不要犹豫立即提交issue，我将尽力解决。此外，欢迎并感激各位以PR的形式作出贡献。
+
 ## 截图
 
 ![](./assets/live.gif)

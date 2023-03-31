@@ -8,6 +8,10 @@
 ![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.askai)
 [![downloads](https://img.shields.io/github/downloads/lisiur/askai/total.svg?style=flat-square)](https://github.com/lisiur/askai/releases)
 
+## Declaration
+
+This project is currently undergoing active development and has only been tested on MacOS M1. In the event of any issues, please do not hesitate to submit an issue as they arise, and I will make every effort to address them. Additionally, all contributions in the form of PRs are welcome and greatly appreciated.
+
 ## Screenshots
 
 ![](./assets/live.gif)
