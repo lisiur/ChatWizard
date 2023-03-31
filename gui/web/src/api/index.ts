@@ -10,6 +10,7 @@ const invoke = async <T>(...args: Parameters<typeof _invoke>) => {
     if (msg.includes("timed out")) {
       message.error(t("common.network.timeout"));
     }
+    debugLog(err.toString())
     return Promise.reject(err);
   });
 };
@@ -115,9 +116,14 @@ export enum Theme {
 
 export interface WindowOptions {
   title: string;
-  url?: string;
+  url: string;
   width: number;
   height: number;
+  resizable: boolean;
+  alwaysOnTop: boolean;
+  visible: boolean,
+  minSize?: [number, number];
+  maxSize?: [number, number];
 }
 
 export async function getChat(id: string) {
@@ -232,8 +238,16 @@ export function exportMarkdown(chatId: string, path: string) {
   });
 }
 
-export function showWindow(label: string, options?: WindowOptions) {
-  return invoke<void>("show_window", { label, options });
+export function showWindow(label: string) {
+  return invoke<void>("show_window", { label });
+}
+
+export function createWindow(label: string, options: WindowOptions) {
+  return invoke<void>("create_window", { label, options });
+}
+
+export function showOrCreateWindow(label: string, options: WindowOptions) {
+  return invoke<void>("show_or_create_window", { label, options });
 }
 
 export function debugLog(log: string) {

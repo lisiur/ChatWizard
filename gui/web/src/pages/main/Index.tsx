@@ -10,36 +10,38 @@ import {
   Storefront as StoreActiveIcon,
 } from "@vicons/ionicons5";
 import { NBadge, NDropdown, NIcon } from "naive-ui";
-import { showWindow } from "../../api";
+import { showOrCreateWindow } from "../../api";
 import { os } from "@tauri-apps/api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useVersion } from "../../hooks/version";
 import Version from "../../components/Version";
+import { i18n } from "../../hooks/i18n";
 
 export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
     const { hasNewVersion } = useVersion();
+    const { t } = i18n.global;
 
     const topMenus = [
       {
         routeName: "chat",
         icon: InactiveChatIcon,
         activeIcon: ActiveChatIcon,
-        size: '2rem',
+        size: "2rem",
       },
       {
         routeName: "prompt",
         icon: PromptIcon,
         activeIcon: PromptActiveIcon,
-        size: '1.7rem',
+        size: "1.7rem",
       },
       {
         routeName: "promptMarket",
         icon: StoreIcon,
         activeIcon: StoreActiveIcon,
-        size: '1.7rem',
+        size: "1.7rem",
       },
     ];
 
@@ -52,11 +54,14 @@ export default defineComponent({
     function settingActionHandler(key: string) {
       switch (key) {
         case "setting": {
-          showWindow("setting", {
-            title: "Setting",
+          showOrCreateWindow("setting", {
+            title: t("window.setting"),
             url: `/#${router.resolve({ name: "setting" }).path}`,
             width: 520,
             height: 400,
+            resizable: false,
+            alwaysOnTop: false,
+            visible: false,
           });
           break;
         }

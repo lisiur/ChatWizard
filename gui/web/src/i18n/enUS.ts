@@ -6,6 +6,8 @@ export const messages = {
   "common.copy.success": "Copied to clipboard",
   "common.network.timeout": "Network Timeout",
 
+  "window.setting": "Setting",
+
   "chat.new": "New Chat",
   "chat.new.defaultTitle": "New Chat",
   "chat.conversations": "Conversations",

@@ -307,16 +307,38 @@ pub async fn get_locale(setting_service: State<'_, SettingService>) -> Result<St
 }
 
 // others
+#[tauri::command]
+pub async fn show_window(label: &str, window: Window) -> Result<()> {
+    log::debug!("show_window: {}", label);
+    window::show_window(label, window)?;
+
+    Ok(())
+}
 
 #[tauri::command]
-pub async fn show_window(
-    label: String,
-    options: Option<WindowOptions>,
+pub async fn show_or_create_window(
+    label: &str,
+    options: WindowOptions,
     window: Window,
     handle: AppHandle,
 ) -> Result<()> {
-    log::debug!("show_window: {} {:?}", label, options);
-    window::show_window_lazy(label, options, window, handle)
+    log::debug!("show_or_create_window: {} {:?}", label, options);
+    window::show_or_create_window(label, window, handle, options)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn create_window(
+    label: &str,
+    options: WindowOptions,
+    window: Window,
+    handle: AppHandle,
+) -> Result<()> {
+    log::debug!("create_window: {} {:?}", label, options);
+    window::create_window(label, options, handle)?;
+
+    Ok(())
 }
 
 #[tauri::command]

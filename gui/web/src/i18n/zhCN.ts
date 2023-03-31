@@ -8,6 +8,8 @@ const messages: Messages = {
   "common.copy.success": "已复制到剪贴板",
   "common.network.timeout": "网络超时",
 
+  "window.setting": "设置",
+
   "chat.new": "新建对话",
   "chat.new.defaultTitle": "新对话",
   "chat.conversations": "对话列表",

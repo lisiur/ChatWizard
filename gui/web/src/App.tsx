@@ -2,7 +2,7 @@ import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { getTheme, Theme, showWindow, getLocale, debugLog } from "./api";
+import { getTheme, Theme, showOrCreateWindow, getLocale, debugLog, showWindow } from "./api";
 import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { window } from "@tauri-apps/api";
@@ -13,18 +13,15 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const windowLabel = route.path.split("/")[1];
-    debugLog(`window label: ${windowLabel}`);
 
     setupLifeCycle()
       .onMounted((ctx) => {
         getTheme().then(async (theme) => {
-          debugLog(`theme: ${theme}`);
           setTheme(theme ?? Theme.System);
 
           // show window after theme is set
           // to avoid flash of unstyled content
           if (windowLabel) {
-            debugLog(`show window: ${windowLabel}`);
             showWindow(windowLabel);
           }
 

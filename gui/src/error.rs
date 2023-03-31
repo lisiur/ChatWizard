@@ -8,6 +8,9 @@ pub enum Error {
 
     #[error(transparent)]
     Request(#[from] reqwest::Error),
+
+    #[error(transparent)]
+    Tauri(#[from] tauri::Error),
 }
 
 impl serde::Serialize for Error {
