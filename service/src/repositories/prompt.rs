@@ -27,6 +27,7 @@ impl PromptRepo {
         let records = prompts::table
             .as_query()
             .filter(prompts::user_id.eq(params.user_id))
+            .order(prompts::created_at.desc())
             .paginate(params.page)
             .per_page(params.per_page)
             .load_and_count_pages::<PromptIndex>(&mut self.0.conn())?;

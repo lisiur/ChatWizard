@@ -4,9 +4,9 @@ use crate::result::Result;
 use crate::schema::chats;
 use crate::types::PageQueryParams;
 use crate::{database::DbConn, models::chat::Chat, types::Id};
+use diesel::prelude::*;
 use diesel::query_builder::AsQuery;
 use diesel::QueryDsl;
-use diesel::*;
 
 #[derive(Clone)]
 pub struct ChatRepo(DbConn);
@@ -27,6 +27,7 @@ impl ChatRepo {
         let result = chats::table
             .as_query()
             .filter(chats::user_id.eq(params.user_id))
+            .order(chats::created_at.desc())
             .paginate(params.page)
             .per_page(params.per_page)
             .load_and_count_pages::<Chat>(&mut self.0.conn())?;
