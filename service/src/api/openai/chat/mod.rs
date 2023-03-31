@@ -16,8 +16,11 @@ pub struct OpenAIChatApi {
 }
 
 impl OpenAIChatApi {
-    pub fn new(client: Client, host: String) -> Self {
-        Self { client, host }
+    pub fn new(client: Client, host: &str) -> Self {
+        Self {
+            client,
+            host: host.to_string(),
+        }
     }
 
     pub async fn send_message(

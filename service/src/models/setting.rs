@@ -21,11 +21,26 @@ pub struct Setting {
 }
 
 impl Setting {
+    pub fn api_key(&self) -> Option<&str> {
+        self.api_key
+            .as_deref()
+            .and_then(|inner| if inner.is_empty() { None } else { Some(inner) })
+    }
+
+    pub fn proxy(&self) -> Option<&str> {
+        self.proxy
+            .as_deref()
+            .and_then(|inner| if inner.is_empty() { None } else { Some(inner) })
+    }
+
+    pub fn forward_url(&self) -> Option<&str> {
+        self.forward_url
+            .as_deref()
+            .and_then(|inner| if inner.is_empty() { None } else { Some(inner) })
+    }
+
     pub fn create_client(&self) -> Client {
-        let proxy = self
-            .proxy
-            .as_ref()
-            .map(|item| reqwest::Proxy::all(item).unwrap());
+        let proxy = self.proxy().map(|item| reqwest::Proxy::all(item).unwrap());
 
         let mut client = Client::new();
         client.proxy(proxy);
@@ -36,29 +51,23 @@ impl Setting {
     pub fn create_openai_chat(&self) -> OpenAIChatApi {
         let mut headers = reqwest::header::HeaderMap::new();
 
-        if let Some(api_key) = self.api_key.as_deref() {
+        if let Some(api_key) = self.api_key() {
             headers.insert(
                 reqwest::header::AUTHORIZATION,
                 format!("Bearer {api_key}").parse().unwrap(),
             );
         }
-        if self.forward_url.is_some() && !self.forward_api_key {
+        if self.forward_url().is_some() && !self.forward_api_key {
             headers.remove(reqwest::header::AUTHORIZATION);
         }
 
-        let proxy = self
-            .proxy
-            .as_ref()
-            .map(|item| reqwest::Proxy::all(item).unwrap());
+        let proxy = self.proxy().map(|item| reqwest::Proxy::all(item).unwrap());
 
         let mut client = Client::new();
         client.headers(Some(headers));
         client.proxy(proxy);
 
-        let host = self
-            .forward_url
-            .clone()
-            .unwrap_or_else(|| "https://api.openai.com".to_string());
+        let host = self.forward_url().unwrap_or("https://api.openai.com");
 
         OpenAIChatApi::new(client, host)
     }
