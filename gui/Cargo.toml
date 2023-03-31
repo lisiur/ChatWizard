@@ -1,5 +1,5 @@
 [package]
-name = "askai"
+name = "wizard"
 version = "0.0.1"
 description = "A Tauri App"
 authors = ["you"]
@@ -13,7 +13,7 @@ edition = "2021"
 tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
-askai-service = { path = "../service" }
+wizard-service = { path = "../service" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive", "rc"] }
 tauri = { version = "1.2", features = ["clipboard-write-text", "dialog-save", "os-all", "process-relaunch", "shell-open", "system-tray", "updater", "window-create", "window-start-dragging"] }

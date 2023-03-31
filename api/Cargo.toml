@@ -1,5 +1,5 @@
 [package]
-name = "askai-api"
+name = "wizard-api"
 version = "0.1.0"
 edition = "2021"
 

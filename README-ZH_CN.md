@@ -1,12 +1,12 @@
 <p align="center">
-  <img width="200" src="./assets/logo.png" alt="AskAI">
-  <h1 align="center">AskAI</h1>
+  <img width="200" src="./assets/logo.png" alt="wizard">
+  <h1 align="center">wizard</h1>
   <p align="center">OpenAI 聊天桌面客户端 (Windows, MacOS, Linux)</p>
 </p>
 
 [![English badge](https://img.shields.io/badge/%E8%8B%B1%E6%96%87-English-blue)](./README.md)
-![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.askai)
-[![downloads](https://img.shields.io/github/downloads/lisiur/askai/total.svg?style=flat-square)](https://github.com/lisiur/askai/releases)
+![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.wizard)
+[![downloads](https://img.shields.io/github/downloads/lisiur/wizard/total.svg?style=flat-square)](https://github.com/lisiur/wizard/releases)
 
 ## 声明
 
@@ -34,7 +34,7 @@
 
 ## 安装
 
-下载[最新发行版](https://github.com/lisiur/askai/releases)
+下载[最新发行版](https://github.com/lisiur/wizard/releases)
 
 ## 开发
 
@@ -51,11 +51,11 @@
 
 ## 常见问题
 
--  MacOS 可能会遇到这个问题: `"askai.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
+-  MacOS 可能会遇到这个问题: `"wizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
 
     打开终端输入：
 
     ```shell
-    xattr -cr /Applications/askai.app
+    xattr -cr /Applications/wizard.app
     ```
 

@@ -1,23 +1,23 @@
 #![allow(unused)]
 use std::path::PathBuf;
 
-use askai_service::models::chat::ChatConfig;
-use askai_service::models::chat_log::ChatLog;
-use askai_service::models::chat_model::ChatModel;
-use askai_service::models::prompt_source::PromptSource;
-use askai_service::models::setting::Setting;
-use askai_service::services::prompt_market::{
+use tauri::{AppHandle, Manager, State, Window};
+use tokio::sync::mpsc;
+use uuid::Uuid;
+use wizard_service::models::chat::ChatConfig;
+use wizard_service::models::chat_log::ChatLog;
+use wizard_service::models::chat_model::ChatModel;
+use wizard_service::models::prompt_source::PromptSource;
+use wizard_service::models::setting::Setting;
+use wizard_service::services::prompt_market::{
     InstallMarketPromptPayload, MarketPrompt, PromptMarketService,
 };
-use askai_service::{
+use wizard_service::{
     Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id, PatchSetting,
     Prompt, PromptIndex, PromptService, ResendMessagePayload, SearchChatLogPayload,
     SearchChatPayload, SearchPromptPayload, SendMessagePayload, SettingService, StreamContent,
     Theme, UpdateChatPayload, UpdatePromptPayload, UpdateSettingPayload,
 };
-use tauri::{AppHandle, Manager, State, Window};
-use tokio::sync::mpsc;
-use uuid::Uuid;
 
 use crate::result::Result;
 use crate::window::{self, WindowOptions};

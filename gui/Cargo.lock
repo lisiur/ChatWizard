@@ -39,12 +39,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
 
 [[package]]
-name = "askai"
+name = "wizard"
 version = "0.0.0"
 dependencies = [
- "askai-api",
- "askai-setting",
- "askai-util",
+ "wizard-api",
+ "wizard-setting",
+ "wizard-util",
  "futures",
  "open",
  "serde",
@@ -57,10 +57,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "askai-api"
+name = "wizard-api"
 version = "0.1.0"
 dependencies = [
- "askai-util",
+ "wizard-util",
  "futures",
  "futures-util",
  "log",
@@ -71,10 +71,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "askai-setting"
+name = "wizard-setting"
 version = "0.1.0"
 dependencies = [
- "askai-util",
+ "wizard-util",
  "directories",
  "log",
  "serde",
@@ -82,7 +82,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "askai-util"
+name = "wizard-util"
 version = "0.1.0"
 dependencies = [
  "anyhow",

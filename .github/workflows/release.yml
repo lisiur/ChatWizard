@@ -45,7 +45,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}`,
-              name: `AskAI v${process.env.PACKAGE_VERSION}`,
+              name: `wizard v${process.env.PACKAGE_VERSION}`,
               body: `${process.env.RELEASE_NOTE}`,
               draft: true,
               prerelease: false
@@ -130,7 +130,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           mkdir -p ${{ github.workspace }}/docs
-          wget -O ${{ github.workspace }}/docs/latest.json https://github.com/lisiur/askai/releases/download/${{ github.ref_name }}/latest.json
+          wget -O ${{ github.workspace }}/docs/latest.json https://github.com/lisiur/wizard/releases/download/${{ github.ref_name }}/latest.json
 
       - uses: peaceiris/actions-gh-pages@v3
         with:

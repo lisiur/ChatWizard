@@ -57,15 +57,15 @@ pub fn init(db_url: &str) -> Result<DbConn> {
             description: "".to_string(),
             price: 0.002,
             unit: "USD".to_string(),
-            vendor: "OpenAI".to_string(),
+            vendor: "openai".to_string(),
         },
         NewChatModel {
             id: Id::from("a5224f79-6d95-439e-a312-22cce02fd61f"),
-            name: "gpt-4-32k".to_string(),
+            name: "gpt-4".to_string(),
             description: "".to_string(),
             price: 0.06,
             unit: "USD".to_string(),
-            vendor: "OpenAI".to_string(),
+            vendor: "openai".to_string(),
         },
     ];
     let chat_model_repo = ChatModelRepo::new(conn.clone());
