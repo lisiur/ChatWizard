@@ -14,6 +14,7 @@ mod error;
 mod project;
 mod result;
 mod tray;
+mod uri_schema_handler;
 mod utils;
 mod window;
 
@@ -76,6 +77,7 @@ async fn main() {
             commands::create_window,
             commands::debug_log,
         ])
+        .register_uri_scheme_protocol("askai", uri_schema_handler::uri_schema_handler)
         .on_window_event(move |event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
                 let win = event.window();
