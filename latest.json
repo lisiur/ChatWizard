@@ -1,23 +1,23 @@
 {
-  "version": "0.0.34",
-  "notes": "## [0.0.34](https://github.com/lisiur/askai/compare/v0.0.33...v0.0.34) (2023-03-31)%0A%0A%0A### Bug Fixes%0A%0A* fix chat logs are not deleted when chat is deleted ([cb88985](https://github.com/lisiur/askai/commit/cb8898554a9a455eeb9cc007c71b217e752eeaab))%0A* fix main window not focused when shown ([8b3d20e](https://github.com/lisiur/askai/commit/8b3d20ec6704f6b56ed8ec4903fb4f2d9d559ebe))%0A* fix order issue ([2677de0](https://github.com/lisiur/askai/commit/2677de037e1abe08401cbc637f09db53c2de2cae))%0A* fix setting forward_url empty bug ([ab6286c](https://github.com/lisiur/askai/commit/ab6286cce86c0e7082d5a8eee098a669d8ad09ae))%0A* fix the horizontal scroll bar ([3e7a10f](https://github.com/lisiur/askai/commit/3e7a10f2493a131786904ac67bcb81b7707a990b))%0A* macos icon size issue ([88d4fc0](https://github.com/lisiur/askai/commit/88d4fc0f55e23e5727a9f9e2be6673266aca6966))%0A%0A%0A### Features%0A%0A* add backtrack change button ([8bd2955](https://github.com/lisiur/askai/commit/8bd2955acfa72f17e24be975ce97ede6619a5f8a))%0A* add tray icon ([2010195](https://github.com/lisiur/askai/commit/20101953ab37e600ffd2144fec2f0a6df96e9807))%0A* support create chat from market ([540341b](https://github.com/lisiur/askai/commit/540341ba7ea8865ae7002466e6e2f2af320c9b72))",
-  "pub_date": "2023-03-31T10:13:59.964Z",
+  "version": "0.0.35",
+  "notes": "## [0.0.35](https://github.com/lisiur/askai/compare/v0.0.34...v0.0.35) (2023-03-31)%0A%0A%0A### Features%0A%0A* change app name ([e9815ef](https://github.com/lisiur/askai/commit/e9815ef25074a6f41d7513b4a70f76e2110f6080))",
+  "pub_date": "2023-03-31T22:12:46.340Z",
   "platforms": {
-    "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1FHMVF3N0JxV2puR3NSYUt1ZXY3UlRvZW5qY1lmYXJobzYzbjUyRUdtT0RUQjNZazJESCt2T0tQMmtaaGlRNldMQzQyVlJKMmhkbzgwQXlsc05JbVF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMjU3MTUwCWZpbGU6YXNrYWkuYXBwLnRhci5negpNOExhNFNJQkxxbk14T2RFVDlLUDNiY0pKeUo3ZUNkWDNzZWxJM0hsd0lxV1ZOQTNHdDVENmtoQlNMaFlIRW51UDJsb0w1VUU4WUN1alJiVVdJcytEQT09Cg==",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_aarch64.app.tar.gz"
-    },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1FSOWswakZ3NGJkODJ6VnhvVWdHYlRmK1FITVNsVnN6VXRINjNWdS80UkcxNE9aSVpLcXJoT3RjVktMcHh2RDJlOFA1UlROOXZ2U1BwTWdzTW1XeFFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMjU3MjM2CWZpbGU6YXNrYWlfMC4wLjM0X2FtZDY0LkFwcEltYWdlLnRhci5nego1cGIzeHNGTXhDOEhOSFVFSkh3MG5VRHVDT2dsV2FQUExSUmFWRWdJMU80MnpLQStaeExhQ25hRGRFUit6N0FodUFHQVJzS3hpMDgyQkNCL3JTc0xDQT09Cg==",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.34_amd64.AppImage.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1lYSmFtMGRTRSswZE5venRIMHFJTi9Ubm03R0dVSmNhMVhBdnNQN0ZCd05VemRIMENERFJWOXNnOHZiT2VZaU1BL0V6UjFBc2FObEFiL1EyS3hJb0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzAwNTUwCWZpbGU6d2l6YXJkXzAuMC4zNV9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKQUljRFpIWmQzaHUzQi9wUEhSYUQ2MWNtaG5oZFJOVlg5eHhEejdkSDRwUXErMGlhRXQ5aXhXU0RXZVZ0TVJRaEhEVzk4M3B4dVJ5UEVHVitLSXRHQXc9PQo=",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.35_amd64.AppImage.tar.gz"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2U2RHh5UjF5ZzJNc1BocXZ6NmZKY3NUWmErY3ZJMzRZajZqMlA0U0hpWC9LU2llbVRjQTZIUUlPYXFtc0hZdXZOSEpiVDVkRG8zMUs2UWxqOTJEMXdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzAwNTU3CWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKWjZEeC9lOENXbERGTFF5REZBcVZUSDBDanJZMmhNY1dKQ2E4dURENzBmek9GazFTQzYzWFBJRUhLd1g4TkxMMGoxOCtLNGFva2R5SEJzcEJ5cm1GQ3c9PQo=",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_aarch64.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1hhYU5YTC9zb1ljUEw2eDJxamJvblZJcTVCSFZrMEY3YmNsR1VuWnhua1N2QWJaL3BaclU4dVdQenJRRWp5elE4MlFmM0pPWllLOHUzN3Fld0RwSkE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMjU3MjcwCWZpbGU6YXNrYWkuYXBwLnRhci5negpzTTczNDc3eE15TE9VUWliZDFiUklEMEJZQjFCcFVPbnNWbDhWRmN2L2ZRVXphMzRkTFJYRmRVOVdYUTZ1RU1TcDVrRDlkVStvUFpGUUo5eEZiNjlDdz09Cg==",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2VJWkdEemZWSi9XbkJweUx0bDhkQ2xvNnpjVkpyZWYyZlowM3FtcVJGUG12UEQreDJOMXlaalBGMHJWSStRWlJzL1JzSEhlVTdEOGlGMkxEZlprK1E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzAwNzMyCWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKOVRNNVVHUkVTaklRa1pscjFmWmc4YmdGWFZJVURpK2ZLYjR2WHdhNEo2UEd1V0VpajZkOHk2d2VOcEgvdEJQTkM1T3NyU1ZwcFBJQkJKV2VIVEFXQUE9PQo=",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_x64.app.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1RmaTVMSXlXejErVVdJQWFieDVjMy8xY2s1T3lnSGdFcFEyTDNYaVFHMTd3a0R6R3c2K0hpVEMrOWRpNW8zTnpQRHArY1dCMGMwQmViYW4zWTFOc1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMjU3NjM2CWZpbGU6YXNrYWlfMC4wLjM0X3g2NF9lbi1VUy5tc2kuemlwCnJhalRSdUx5TmhieXZFalF4L3EyaE9XSS9GYW93ajhDeGtTaDYrZ0ZxNFZ0eUhlOERwWGZqWCtETVdOaXdoK2k5cWRtZHBEMUQrN2hvSUxRQmxQNURnPT0K",
-      "url": "https://github.com/lisiur/askai/releases/latest/download/askai_0.0.34_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2VxeG4zNElqRVgvZGM3UXNxV1plaE84Tnl5SWZ4VzRjbDl2emYxT3U4QVFvNFR4Y0EzVzdEbkVOWlRtTENENnBXSUxCcVF6cXJaWEx2MWtBeVc0aGdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzAwNzYyCWZpbGU6d2l6YXJkXzAuMC4zNV94NjRfZW4tVVMubXNpLnppcApiOTB3VktDVDIrbmM2Zm9qQXF2MFJjdWEzcHg3Q29EV2JsYjlkZHBLOHpuTDZJZjl4Ny9jMWUyOTUyMWphMnlXUi9IL3VsZ3AxWVpNOGhCWTk0dlVCQT09Cg==",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.35_x64_en-US.msi.zip"
     }
   }
 }
