@@ -1,14 +1,14 @@
 <p align="center">
   <img width="200" src="./assets/logo.png" alt="AskAI">
   <h1 align="center">AskAI</h1>
-  <p align="center">OpenAI chat client Desktop Application (Windows, MacOS, Linux)</p>
+  <p align="center">OpenAI 聊天桌面客户端 (Windows, MacOS, Linux)</p>
 </p>
 
-[![简体中文 badge](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue)](./README-ZH_CN.md)
+[![English badge](https://img.shields.io/badge/%E8%8B%B1%E6%96%87-English-blue)](./README.md)
 ![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.askai)
 [![downloads](https://img.shields.io/github/downloads/lisiur/askai/total.svg?style=flat-square)](https://github.com/lisiur/askai/releases)
 
-## Screenshots
+## 截图
 
 ![](./assets/live.gif)
 ![](./assets/chat.jpeg)
@@ -18,38 +18,38 @@
 ![](./assets/prompt-market2.jpeg)
 ![](./assets/settings.jpeg)
 
-## Features
+## 特性
 
-- support chat configuration
-- support local prompt
-- support prompt market
-- support multiple language
-- support proxy
-- support theme
-- support forward openai api
+- 支持聊天参数配置
+- 支持本地提示词
+- 支持提示词市场
+- 支持多种语言
+- 支持代理
+- 支持主题
+- 支持转发聊天接口
 
-## Installation
+## 安装
 
-Download [latest release](https://github.com/lisiur/askai/releases)
+下载[最新发行版](https://github.com/lisiur/askai/releases)
 
-## Development
+## 开发
 
-- generate icons
+- 生成图标
 
     ```bash
     cd gui && cargo tauri icon icons/app-icon.png
     ```
-- dev
+- 启动开发
     ```bash
     pnpm install && cd gui/web && pnpm install
     pnpm dev
     ```
 
-## Q&A
+## 常见问题
 
--  MacOS users may encounter this problem: `"askai.app" is damaged and can't be opened. You should move it to the Trash.`
+-  MacOS 可能会遇到这个问题: `"askai.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
 
-    open terminal and execute:
+    打开终端输入：
 
     ```shell
     xattr -cr /Applications/askai.app
