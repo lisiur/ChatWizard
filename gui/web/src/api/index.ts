@@ -196,11 +196,11 @@ export function getPromptSourcePrompts(sourceId: string) {
 }
 
 export function installMarketPrompt(prompt: MarketPrompt) {
-  return invoke("install_market_prompt", { ...prompt });
+  return invoke<string>("install_market_prompt", { ...prompt });
 }
 
 export function installMarketPromptAndCreateChat(prompt: MarketPrompt) {
-  return invoke("install_market_prompt_and_create_chat", { ...prompt });
+  return invoke<string>("install_market_prompt_and_create_chat", { ...prompt });
 }
 
 export function getSettings() {

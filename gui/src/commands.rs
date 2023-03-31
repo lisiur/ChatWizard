@@ -221,13 +221,13 @@ pub async fn install_market_prompt(
     name: String,
     content: String,
     prompt_market_service: State<'_, PromptMarketService>,
-) -> Result<()> {
-    prompt_market_service.install_market_prompt(InstallMarketPromptPayload {
+) -> Result<Id> {
+    let prompt_id = prompt_market_service.install_market_prompt(InstallMarketPromptPayload {
         prompt: MarketPrompt { name, content },
         user_id: Id::local(),
     })?;
 
-    Ok(())
+    Ok(prompt_id)
 }
 
 #[tauri::command]
@@ -235,13 +235,15 @@ pub async fn install_market_prompt_and_create_chat(
     name: String,
     content: String,
     prompt_market_service: State<'_, PromptMarketService>,
-) -> Result<()> {
-    prompt_market_service.install_market_prompt_and_create_chat(InstallMarketPromptPayload {
-        prompt: MarketPrompt { name, content },
-        user_id: Id::local(),
-    })?;
+) -> Result<Id> {
+    let chat_id = prompt_market_service.install_market_prompt_and_create_chat(
+        InstallMarketPromptPayload {
+            prompt: MarketPrompt { name, content },
+            user_id: Id::local(),
+        },
+    )?;
 
-    Ok(())
+    Ok(chat_id)
 }
 
 // settings

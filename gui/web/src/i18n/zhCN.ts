@@ -46,6 +46,8 @@ const messages: Messages = {
   "prompt.update.success": "更新成功",
 
   "prompt.market.prompts": "提示词市场",
+  "prompt.market.actions.install": "安装",
+  "prompt.market.actions.newChat": "新建对话",
   "prompt.market.install.success": "提示词安装成功",
 
   "setting.locale": "语言",

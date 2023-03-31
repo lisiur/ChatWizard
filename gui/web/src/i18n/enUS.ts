@@ -44,6 +44,8 @@ export const messages = {
   "prompt.update.success": "Prompt updated successfully",
 
   "prompt.market.prompts": "Prompts Market",
+  "prompt.market.actions.install": "Install",
+  "prompt.market.actions.newChat": "New Chat",
   "prompt.market.install.success": "Prompt installed successfully",
 
   "setting.locale": "Language",

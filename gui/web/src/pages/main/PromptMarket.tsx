@@ -7,10 +7,12 @@ import DragBar from "../../components/DragBar";
 import { BagAdd as InstallIcon } from "@vicons/ionicons5";
 import { message } from "../../utils/prompt";
 import { useTask } from "../../hooks/task";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const router = useRouter();
 
     const sources = ref<Array<api.PromptMarketSource>>([]);
     const currentSourceId = ref<string>();
@@ -45,10 +47,14 @@ export default defineComponent({
       });
     });
 
+    const promptsCache = new Map();
     const loadMarketPromptsTask = useTask(async () => {
-      await api.getPromptSourcePrompts(currentSourceId.value!).then((list) => {
-        marketPrompts.value = list;
-      });
+      const sourceId = currentSourceId.value!;
+      if (!promptsCache.has(sourceId)) {
+        const list = await api.getPromptSourcePrompts(sourceId);
+        promptsCache.set(sourceId, list);
+      }
+      marketPrompts.value = promptsCache.get(currentSourceId.value!);
     });
 
     watch(
@@ -67,15 +73,36 @@ export default defineComponent({
     loadSourcesTask.exec();
 
     function explorerHandler(action: string, item: ExplorerItem) {
-      let prompt = marketPrompts.value.find((m) => m.name === item.id);
-      if (action === "select") {
-        selectHandler(prompt!);
+      let prompt = marketPrompts.value.find((m) => m.name === item.id)!;
+      switch (action) {
+        case "select": {
+          selectHandler(prompt);
+          break;
+        }
+        case "install": {
+          installHandler(prompt);
+          break;
+        }
+        case "newChat": {
+          newChatHandler(prompt);
+          break;
+        }
       }
     }
 
     async function installHandler(prompt: api.MarketPrompt) {
       await api.installMarketPrompt(prompt);
       message.success(t("prompt.market.install.success"));
+    }
+
+    async function newChatHandler(prompt: api.MarketPrompt) {
+      const chatId = await api.installMarketPromptAndCreateChat(prompt);
+      router.push({
+        name: "chat",
+        query: {
+          id: chatId,
+        },
+      });
     }
 
     async function selectHandler(prompt: api.MarketPrompt) {
@@ -105,6 +132,16 @@ export default defineComponent({
             <Explorer
               class="flex-1 overflow-auto"
               active={currentPrompt.value?.name}
+              menus={[
+                {
+                  label: t("prompt.market.actions.install"),
+                  key: "install",
+                },
+                {
+                  label: t("prompt.market.actions.newChat"),
+                  key: "newChat",
+                },
+              ]}
               list={explorerList.value}
               onAction={explorerHandler}
             ></Explorer>
