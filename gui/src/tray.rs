@@ -33,6 +33,7 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
             "show" => {
                 let window = app.get_window("main").unwrap();
                 window.show().unwrap();
+                window.set_focus().unwrap();
             }
             "quit" => app.exit(0),
             _ => {}
