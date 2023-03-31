@@ -4,10 +4,13 @@ AskAI is an OpenAI chat client desktop app (Windows, MacOS, Linux)
 
 ## Screenshots
 
-![](./assets/chat.png)
-![](./assets/chat_setting.png)
-![](./assets/prompt.png)
-![](./assets/setting.png)
+![](./assets/live.gif)
+![](./assets/chat.jpeg)
+![](./assets/chat-config.jpeg)
+![](./assets/prompt.jpeg)
+![](./assets/prompt-market.jpeg)
+![](./assets/prompt-market2.jpeg)
+![](./assets/settings.jpeg)
 
 ## Features
 
