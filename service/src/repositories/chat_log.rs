@@ -71,6 +71,14 @@ impl ChatLogRepo {
         Ok(size)
     }
 
+    pub fn delete_by_chat_id(&self, chat_id: Id) -> Result<usize> {
+        let size = diesel::delete(chat_logs::table)
+            .filter(chat_logs::chat_id.eq(chat_id))
+            .execute(&mut *self.0.conn())?;
+
+        Ok(size)
+    }
+
     pub fn insert(&self, chat_log: &NewChatLog) -> Result<usize> {
         let size = diesel::insert_into(chat_logs::table)
             .values(chat_log)
@@ -80,11 +88,13 @@ impl ChatLogRepo {
     }
 
     pub fn select_last_n(&self, n: i64, chat_id: Id) -> Result<Vec<ChatLog>> {
-        let records = chat_logs::table
+        let mut records = chat_logs::table
             .filter(chat_logs::chat_id.eq(chat_id))
             .order(chat_logs::created_at.desc())
             .limit(n)
             .load::<ChatLog>(&mut *self.0.conn())?;
+
+        records.reverse();
 
         Ok(records)
     }

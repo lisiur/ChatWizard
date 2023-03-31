@@ -107,6 +107,7 @@ impl ChatService {
 
     pub fn delete_chat(&self, payload: DeleteChatPayload) -> Result<()> {
         self.chat_repo.delete_by_id(payload.id)?;
+        self.chat_log_repo.delete_by_chat_id(payload.id)?;
 
         Ok(())
     }
