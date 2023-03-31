@@ -9,6 +9,14 @@ export default defineComponent({
   },
   setup(props) {
     const cost = computed(() => props.value.toFixed(6));
-    return () => <span>${cost.value}</span>;
+    return () => (
+      <span
+        style={{
+          color: "var(--chat-btn-color)",
+        }}
+      >
+        ${cost.value}
+      </span>
+    );
   },
 });

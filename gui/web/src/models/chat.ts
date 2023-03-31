@@ -7,6 +7,7 @@ import {
   ChatIndex,
   ChatLog,
   getChat,
+  updateChat,
 } from "../api";
 import {
   AssistantMessage,
@@ -78,6 +79,14 @@ export class Chat {
     userMessage.id = await resendMessage(userMessage.id);
 
     this.__receiveAssistantMessage(this, userMessage, params);
+  }
+
+  async updateBacktrack(backtrack: number) {
+    this.index.config.backtrack = backtrack;
+    await updateChat({
+      id: this.index.id,
+      config: this.index.config
+    })
   }
 
   async exportMarkdown(path: string) {

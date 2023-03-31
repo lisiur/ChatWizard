@@ -19,7 +19,7 @@ import {
 import { NButton, NIcon, NScrollbar, NTag, NTooltip } from "naive-ui";
 import { writeToClipboard } from "../utils/clipboard";
 import { useComposition } from "../hooks/composition";
-import { Markdown } from "@vicons/fa";
+import { Markdown as MarkdownIcon } from "@vicons/fa";
 import { Chat } from "../models/chat";
 import { useAutoScroll } from "../hooks/scroll";
 import { save } from "@tauri-apps/api/dialog";
@@ -28,6 +28,7 @@ import { usePrompt } from "../hooks/prompt";
 import ChatConfig from "./ChatConfig";
 import { message } from "../utils/prompt";
 import Cost from "./Cost";
+import Backtrack from "./Backtrack";
 import DragBar from "./DragBar";
 
 export default defineComponent({
@@ -43,9 +44,7 @@ export default defineComponent({
   },
   setup(props, { expose }) {
     const { t } = useI18n();
-    const prompt = usePrompt(
-      computed(() => props.chat.index.promptId)
-    );
+    const prompt = usePrompt(computed(() => props.chat.index.promptId));
 
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const inputRef = ref<HTMLTextAreaElement>();
@@ -320,20 +319,15 @@ export default defineComponent({
 
         {/* input */}
         <div class="border-t" style="border-color: var(--border-color)">
-          <div class="flex items-center">
-            <Cost
-              class="pl-2 text-xs"
-              style={{
-                color: "var(--chat-btn-color)",
-              }}
-              value={props.chat.index.cost}
-            ></Cost>
+          <div class="flex items-center h-8">
+            <Cost class="pl-2 text-xs" value={props.chat.index.cost}></Cost>
+            <Backtrack class="ml-2" chat={props.chat}></Backtrack>
             <div class="flex-1 flex justify-end p-1">
-              {renderButton({
+              {/* {renderButton({
                 handler: exportMarkdown,
-                icon: Markdown,
+                icon: MarkdownIcon,
                 tooltip: t("chat.exportMarkdown"),
-              })}
+              })} */}
             </div>
           </div>
           <textarea
