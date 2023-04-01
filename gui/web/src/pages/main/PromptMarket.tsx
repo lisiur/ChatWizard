@@ -35,6 +35,7 @@ export default defineComponent({
       return marketPrompts.value.map((m) => ({
         id: m.name,
         title: m.name,
+        data: m,
       }));
     });
 
@@ -142,7 +143,7 @@ export default defineComponent({
                   key: "newChat",
                 },
               ]}
-              list={explorerList.value}
+              unstickList={explorerList.value}
               onAction={explorerHandler}
             ></Explorer>
           )}

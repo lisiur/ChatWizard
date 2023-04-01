@@ -17,6 +17,8 @@ const messages: Messages = {
   "chat.delivered": "已发送",
   "chat.exportMarkdown": "导出 Markdown",
   "chat.rename": "重命名",
+  "chat.stick": "置顶",
+  "chat.unstick": "取消置顶",
   "chat.busy": "请等待上一条响应完成",
 
   "chat.config.model": "模型",

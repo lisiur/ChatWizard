@@ -38,6 +38,8 @@ diesel::table! {
         vendor -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        sort -> Integer,
+        stick -> Bool,
     }
 }
 

@@ -42,6 +42,8 @@ impl ChatService {
     pub fn create_chat(&self, payload: CreateChatPayload) -> Result<Id> {
         let chat_id = Id::random();
 
+        let non_stick_min_order = self.chat_repo.select_non_stick_min_order(payload.user_id)?;
+
         let new_chat = NewChat {
             id: chat_id,
             user_id: payload.user_id,
@@ -50,6 +52,8 @@ impl ChatService {
             config: payload.config.into(),
             cost: 0.0,
             vendor: payload.vendor,
+            sort: non_stick_min_order - 1,
+            stick: false,
         };
 
         self.chat_repo.insert(&new_chat)?;
@@ -64,18 +68,27 @@ impl ChatService {
     }
 
     pub fn search_chats(&self, payload: SearchChatPayload) -> Result<PaginatedRecords<Chat>> {
-        let mut params = PageQueryParams::default();
-
-        if let Some(page) = payload.page {
-            params.page = page;
-        }
-        if let Some(per_page) = payload.per_page {
-            params.per_page = per_page;
-        }
-
+        let params = payload.into();
         let records = self.chat_repo.select_index(params)?;
 
         Ok(records)
+    }
+
+    pub fn get_non_stick_chats(
+        &self,
+        payload: SearchChatPayload,
+    ) -> Result<PaginatedRecords<Chat>> {
+        let params = payload.into();
+        let records = self.chat_repo.select_non_stick(&params)?;
+
+        Ok(records)
+    }
+
+    pub fn get_stick_chats(&self, payload: SearchChatPayload) -> Result<Vec<Chat>> {
+        let params = payload.into();
+        let records = self.chat_repo.select_stick(&params)?;
+
+        Ok(records.records)
     }
 
     pub fn search_chat_logs(
@@ -97,10 +110,83 @@ impl ChatService {
             title: payload.title,
             prompt_id: payload.prompt_id,
             config: payload.config.map(|c| c.into()),
+            sort: payload.sort,
             ..Default::default()
         };
 
         self.chat_repo.update(&patch_chat)?;
+
+        Ok(())
+    }
+
+    pub fn set_chat_stick(&self, user_id: Id, chat_id: Id, stick: bool) -> Result<()> {
+        if stick {
+            let order = self.chat_repo.select_stick_min_order(user_id)?;
+            self.chat_repo.update(&PatchChat {
+                id: chat_id,
+                stick: Some(true),
+                sort: Some(order - 1),
+                ..Default::default()
+            })?;
+        } else {
+            let order = self.chat_repo.select_non_stick_min_order(user_id)?;
+            self.chat_repo.update(&PatchChat {
+                id: chat_id,
+                stick: Some(false),
+                sort: Some(order - 1),
+                ..Default::default()
+            })?;
+        }
+
+        Ok(())
+    }
+
+    pub fn move_non_stick_chat(&self, payload: MoveChatPayload) -> Result<()> {
+        let user_id = payload.user_id;
+        let from_chat = self.chat_repo.select_by_id(payload.from)?;
+        let to_chat = self.chat_repo.select_by_id(payload.to)?;
+
+        if from_chat.sort > to_chat.sort {
+            // update sort from to_chat to from_chat
+            self.chat_repo
+                .increase_non_stick_order(user_id, to_chat.sort, from_chat.sort)?;
+        } else {
+            // update sort from from_chat to to_chat
+            self.chat_repo
+                .decrease_non_stick_order(user_id, from_chat.sort, to_chat.sort)?;
+        }
+
+        // reset from_chat's sort to_chat's sort
+        self.update_chat(UpdateChatPayload {
+            id: from_chat.id,
+            sort: Some(to_chat.sort),
+            ..Default::default()
+        })?;
+
+        Ok(())
+    }
+
+    pub fn move_stick_chat(&self, payload: MoveChatPayload) -> Result<()> {
+        let user_id = payload.user_id;
+        let from_chat = self.chat_repo.select_by_id(payload.from)?;
+        let to_chat = self.chat_repo.select_by_id(payload.to)?;
+
+        if from_chat.sort > to_chat.sort {
+            // update sort from to_chat to from_chat
+            self.chat_repo
+                .increase_stick_order(user_id, to_chat.sort, from_chat.sort)?;
+        } else {
+            // update sort from from_chat to to_chat
+            self.chat_repo
+                .decrease_stick_order(user_id, from_chat.sort, to_chat.sort)?;
+        }
+
+        // reset from_chat's sort to_chat's sort
+        self.update_chat(UpdateChatPayload {
+            id: from_chat.id,
+            sort: Some(to_chat.sort),
+            ..Default::default()
+        })?;
 
         Ok(())
     }
@@ -303,6 +389,21 @@ pub struct SearchChatPayload {
     pub prompt_id: Option<Id>,
 }
 
+impl<T: Default, U: Default> From<SearchChatPayload> for PageQueryParams<T, U> {
+    fn from(value: SearchChatPayload) -> Self {
+        let mut params = PageQueryParams::default();
+
+        if let Some(page) = value.page {
+            params.page = page;
+        }
+        if let Some(per_page) = value.per_page {
+            params.per_page = per_page;
+        }
+
+        params
+    }
+}
+
 #[derive(serde::Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchChatLogPayload {
@@ -312,13 +413,22 @@ pub struct SearchChatLogPayload {
     pub user_id: Id,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateChatPayload {
     pub id: Id,
     pub title: Option<String>,
     pub prompt_id: Option<Id>,
     pub config: Option<ChatConfig>,
+    pub sort: Option<i32>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MoveChatPayload {
+    pub user_id: Id,
+    pub from: Id,
+    pub to: Id,
 }
 
 #[derive(serde::Deserialize)]

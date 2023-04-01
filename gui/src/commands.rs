@@ -13,10 +13,11 @@ use wizard_service::services::prompt_market::{
     InstallMarketPromptPayload, MarketPrompt, PromptMarketService,
 };
 use wizard_service::{
-    Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id, PatchSetting,
-    Prompt, PromptIndex, PromptService, ResendMessagePayload, SearchChatLogPayload,
-    SearchChatPayload, SearchPromptPayload, SendMessagePayload, SettingService, StreamContent,
-    Theme, UpdateChatPayload, UpdatePromptPayload, UpdateSettingPayload,
+    Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id,
+    MoveChatPayload, PatchSetting, Prompt, PromptIndex, PromptService, ResendMessagePayload,
+    SearchChatLogPayload, SearchChatPayload, SearchPromptPayload, SendMessagePayload,
+    SettingService, StreamContent, Theme, UpdateChatPayload, UpdatePromptPayload,
+    UpdateSettingPayload,
 };
 
 use crate::result::Result;
@@ -54,6 +55,59 @@ pub async fn all_chats(chat_service: State<'_, ChatService>) -> Result<Vec<Chat>
     let records = chat_service.search_chats(SearchChatPayload::default())?;
 
     Ok(records.records)
+}
+
+#[tauri::command]
+pub async fn all_non_stick_chats(chat_service: State<'_, ChatService>) -> Result<Vec<Chat>> {
+    let records = chat_service.get_non_stick_chats(SearchChatPayload::default())?;
+
+    Ok(records.records)
+}
+
+#[tauri::command]
+pub async fn all_stick_chats(chat_service: State<'_, ChatService>) -> Result<Vec<Chat>> {
+    let records = chat_service.get_stick_chats(SearchChatPayload::default())?;
+
+    Ok(records)
+}
+
+#[tauri::command]
+pub async fn set_chat_stick(
+    chat_id: Id,
+    stick: bool,
+    chat_service: State<'_, ChatService>,
+) -> Result<()> {
+    log::debug!("set_chat_stick: {} {}", chat_id, stick);
+    chat_service.set_chat_stick(Id::local(), chat_id, stick)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn move_stick_chat(from: Id, to: Id, chat_service: State<'_, ChatService>) -> Result<()> {
+    chat_service.move_stick_chat(MoveChatPayload {
+        from,
+        to,
+        user_id: Id::local(),
+    })?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn move_non_stick_chat(
+    from: Id,
+    to: Id,
+    chat_service: State<'_, ChatService>,
+) -> Result<()> {
+    log::debug!("move_non_stick_chat: {} {}", from, to);
+    chat_service.move_non_stick_chat(MoveChatPayload {
+        from,
+        to,
+        user_id: Id::local(),
+    })?;
+
+    Ok(())
 }
 
 #[tauri::command]

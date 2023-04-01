@@ -1,11 +1,13 @@
 import { NDropdown, NScrollbar } from "naive-ui";
 import { DropdownMixedOption } from "naive-ui/es/dropdown/src/interface";
-import { defineComponent, nextTick, PropType, ref } from "vue";
+import { computed, defineComponent, nextTick, PropType, ref } from "vue";
+import Draggable from "vuedraggable";
 
 export type ExplorerMenuItem = DropdownMixedOption;
-export interface ExplorerItem {
+export interface ExplorerItem<T = any> {
   id: string;
   title: string;
+  data: T;
 }
 
 export default defineComponent({
@@ -13,12 +15,18 @@ export default defineComponent({
     active: {
       type: String,
     },
-    list: {
+    unstickList: {
+      type: Array as PropType<ExplorerItem[]>,
+      default: () => [],
+    },
+    stickList: {
       type: Array as PropType<ExplorerItem[]>,
       default: () => [],
     },
     menus: {
-      type: Array as PropType<ExplorerMenuItem[]>,
+      type: Array as PropType<
+        Array<ExplorerMenuItem | ((item: ExplorerItem) => ExplorerMenuItem)>
+      >,
       default: () => [],
     },
     onAction: {
@@ -26,19 +34,89 @@ export default defineComponent({
         (action: "select" | string, item: ExplorerItem) => void
       >,
     },
+    onDarg: {
+      type: Function as PropType<
+        (group: "stick" | "unstick", from: string, to: string) => void
+      >,
+    },
   },
   setup(props) {
+    function renderColumn(item: ExplorerItem) {
+      const menus = computed(() => {
+        return props.menus.map((menu) => {
+          if (typeof menu === "function") {
+            return menu(item);
+          } else {
+            return menu;
+          }
+        });
+      });
+      return (
+        <Column
+          active={props.active}
+          item={item}
+          menus={menus.value}
+          onAction={(e) => props.onAction?.(e, item)}
+        ></Column>
+      );
+    }
+
+    function stickListDragEndHandler(e: {
+      oldDraggableIndex: number;
+      newDraggableIndex: number;
+    }) {
+      if (e.oldDraggableIndex === e.newDraggableIndex) return;
+      props.onDarg?.(
+        "stick",
+        props.stickList[e.oldDraggableIndex].id,
+        props.stickList[e.newDraggableIndex].id
+      );
+    }
+
+    function unstickListDragEndHandler(e: {
+      oldDraggableIndex: number;
+      newDraggableIndex: number;
+    }) {
+      if (e.oldDraggableIndex === e.newDraggableIndex) return;
+      props.onDarg?.(
+        "unstick",
+        props.unstickList[e.oldDraggableIndex].id,
+        props.unstickList[e.newDraggableIndex].id
+      );
+    }
     return () => (
       <div class="select-none">
         <NScrollbar>
-          {props.list?.map((item) => (
-            <Column
-              active={props.active}
-              item={item}
-              menus={props.menus}
-              onAction={(e) => props.onAction?.(e, item)}
-            ></Column>
-          ))}
+          <div
+            style={{
+              backgroundColor: "var(--explorer-stick-bg-color)",
+            }}
+          >
+            <Draggable
+              v-model={props.stickList}
+              itemKey="id"
+              //@ts-ignore
+              disabled={!props.onDarg}
+              //@ts-ignore
+              onEnd={stickListDragEndHandler}
+            >
+              {{
+                item: ({ element }: any) => renderColumn(element),
+              }}
+            </Draggable>
+          </div>
+          <Draggable
+            v-model={props.unstickList}
+            itemKey="id"
+            //@ts-ignore
+            disabled={!props.onDarg}
+            //@ts-ignore
+            onEnd={unstickListDragEndHandler}
+          >
+            {{
+              item: ({ element }: any) => renderColumn(element),
+            }}
+          </Draggable>
         </NScrollbar>
       </div>
     );
@@ -101,7 +179,7 @@ const Column = defineComponent({
         onContextmenu={contextMenuHandler}
       >
         <div class="flex-1 overflow-hidden flex items-center cursor-default">
-          <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap ">
+          <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap select-none">
             {props.item.title}
           </div>
         </div>

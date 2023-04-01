@@ -16,11 +16,121 @@ impl ChatRepo {
         Self(conn)
     }
 
-    pub fn count(&self) -> Result<i64> {
+    pub fn count(&self, user_id: Id) -> Result<i64> {
         chats::table
+            .filter(chats::user_id.eq(user_id))
             .count()
             .get_result(&mut *self.0.conn())
             .map_err(Into::into)
+    }
+
+    pub fn select_non_stick(
+        &self,
+        params: &PageQueryParams<(), ()>,
+    ) -> Result<PaginatedRecords<Chat>> {
+        chats::table
+            .as_query()
+            .filter(chats::user_id.eq(params.user_id))
+            .filter(chats::stick.eq(false))
+            .order(chats::sort.asc())
+            .paginate(params.page)
+            .per_page(params.per_page)
+            .load_and_count_pages::<Chat>(&mut self.0.conn())
+            .map_err(|e| e.into())
+    }
+
+    pub fn select_stick(&self, params: &PageQueryParams<(), ()>) -> Result<PaginatedRecords<Chat>> {
+        chats::table
+            .as_query()
+            .filter(chats::user_id.eq(params.user_id))
+            .filter(chats::stick.eq(true))
+            .order(chats::sort.asc())
+            .paginate(params.page)
+            .per_page(params.per_page)
+            .load_and_count_pages::<Chat>(&mut self.0.conn())
+            .map_err(|e| e.into())
+    }
+
+    pub fn select_non_stick_min_order(&self, user_id: Id) -> Result<i32> {
+        match chats::table
+            .select(chats::sort)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(false))
+            .order(chats::sort.asc())
+            .first::<i32>(&mut *self.0.conn())
+        {
+            Ok(order) => Ok(order),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Ok(0),
+                _ => Err(err.into()),
+            },
+        }
+    }
+
+    pub fn select_stick_min_order(&self, user_id: Id) -> Result<i32> {
+        match chats::table
+            .select(chats::sort)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(true))
+            .order(chats::sort.asc())
+            .first::<i32>(&mut *self.0.conn())
+        {
+            Ok(order) => Ok(order),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Ok(0),
+                _ => Err(err.into()),
+            },
+        }
+    }
+
+    pub fn decrease_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
+        diesel::update(chats::table)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(true))
+            .filter(chats::sort.ge(from))
+            .filter(chats::sort.le(to))
+            .set(chats::sort.eq(chats::sort - 1))
+            .execute(&mut *self.0.conn())
+            .map_err(|e| e.into())
+    }
+
+    pub fn increase_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
+        diesel::update(chats::table)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(true))
+            .filter(chats::sort.ge(from))
+            .filter(chats::sort.le(to))
+            .set(chats::sort.eq(chats::sort + 1))
+            .execute(&mut *self.0.conn())
+            .map_err(|e| e.into())
+    }
+
+    pub fn decrease_non_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
+        diesel::update(chats::table)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(false))
+            .filter(chats::sort.ge(from))
+            .filter(chats::sort.le(to))
+            .set(chats::sort.eq(chats::sort - 1))
+            .execute(&mut *self.0.conn())
+            .map_err(|e| e.into())
+    }
+
+    pub fn increase_non_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
+        log::debug!(
+            "increase_non_stick_order: user: {}, from: {}, to: {}",
+            user_id,
+            from,
+            to
+        );
+        diesel::update(chats::table)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::stick.eq(false))
+            .filter(chats::sort.ge(from))
+            .filter(chats::sort.le(to))
+            .set(chats::sort.eq(chats::sort + 1))
+            .execute(&mut *self.0.conn())
+            .map_err(|e| e.into())
     }
 
     pub fn select_index(&self, params: PageQueryParams<(), ()>) -> Result<PaginatedRecords<Chat>> {
@@ -57,6 +167,7 @@ impl ChatRepo {
     }
 
     pub fn update(&self, chat: &PatchChat) -> Result<usize> {
+        log::debug!("update chat: {:?}", chat);
         let size = diesel::update(chats::table)
             .filter(chats::id.eq(chat.id))
             .set(chat)
@@ -117,6 +228,8 @@ mod tests {
             config: ChatConfig::default().into(),
             cost: 0.0,
             vendor: "openai".to_string(),
+            sort: 0,
+            stick: false,
         }
     }
 
@@ -150,10 +263,7 @@ mod tests {
         let patch_chat = PatchChat {
             id: chat.id,
             title: Some("test2".to_string()),
-            config: None,
-            cost: None,
-            prompt_id: None,
-            vendor: None,
+            ..Default::default()
         };
 
         repo.update(&patch_chat).unwrap();

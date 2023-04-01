@@ -15,6 +15,8 @@ export const messages = {
   "chat.delivered": "delivered",
   "chat.exportMarkdown": "Export Markdown",
   "chat.rename": "Rename",
+  "chat.stick": "Pin",
+  "chat.unstick": "Unpin",
   "chat.busy": "Please wait for the previous response to complete.",
 
   "chat.config.model": "Model",

@@ -17,6 +17,8 @@ pub struct NewChat {
     pub config: JsonWrapper<ChatConfig>,
     pub cost: f32,
     pub vendor: String,
+    pub sort: i32,
+    pub stick: bool,
 }
 
 #[derive(Queryable, Serialize, Debug)]
@@ -31,9 +33,11 @@ pub struct Chat {
     pub vendor: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub sort: i32,
+    pub stick: bool,
 }
 
-#[derive(AsChangeset, Deserialize, Default)]
+#[derive(AsChangeset, Deserialize, Default, Debug)]
 #[diesel(table_name = chats)]
 pub struct PatchChat {
     pub id: Id,
@@ -42,6 +46,8 @@ pub struct PatchChat {
     pub config: Option<JsonWrapper<ChatConfig>>,
     pub cost: Option<f32>,
     pub vendor: Option<String>,
+    pub sort: Option<i32>,
+    pub stick: Option<bool>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]

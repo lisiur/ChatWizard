@@ -100,6 +100,7 @@ impl PromptMarketService {
         let user_id = payload.user_id;
         let prompt_id = self.install_market_prompt(payload)?;
 
+        let min_sort = self.chat_repo.select_non_stick_min_order(user_id)?;
         let chat_id = Id::random();
         let chat = NewChat {
             id: chat_id,
@@ -109,6 +110,8 @@ impl PromptMarketService {
             config: ChatConfig::default().into(),
             cost: 0.0,
             vendor: "openai".to_string(),
+            sort: min_sort - 1,
+            stick: false,
         };
         self.chat_repo.insert(&chat)?;
         Ok(chat_id)

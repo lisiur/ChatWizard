@@ -21,6 +21,7 @@ export default defineComponent({
       return promptIndexList.value.map((m) => ({
         id: m.id,
         title: m.name,
+        data: m,
       }));
     });
 
@@ -111,7 +112,7 @@ export default defineComponent({
     }
 
     async function newChatHandler(id: string, act: string) {
-      const chatId = await api.createChat({
+      const chatId = await api.newChat({
         promptId: id,
         title: act,
       });
@@ -207,7 +208,7 @@ export default defineComponent({
                 key: "delete",
               },
             ]}
-            list={explorerList.value}
+            unstickList={explorerList.value}
             onAction={explorerHandler}
           ></Explorer>
         </div>

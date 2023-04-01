@@ -10,7 +10,7 @@ const invoke = async <T>(...args: Parameters<typeof _invoke>) => {
     if (msg.includes("timed out")) {
       message.error(t("common.network.timeout"));
     }
-    debugLog(err.toString())
+    debugLog(err.toString());
     return Promise.reject(err);
   });
 };
@@ -22,6 +22,8 @@ export interface ChatIndex {
   config: ChatConfig;
   cost: number;
   vendor: string;
+  sort: number;
+  stick: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -121,7 +123,7 @@ export interface WindowOptions {
   height: number;
   resizable: boolean;
   alwaysOnTop: boolean;
-  visible: boolean,
+  visible: boolean;
   minSize?: [number, number];
   maxSize?: [number, number];
 }
@@ -142,15 +144,32 @@ export async function updateChat(payload: ChatUpdatePayload) {
   return invoke<void>("update_chat", { payload });
 }
 
-export async function createChat(params?: {
-  promptId?: string;
-  title?: string;
-}) {
+export async function newChat(params?: { promptId?: string; title?: string }) {
   return invoke<string>("new_chat", params);
 }
 
 export async function deleteChat(chatId: string) {
   return invoke<void>("delete_chat", { chatId });
+}
+
+export async function allNonStickChats() {
+  return invoke<Array<ChatIndex>>("all_non_stick_chats");
+}
+
+export async function allStickChats() {
+  return invoke<Array<ChatIndex>>("all_stick_chats");
+}
+
+export async function setChatStick(chatId: string, stick: boolean) {
+  return invoke<void>("set_chat_stick", { chatId, stick });
+}
+
+export async function moveStickChat(from: string, to: string) {
+  return invoke<void>("move_stick_chat", { from, to });
+}
+
+export async function moveNonStickChat(from: string, to: string) {
+  return invoke<void>("move_non_stick_chat", { from, to });
 }
 
 export function sendMessage(chatId: string, message: string) {

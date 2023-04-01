@@ -9,6 +9,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "../../hooks/i18n";
 import { prompt } from "../../utils/prompt";
 import Explorer, { ExplorerItem } from "../../components/Explorer";
+import { useChatService } from "../../services/chat";
 
 export default defineComponent({
   setup() {
@@ -17,37 +18,53 @@ export default defineComponent({
 
     const chatRef = ref<InstanceType<typeof ChatComp>>();
 
-    const chatIndexList = ref<Array<api.ChatIndex>>([]);
-    const explorerList = computed(() => {
-      return chatIndexList.value.map((m) => ({
+    const {
+      load,
+      reload,
+      allChats,
+      allStickChats,
+      allNonStickChats,
+      moveNonStickChat,
+      moveStickChat,
+      setChatStick,
+    } = useChatService();
+
+    const nonStickExplorerList = computed(() => {
+      return allNonStickChats.value.map((m) => ({
         id: m.id,
         title: m.title || t("chat.new.defaultTitle"),
+        data: m,
+      }));
+    });
+
+    const stickExplorerList = computed(() => {
+      return allStickChats.value.map((m) => ({
+        id: m.id,
+        title: m.title || t("chat.new.defaultTitle"),
+        data: m,
       }));
     });
 
     const currentChat = ref<Chat>();
     const currentChatIndex = computed(
-      () =>
-        chatIndexList.value.find((m) => m.id === currentChat.value?.index.id)!
+      () => allChats.value.find((m) => m.id === currentChat.value?.index.id)!
     );
 
-    refreshChatMetaList().then(() => {
+    load().then(() => {
       if (route.query.id) {
         selectHandler(route.query.id as string);
+      } else {
+        if (allChats.value.length > 0) {
+          selectHandler(allChats.value[0].id);
+        }
       }
     });
 
-    async function refreshChatMetaList() {
-      await api.allChats().then((list) => {
-        chatIndexList.value = list;
-      });
-    }
-
     async function createChat() {
-      const chatId = await api.createChat({
+      const chatId = await api.newChat({
         title: "",
       });
-      await refreshChatMetaList();
+      await reload();
 
       await selectHandler(chatId);
 
@@ -68,7 +85,28 @@ export default defineComponent({
         }
         case "rename": {
           await renameHandler(item.id, item.title);
+          return;
         }
+        case "stick": {
+          await setChatStick(item.id, true);
+          return;
+        }
+        case "unstick": {
+          await setChatStick(item.id, false);
+          return;
+        }
+      }
+    }
+
+    async function explorerDragHandler(
+      group: "stick" | "unstick",
+      from: string,
+      to: string
+    ) {
+      if (group === "stick") {
+        await moveStickChat(from, to);
+      } else {
+        await moveNonStickChat(from, to);
       }
     }
 
@@ -83,7 +121,7 @@ export default defineComponent({
           if (currentChat.value && currentChat.value.index.id === id) {
             currentChat.value.index.title = title;
           }
-          await refreshChatMetaList();
+          await reload();
         },
       });
     }
@@ -93,11 +131,11 @@ export default defineComponent({
         currentChat.value = undefined;
       }
       await api.deleteChat(id);
-      refreshChatMetaList();
+      reload();
     }
 
     async function selectHandler(id: string) {
-      const index = chatIndexList.value.find((m) => m.id === id)!;
+      const index = allChats.value.find((m) => m.id === id)!;
       const logs = await api.loadChat(id);
       const chat = Chat.init(index, logs);
       currentChat.value = shallowReactive(chat);
@@ -123,7 +161,7 @@ export default defineComponent({
         });
         currentChatIndex.value!.title = message.content;
         currentChat.value!.index.title = message.content;
-        await refreshChatMetaList();
+        await reload();
       }
     }
 
@@ -152,6 +190,20 @@ export default defineComponent({
                 label: t("chat.rename"),
                 key: "rename",
               },
+              (item) => {
+                const data = item.data as api.ChatIndex;
+                if (data.stick) {
+                  return {
+                    label: t("chat.unstick"),
+                    key: "unstick",
+                  };
+                } else {
+                  return {
+                    label: t("chat.stick"),
+                    key: "stick",
+                  };
+                }
+              },
               {
                 type: "divider",
               },
@@ -160,8 +212,10 @@ export default defineComponent({
                 key: "delete",
               },
             ]}
-            list={explorerList.value}
+            stickList={stickExplorerList.value}
+            unstickList={nonStickExplorerList.value}
             onAction={explorerHandler}
+            onDarg={explorerDragHandler}
           ></Explorer>
         </div>
         <div
