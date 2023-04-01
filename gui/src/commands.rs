@@ -153,7 +153,7 @@ pub async fn send_message(
     message: String,
     window: Window,
     chat_service: State<'_, ChatService>,
-) -> Result<Id> {
+) -> Result<[Id; 2]> {
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
 
     let (message_id, reply_id, _) = chat_service
@@ -167,7 +167,7 @@ pub async fn send_message(
         }
     });
 
-    Ok(message_id)
+    Ok([message_id, reply_id])
 }
 
 #[tauri::command]
@@ -175,7 +175,7 @@ pub async fn resend_message(
     message_id: Id,
     window: Window,
     chat_service: State<'_, ChatService>,
-) -> Result<Id> {
+) -> Result<[Id; 2]> {
     let (sender, mut receiver) = mpsc::channel::<StreamContent>(20);
 
     let (message_id, reply_id, _) = chat_service
@@ -189,7 +189,7 @@ pub async fn resend_message(
         }
     });
 
-    Ok(message_id)
+    Ok([message_id, reply_id])
 }
 
 #[tauri::command]
@@ -393,6 +393,14 @@ pub async fn create_window(
 ) -> Result<()> {
     log::debug!("create_window: {} {:?}", label, options);
     window::create_window(label, options, handle)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn open(url: String) -> Result<()> {
+    log::debug!("open: {}", url);
+    open::that(url)?;
 
     Ok(())
 }

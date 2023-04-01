@@ -173,11 +173,11 @@ export async function moveNonStickChat(from: string, to: string) {
 }
 
 export function sendMessage(chatId: string, message: string) {
-  return invoke<string>("send_message", { chatId, message });
+  return invoke<[string, string]>("send_message", { chatId, message });
 }
 
 export function resendMessage(messageId: string) {
-  return invoke<string>("resend_message", { messageId });
+  return invoke<[string, string]>("resend_message", { messageId });
 }
 
 export function getChatModels() {

@@ -1,8 +1,9 @@
-export class Message {}
+export class Message {
+  id = "";
+  content = "";
+}
 
 export class UserMessage extends Message {
-  id = "";
-  content: string;
   delivered = false;
   finished = null as boolean | null;
 
@@ -23,15 +24,15 @@ export class UserMessage extends Message {
 }
 
 export class AssistantMessage extends Message {
-  content: string;
   // waiting for response
   pending = true;
   // response is completed
   done = false;
 
-  constructor(content?: string) {
+  constructor(id: string, content: string) {
     super();
-    this.content = content ?? "";
+    this.id = id;
+    this.content = content;
   }
 
   appendContent(content: string) {

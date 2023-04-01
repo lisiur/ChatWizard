@@ -34,6 +34,10 @@ html, body, #app {
   margin: .5rem 0;
 }
 
+.markdown-root a {
+  color: var(--primary-color);
+}
+
 .markdown-root ul {
   padding-left: 1rem;
   list-style: inside;

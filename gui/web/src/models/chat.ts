@@ -41,7 +41,7 @@ export class Chat {
           break;
         }
         case "assistant": {
-          const msg = new AssistantMessage(log.message);
+          const msg = new AssistantMessage(log.id, log.message);
           msg.markHistory();
           messages.push(msg);
           break;
@@ -56,10 +56,10 @@ export class Chat {
     const userMessage = reactive(new UserMessage(message));
     this.messages.push(userMessage);
 
-    const messageId = await sendMessage(this.index.id, message);
+    const [messageId, replyId] = await sendMessage(this.index.id, message);
     userMessage.setId(messageId);
 
-    this.__receiveAssistantMessage(this, userMessage, params);
+    this.__receiveAssistantMessage(this, userMessage, replyId, params);
 
     return messageId;
   }
@@ -76,17 +76,18 @@ export class Chat {
     userMessage.delivered = false;
     userMessage.finished = null;
 
-    userMessage.id = await resendMessage(userMessage.id);
+    const [newMessageId, replyId] = await resendMessage(userMessage.id);
+    userMessage.id = newMessageId;
 
-    this.__receiveAssistantMessage(this, userMessage, params);
+    this.__receiveAssistantMessage(this, userMessage, replyId, params);
   }
 
   async updateBacktrack(backtrack: number) {
     this.index.config.backtrack = backtrack;
     await updateChat({
       id: this.index.id,
-      config: this.index.config
-    })
+      config: this.index.config,
+    });
   }
 
   async exportMarkdown(path: string) {
@@ -96,6 +97,7 @@ export class Chat {
   async __receiveAssistantMessage(
     chat: Chat,
     userMessage: UserMessage,
+    id: string,
     params?: {
       onFinish?: () => void;
     }
@@ -105,7 +107,7 @@ export class Chat {
       message: assistantMessage,
       startLoading,
       endLoading,
-    } = useAssistantMessage();
+    } = useAssistantMessage(id);
 
     startLoading();
     this.messages.push(assistantMessage);
@@ -117,7 +119,7 @@ export class Chat {
 
       switch (chunk.type) {
         case "error": {
-          console.log(chunk)
+          console.log(chunk);
           this.messages.pop();
           this.messages.push(new ErrorMessage(chunk.data));
           userMessage.finished = false;
@@ -138,7 +140,7 @@ export class Chat {
           unListen();
 
           getChat(chat.index.id).then((newChat) => {
-            console.log(newChat)
+            console.log(newChat);
             Object.assign(chat.index, newChat);
           });
           break;
@@ -148,10 +150,10 @@ export class Chat {
   }
 }
 
-function useAssistantMessage() {
+function useAssistantMessage(id: string) {
   let index = 0;
   const values = [".&nbsp;&nbsp;", "..&nbsp;", "..."];
-  const message = reactive(new AssistantMessage());
+  const message = reactive(new AssistantMessage(id, ""));
 
   let interval: NodeJS.Timeout;
 

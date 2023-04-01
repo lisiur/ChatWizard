@@ -8,6 +8,7 @@ import {
   onMounted,
   watch,
   DefineComponent,
+  toRef,
 } from "vue";
 import mdRender from "../utils/mdRender";
 import {
@@ -30,6 +31,7 @@ import { message } from "../utils/prompt";
 import Cost from "./Cost";
 import Backtrack from "./Backtrack";
 import DragBar from "./DragBar";
+import { interceptLink } from "../utils/interceptLink";
 
 export default defineComponent({
   name: "Chat",
@@ -74,10 +76,33 @@ export default defineComponent({
       destroyAutoScroll();
     });
 
+    watch(() => props.chat.messages, (messages) => {
+    })
+
     const userMessage = ref("");
 
     function keydownHandler(e: KeyboardEvent) {
-      if (e.key === "Enter" && !e.ctrlKey && !isComposition.value) {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = inputRef.value?.selectionStart;
+        const end = inputRef.value?.selectionEnd;
+        if (start !== undefined && end !== undefined) {
+          userMessage.value =
+            userMessage.value.substring(0, start) +
+            "  " +
+            userMessage.value.substring(end);
+          nextTick(() => {
+            inputRef.value?.setSelectionRange(start + 4, start + 4);
+          });
+        }
+      }
+      if (
+        e.key === "Enter" &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.shiftKey &&
+        !isComposition.value
+      ) {
         if (props.chat.busy.value) {
           message.warning(t("chat.busy"));
           e.preventDefault();
@@ -173,9 +198,17 @@ export default defineComponent({
     }
 
     function renderAssistantMessage(msg: AssistantMessage) {
-      const html = mdRender(msg.content);
+      let content = msg.content;
+      const codeBlockAssignNum = msg.content.split('```').length - 1;
+      if (codeBlockAssignNum % 2 === 1) {
+        content += '\n```';
+      }
+      const html = mdRender(content);
       return (
-        <div class="flex relative justify-start items-start pl-4 pr-24">
+        <div
+          class="flex relative justify-start items-start pl-4 pr-24"
+          data-message-id={msg.id}
+        >
           <div class="relative flex-1 overflow-hidden">
             <div
               class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
@@ -215,7 +248,7 @@ export default defineComponent({
               class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
               style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
             >
-              {message.content}
+              <pre class="break-words whitespace-pre-line">{message.content}</pre>
             </div>
             <div class="absolute bottom-[-1.2rem] right-1 text-xs">
               {(() => {

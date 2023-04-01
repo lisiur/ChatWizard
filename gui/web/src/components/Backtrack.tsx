@@ -28,7 +28,7 @@ export default defineComponent({
 
     return () => (
       <span>
-        <NPopover class="w-28" onUpdateShow={updateBacktrack}>
+        <NPopover class="w-28" trigger="click" onUpdateShow={updateBacktrack}>
           {{
             trigger: () => (
               <NButton tertiary size="tiny">

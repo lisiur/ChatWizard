@@ -60,7 +60,7 @@ pub struct ChatConfig {
 impl Default for ChatConfig {
     fn default() -> Self {
         Self {
-            backtrack: 3,
+            backtrack: 2,
             params: ChatParams {
                 model: "gpt-3.5-turbo".to_string(),
                 temperature: None,
