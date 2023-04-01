@@ -1,6 +1,6 @@
-## [0.0.35](https://github.com/lisiur/askai/compare/v0.0.34...v0.0.35) (2023-03-31)
+## [0.0.36](https://github.com/lisiur/askai/compare/v0.0.35...v0.0.36) (2023-04-01)
 
 
 ### Features
 
-* change app name ([e9815ef](https://github.com/lisiur/askai/commit/e9815ef25074a6f41d7513b4a70f76e2110f6080))
+* support drag and pin ([8e42385](https://github.com/lisiur/askai/commit/8e42385dde9f356c97c7bc657e8390205087489a))
