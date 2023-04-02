@@ -23,10 +23,10 @@ import {
   NSelect,
   NTooltip,
 } from "naive-ui";
-import { Chat } from "../models/chat";
-import { useI18n } from "../hooks/i18n";
-import { getChatModels, updateChat } from "../api";
-import { useAsyncData } from "../hooks/asyncData";
+import { Chat } from "../../models/chat";
+import { useI18n } from "../../hooks/i18n";
+import { getChatModels, updateChat } from "../../api";
+import { useAsyncData } from "../../hooks/asyncData";
 
 export default defineComponent({
   props: {

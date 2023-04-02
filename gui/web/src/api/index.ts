@@ -24,8 +24,10 @@ export interface ChatIndex {
   vendor: string;
   sort: number;
   stick: boolean;
+  archive: boolean;
   createdAt: string;
   updatedAt: string;
+  archivedAt?: string;
 }
 
 export interface ChatLog {
@@ -158,6 +160,14 @@ export async function allNonStickChats() {
 
 export async function allStickChats() {
   return invoke<Array<ChatIndex>>("all_stick_chats");
+}
+
+export async function allArchiveChats() {
+  return invoke<Array<ChatIndex>>("all_archive_chats");
+}
+
+export async function setChatArchive(chatId: string) {
+  return invoke<void>("set_chat_archive", { chatId });
 }
 
 export async function setChatStick(chatId: string, stick: boolean) {

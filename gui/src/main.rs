@@ -57,6 +57,8 @@ async fn main() {
             commands::set_chat_stick,
             commands::move_stick_chat,
             commands::move_non_stick_chat,
+            commands::all_archive_chats,
+            commands::set_chat_archive,
             commands::send_message,
             commands::resend_message,
             commands::get_chat_models,

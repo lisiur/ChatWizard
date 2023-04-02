@@ -1,5 +1,5 @@
 import { computed, defineComponent, ref, shallowReactive } from "vue";
-import ChatComp from "../../components/Chat";
+import ChatComp from "../../components/chat/Chat";
 import * as api from "../../api";
 import { Chat } from "../../models/chat";
 import { Message, UserMessage } from "../../models/message";
@@ -24,9 +24,11 @@ export default defineComponent({
       allChats,
       allStickChats,
       allNonStickChats,
+      allArchiveChats,
       moveNonStickChat,
       moveStickChat,
       setChatStick,
+      setChatArchive,
     } = useChatService();
 
     const nonStickExplorerList = computed(() => {
@@ -39,6 +41,14 @@ export default defineComponent({
 
     const stickExplorerList = computed(() => {
       return allStickChats.value.map((m) => ({
+        id: m.id,
+        title: m.title || t("chat.new.defaultTitle"),
+        data: m,
+      }));
+    });
+
+    const archiveExplorerList = computed(() => {
+      return allArchiveChats.value.map((m) => ({
         id: m.id,
         title: m.title || t("chat.new.defaultTitle"),
         data: m,
@@ -93,6 +103,10 @@ export default defineComponent({
         }
         case "unstick": {
           await setChatStick(item.id, false);
+          return;
+        }
+        case "archive": {
+          await setChatArchive(item.id);
           return;
         }
       }
@@ -190,19 +204,26 @@ export default defineComponent({
                 label: t("chat.rename"),
                 key: "rename",
               },
-              (item) => {
-                const data = item.data as api.ChatIndex;
-                if (data.stick) {
-                  return {
-                    label: t("chat.unstick"),
-                    key: "unstick",
-                  };
-                } else {
-                  return {
-                    label: t("chat.stick"),
-                    key: "stick",
-                  };
-                }
+              {
+                label: t("chat.stick"),
+                key: "stick",
+                visible(data) {
+                  return !data.data.stick && !data.data.archive;
+                },
+              },
+              {
+                label: t("chat.unstick"),
+                key: "unstick",
+                visible(data) {
+                  return data.data.stick && !data.data.archive;
+                },
+              },
+              {
+                label: t("chat.archive"),
+                key: "archive",
+                visible(data) {
+                  return !data.data.archive;
+                },
               },
               {
                 type: "divider",
@@ -214,6 +235,7 @@ export default defineComponent({
             ]}
             stickList={stickExplorerList.value}
             unstickList={nonStickExplorerList.value}
+            archivedList={archiveExplorerList.value}
             onAction={explorerHandler}
             onDarg={explorerDragHandler}
           ></Explorer>

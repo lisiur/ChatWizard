@@ -56,3 +56,7 @@ html, body, #app {
   border-radius: .5rem;
   margin: .8rem 0;
 }
+
+.n-scrollbar-content {
+  height: 100%;
+}

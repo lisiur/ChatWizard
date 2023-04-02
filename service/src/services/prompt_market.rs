@@ -108,10 +108,8 @@ impl PromptMarketService {
             user_id,
             title: name,
             config: ChatConfig::default().into(),
-            cost: 0.0,
-            vendor: "openai".to_string(),
             sort: min_sort - 1,
-            stick: false,
+            ..Default::default()
         };
         self.chat_repo.insert(&chat)?;
         Ok(chat_id)

@@ -40,6 +40,8 @@ diesel::table! {
         updated_at -> Timestamp,
         sort -> Integer,
         stick -> Bool,
+        archive -> Bool,
+        archived_at -> Nullable<Timestamp>,
     }
 }
 

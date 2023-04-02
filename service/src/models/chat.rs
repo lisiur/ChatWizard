@@ -19,6 +19,24 @@ pub struct NewChat {
     pub vendor: String,
     pub sort: i32,
     pub stick: bool,
+    pub archive: bool,
+}
+
+impl Default for NewChat {
+    fn default() -> Self {
+        Self {
+            id: Id::random(),
+            user_id: Id::local(),
+            title: "".to_string(),
+            prompt_id: None,
+            config: ChatConfig::default().into(),
+            cost: 0.0,
+            vendor: "openai".to_string(),
+            sort: 0,
+            stick: false,
+            archive: false,
+        }
+    }
 }
 
 #[derive(Queryable, Serialize, Debug)]
@@ -35,6 +53,8 @@ pub struct Chat {
     pub updated_at: NaiveDateTime,
     pub sort: i32,
     pub stick: bool,
+    pub archive: bool,
+    pub archived_at: Option<NaiveDateTime>,
 }
 
 #[derive(AsChangeset, Deserialize, Default, Debug)]
@@ -48,6 +68,8 @@ pub struct PatchChat {
     pub vendor: Option<String>,
     pub sort: Option<i32>,
     pub stick: Option<bool>,
+    pub archive: Option<bool>,
+    pub archived_at: Option<NaiveDateTime>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]

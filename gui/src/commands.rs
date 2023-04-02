@@ -72,6 +72,20 @@ pub async fn all_stick_chats(chat_service: State<'_, ChatService>) -> Result<Vec
 }
 
 #[tauri::command]
+pub async fn all_archive_chats(chat_service: State<'_, ChatService>) -> Result<Vec<Chat>> {
+    let records = chat_service.get_archive_chats(SearchChatPayload::default())?;
+
+    Ok(records)
+}
+
+#[tauri::command]
+pub async fn set_chat_archive(chat_id: Id, chat_service: State<'_, ChatService>) -> Result<()> {
+    chat_service.set_chat_archive(chat_id)?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn set_chat_stick(
     chat_id: Id,
     stick: bool,

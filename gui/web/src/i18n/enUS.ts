@@ -5,6 +5,7 @@ export const messages = {
   "common.delete": "Delete",
   "common.copy.success": "Copied to clipboard",
   "common.network.timeout": "Network Timeout",
+  "common.newVersion": "New version",
 
   "window.setting": "Setting",
 
@@ -17,6 +18,7 @@ export const messages = {
   "chat.rename": "Rename",
   "chat.stick": "Pin",
   "chat.unstick": "Unpin",
+  "chat.archive": "Archive",
   "chat.busy": "Please wait for the previous response to complete.",
 
   "chat.config.model": "Model",

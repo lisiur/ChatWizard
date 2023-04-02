@@ -1,7 +1,7 @@
 import { computed, defineComponent, PropType, ref, watch } from "vue";
 import { History as HistoryIcon } from "@vicons/fa";
 import { NButton, NIcon, NInputNumber, NPopover } from "naive-ui";
-import { Chat } from "../models/chat";
+import { Chat } from "../../models/chat";
 
 export default defineComponent({
   props: {

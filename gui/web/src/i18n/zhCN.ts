@@ -7,6 +7,7 @@ const messages: Messages = {
   "common.delete": "删除",
   "common.copy.success": "已复制到剪贴板",
   "common.network.timeout": "网络超时",
+  "common.newVersion": "新版本",
 
   "window.setting": "设置",
 
@@ -19,6 +20,7 @@ const messages: Messages = {
   "chat.rename": "重命名",
   "chat.stick": "置顶",
   "chat.unstick": "取消置顶",
+  "chat.archive": "归档",
   "chat.busy": "请等待上一条响应完成",
 
   "chat.config.model": "模型",

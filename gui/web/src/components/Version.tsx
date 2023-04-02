@@ -1,13 +1,15 @@
 import { NBadge, NButton, NSpace } from "naive-ui";
 import { defineComponent, ref } from "vue";
+import { useI18n } from "../hooks/i18n";
 import { useVersion } from "../hooks/version";
 import mdRender from "../utils/mdRender";
 import { dialog, message } from "../utils/prompt";
 
 export default defineComponent({
   setup() {
-    const { version, hasNewVersion, installNewVersion, newVersion, relaunch } =
+    const { hasNewVersion, installNewVersion, newVersion, relaunch } =
       useVersion();
+    const { t } = useI18n()
 
     function showUpdateHandler() {
       const releaseContent = (newVersion.value?.body ?? "").replaceAll(
@@ -68,7 +70,7 @@ export default defineComponent({
       >
         <NBadge dot show={hasNewVersion.value}>
           <span class="select-none cursor-default">
-            v{version.value}
+            {t("common.newVersion")}
           </span>
         </NBadge>
       </div>

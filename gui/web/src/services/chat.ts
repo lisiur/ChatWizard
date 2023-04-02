@@ -21,6 +21,15 @@ export function useChatService() {
     }
   );
 
+  const loadAllArchiveChatsTask = useTask(
+    async () => {
+      return await api.allArchiveChats();
+    },
+    {
+      default: [],
+    }
+  );
+
   const allStickChats = toRef(loadAllStickChatsTask, "result") as Ref<
     api.ChatIndex[]
   >;
@@ -29,19 +38,31 @@ export function useChatService() {
     api.ChatIndex[]
   >;
 
+  const allArchiveChats = toRef(loadAllArchiveChatsTask, "result") as Ref<
+    api.ChatIndex[]
+  >;
+
   const allChats = computed(() => {
-    return allStickChats.value.concat(allNonStickChats.value);
+    return allStickChats.value
+      .concat(allNonStickChats.value)
+      .concat(allArchiveChats.value);
   });
 
   async function reload() {
     return Promise.all([
       loadAllNonStickChatsTask.exec(),
       loadAllStickChatsTask.exec(),
+      loadAllArchiveChatsTask.exec(),
     ]);
   }
 
   async function setChatStick(chatId: string, stick: boolean) {
     await api.setChatStick(chatId, stick);
+    await reload();
+  }
+
+  async function setChatArchive(chatId: string) {
+    await api.setChatArchive(chatId);
     await reload();
   }
 
@@ -61,7 +82,9 @@ export function useChatService() {
     allChats,
     allStickChats,
     allNonStickChats,
+    allArchiveChats,
     setChatStick,
+    setChatArchive,
     moveStickChat,
     moveNonStickChat,
   };

@@ -1,3 +1,4 @@
+use chrono::Utc;
 use futures::StreamExt;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
@@ -50,10 +51,9 @@ impl ChatService {
             title: payload.title,
             prompt_id: payload.prompt_id,
             config: payload.config.into(),
-            cost: 0.0,
             vendor: payload.vendor,
             sort: non_stick_min_order - 1,
-            stick: false,
+            ..Default::default()
         };
 
         self.chat_repo.insert(&new_chat)?;
@@ -91,6 +91,13 @@ impl ChatService {
         Ok(records.records)
     }
 
+    pub fn get_archive_chats(&self, payload: SearchChatPayload) -> Result<Vec<Chat>> {
+        let params = payload.into();
+        let records = self.chat_repo.select_archived(&params)?;
+
+        Ok(records.records)
+    }
+
     pub fn search_chat_logs(
         &self,
         payload: SearchChatLogPayload,
@@ -115,6 +122,17 @@ impl ChatService {
         };
 
         self.chat_repo.update(&patch_chat)?;
+
+        Ok(())
+    }
+
+    pub fn set_chat_archive(&self, chat_id: Id) -> Result<()> {
+        self.chat_repo.update(&PatchChat {
+            id: chat_id,
+            archive: Some(true),
+            archived_at: Some(Utc::now().naive_local()),
+            ..Default::default()
+        })?;
 
         Ok(())
     }
