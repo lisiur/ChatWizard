@@ -55,6 +55,15 @@ export const messages = {
   "prompt.market.actions.newChat": "New Chat",
   "prompt.market.install.success": "Prompt installed successfully",
 
+  "config.setting": "Setting",
+
+  "setting.upgrade.newVersion": "New version is available",
+  "setting.upgrade.cancel": "Later",
+  "setting.upgrade.upgrade": "Upgrade",
+  "setting.upgrade.downloading": "Downloading...",
+  "setting.upgrade.relaunch": "Restart",
+  "setting.upgrade.later": "Later",
+
   "setting.locale": "Language",
   "setting.apiKey": "Api Key",
   "setting.proxy": "Proxy",

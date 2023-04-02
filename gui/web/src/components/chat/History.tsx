@@ -231,7 +231,7 @@ export default defineComponent({
           {{
             trigger: () => (
               <NButton type="error" text size="tiny">
-                {t("common.delete")}
+                {t("chat.message.delete")}
               </NButton>
             ),
             default: () => t("chat.message.delete.hint"),

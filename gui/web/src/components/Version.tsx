@@ -9,7 +9,7 @@ export default defineComponent({
   setup() {
     const { hasNewVersion, installNewVersion, newVersion, relaunch } =
       useVersion();
-    const { t } = useI18n()
+    const { t } = useI18n();
 
     function showUpdateHandler() {
       const releaseContent = (newVersion.value?.body ?? "").replaceAll(
@@ -20,12 +20,12 @@ export default defineComponent({
       const loading = ref(false);
       const dl = dialog.create({
         showIcon: false,
-        title: "New version is available!",
+        title: t("setting.upgrade.newVersion"),
         content: () => {
           return <div class="markdown-root" v-html={renderContent}></div>;
         },
         action: () => {
-          const positiveText = ref("Upgrade");
+          const positiveText = ref(t("setting.upgrade.upgrade"));
           return (
             <NSpace>
               <NButton onClick={() => dl.destroy()}>Cancel</NButton>
@@ -33,7 +33,7 @@ export default defineComponent({
                 type="primary"
                 loading={loading.value}
                 onClick={() => {
-                  positiveText.value = "Downloading...";
+                  positiveText.value = t("setting.upgrade.downloading");
                   loading.value = true;
                   installNewVersion()
                     .then(() => {
@@ -41,8 +41,8 @@ export default defineComponent({
                       dialog.success({
                         title: "Download Success",
                         content: "Please restart the app to apply the update.",
-                        positiveText: "Restart",
-                        negativeText: "Later",
+                        positiveText: t("setting.upgrade.relaunch"),
+                        negativeText: t("setting.upgrade.later"),
                         onPositiveClick: relaunch,
                       });
                     })
@@ -50,7 +50,7 @@ export default defineComponent({
                       message.error(err);
                     })
                     .finally(() => {
-                      positiveText.value = "Upgrade";
+                      positiveText.value = t("setting.upgrade.upgrade");
                       loading.value = false;
                     });
                 }}
