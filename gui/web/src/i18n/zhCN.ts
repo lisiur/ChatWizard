@@ -24,6 +24,7 @@ const messages: Messages = {
   "chat.busy": "请等待上一条响应完成",
 
   "chat.message.resend": '重新发送',
+  "chat.message.delete": '删除',
   "chat.message.delete.hint": '确定要删除此消息吗？',
 
   "chat.config.model": "模型",
@@ -56,6 +57,15 @@ const messages: Messages = {
   "prompt.market.actions.install": "安装",
   "prompt.market.actions.newChat": "新建对话",
   "prompt.market.install.success": "提示词安装成功",
+
+  "config.setting": "设置",
+
+  "setting.upgrade.newVersion": "有新版本可用",
+  "setting.upgrade.cancel": "暂不升级",
+  "setting.upgrade.upgrade": "升级",
+  "setting.upgrade.downloading": "正在下载...",
+  "setting.upgrade.relaunch": "重启",
+  "setting.upgrade.later": "稍后重启",
 
   "setting.locale": "语言",
   "setting.apiKey": "密钥",

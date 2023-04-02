@@ -114,7 +114,7 @@ export default defineComponent({
                   placement="right-end"
                   options={[
                     {
-                      label: "Setting",
+                      label: t("config.setting"),
                       key: "setting",
                     },
                     {

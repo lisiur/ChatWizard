@@ -22,6 +22,7 @@ export const messages = {
   "chat.busy": "Please wait for the previous response to complete.",
 
   "chat.message.resend": 'resend',
+  "chat.message.delete": 'delete',
   "chat.message.delete.hint": 'Are you sure to delete this message?',
 
   "chat.config.model": "Model",
@@ -54,6 +55,15 @@ export const messages = {
   "prompt.market.actions.install": "Install",
   "prompt.market.actions.newChat": "New Chat",
   "prompt.market.install.success": "Prompt installed successfully",
+
+  "config.setting": "Setting",
+
+  "setting.upgrade.newVersion": "New version is available",
+  "setting.upgrade.cancel": "Later",
+  "setting.upgrade.upgrade": "Upgrade",
+  "setting.upgrade.downloading": "Downloading...",
+  "setting.upgrade.relaunch": "Restart",
+  "setting.upgrade.later": "Later",
 
   "setting.locale": "Language",
   "setting.apiKey": "Api Key",
