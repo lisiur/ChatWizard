@@ -41,12 +41,14 @@ Download [latest release](https://github.com/lisiur/wizard/releases)
 - generate icons
 
     ```bash
-    cd gui && cargo tauri icon icons/app-icon.png
+    cd gui
+    cargo tauri icon icons/macos/app-icon.png -o icons/macos
+    cargo tauri icon icons/linux/app-icon.png -o icons/linux
+    cargo tauri icon icons/windows/app-icon.png -o icons/windows
     ```
 - dev
     ```bash
-    pnpm install && cd gui/web && pnpm install
-    pnpm dev
+    pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
     ```
 
 ## Q&A

@@ -41,12 +41,14 @@
 - 生成图标
 
     ```bash
-    cd gui && cargo tauri icon icons/app-icon.png
+    cd gui
+    cargo tauri icon icons/macos/app-icon.png -o icons/macos
+    cargo tauri icon icons/linux/app-icon.png -o icons/linux
+    cargo tauri icon icons/windows/app-icon.png -o icons/windows
     ```
 - 启动开发
     ```bash
-    pnpm install && cd gui/web && pnpm install
-    pnpm dev
+    pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
     ```
 
 ## 常见问题
