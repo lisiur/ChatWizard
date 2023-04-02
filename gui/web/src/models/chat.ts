@@ -8,6 +8,7 @@ import {
   ChatLog,
   getChat,
   updateChat,
+  deleteChatLog,
 } from "../api";
 import {
   AssistantMessage,
@@ -50,6 +51,12 @@ export class Chat {
     }
 
     return new Chat(chat, messages);
+  }
+
+  async deleteLog(logId: string) {
+    await deleteChatLog(logId);
+    const index = this.messages.findIndex((item) => item.id === logId);
+    this.messages.splice(index, 1)
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {

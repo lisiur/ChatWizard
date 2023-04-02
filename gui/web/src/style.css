@@ -25,10 +25,12 @@ html, body, #app {
   padding: 0;
 }
 
-.markdown-root *{
+.markdown-root pre {
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+.markdown-root 
 
 .markdown-root p {
   margin: .5rem 0;

@@ -182,6 +182,10 @@ export async function moveNonStickChat(from: string, to: string) {
   return invoke<void>("move_non_stick_chat", { from, to });
 }
 
+export async function deleteChatLog(logId: string) {
+  return invoke<void>("delete_chat_log", { logId });
+}
+
 export function sendMessage(chatId: string, message: string) {
   return invoke<[string, string]>("send_message", { chatId, message });
 }

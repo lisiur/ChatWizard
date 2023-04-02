@@ -102,6 +102,7 @@ export default defineComponent({
           ref={historyRef}
           messages={props.chat.messages}
           resendMessage={resendMessage}
+          deleteMessage={props.chat.deleteLog}
         ></History>
 
         <UserInput

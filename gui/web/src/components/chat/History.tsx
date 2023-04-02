@@ -1,4 +1,4 @@
-import { NButton, NScrollbar } from "naive-ui";
+import { NButton, NPopconfirm, NScrollbar, NSpace } from "naive-ui";
 import {
   computed,
   defineComponent,
@@ -20,7 +20,7 @@ import {
 import { writeToClipboard } from "../../utils/clipboard";
 import { interceptLink } from "../../utils/interceptLink";
 import mdRender from "../../utils/mdRender";
-import { message } from "../../utils/prompt";
+import { dialog, message } from "../../utils/prompt";
 
 export default defineComponent({
   props: {
@@ -29,6 +29,9 @@ export default defineComponent({
       default: () => [],
     },
     resendMessage: {
+      type: Function as PropType<(messageId: string) => void>,
+    },
+    deleteMessage: {
       type: Function as PropType<(messageId: string) => void>,
     },
   },
@@ -120,64 +123,74 @@ export default defineComponent({
       const html = mdRender(content);
       return (
         <div
-          class="flex relative justify-start items-start pl-4 pr-24"
+          key={msg.id}
+          class="flex justify-start items-start pl-4 pr-24 pb-4 group"
           id={`assistant-${msg.id}`}
         >
-          <div class="relative flex-1 overflow-hidden">
+          <div class="relative">
             <div
-              class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
+              class="markdown-root inline-block px-3 py-2 ml-2 rounded-t-xl rounded-r-xl z-1"
               style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
               v-html={html}
             ></div>
+            {msg.done ? (
+              <div class="group-hover:block hidden absolute bottom-[-1.2rem] left-0 text-xs">
+                <NSpace size="small">
+                  <NButton
+                    type="default"
+                    text
+                    size="tiny"
+                    class="ml-2 text-gray-500"
+                    onClick={async () => {
+                      await writeToClipboard(msg.content);
+                      message.success(t("common.copy.success"));
+                    }}
+                  >
+                    {t("common.copy")}
+                  </NButton>
+                  {renderDeleteMessageButton(msg.id)}
+                </NSpace>
+              </div>
+            ) : null}
           </div>
-          {msg.done ? (
-            <div class="absolute bottom-[-1.2rem] left-4 text-xs">
-              <NButton
-                type="default"
-                text
-                size="tiny"
-                class="ml-2 text-gray-500"
-                onClick={async () => {
-                  await writeToClipboard(msg.content);
-                  message.success(t("common.copy.success"));
-                }}
-              >
-                {t("common.copy")}
-              </NButton>
-            </div>
-          ) : null}
         </div>
       );
     }
 
     function renderUserMessage(message: UserMessage) {
       return (
-        <div class="flex justify-end items-start pr-4 pl-24">
+        <div
+          key={message.id}
+          class="flex justify-end items-start pr-4 pl-24 pb-4 group"
+        >
           <div class="relative">
             <div
               class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
               style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
             >
-              <pre class="break-words whitespace-pre-line">
+              <div class="break-words whitespace-pre-line">
                 {message.content}
-              </pre>
+              </div>
             </div>
-            <div class="absolute bottom-[-1.2rem] right-1 text-xs">
-              {(() => {
-                if (message.finished === false) {
-                  return (
-                    <NButton
-                      type="error"
-                      text
-                      size="tiny"
-                      class="mr-2"
-                      onClick={() => props.resendMessage?.(message.id)}
-                    >
-                      resend
-                    </NButton>
-                  );
-                }
-              })()}
+            <div class="group-hover:block hidden absolute bottom-[-1.2rem] right-0 text-xs">
+              <NSpace size="small">
+                {(() => {
+                  if (message.finished === false) {
+                    return (
+                      <NButton
+                        type="error"
+                        text
+                        size="tiny"
+                        class="mr-2"
+                        onClick={() => props.resendMessage?.(message.id)}
+                      >
+                        {t("chat.message.resend")}
+                      </NButton>
+                    );
+                  }
+                })()}
+                {renderDeleteMessageButton(message.id)}
+              </NSpace>
             </div>
           </div>
         </div>
@@ -203,7 +216,7 @@ export default defineComponent({
                 }
                 case "api": {
                   const error = message.error.error;
-                  return error.message;
+                  return error.message ?? error.type;
                 }
               }
             })()}
@@ -212,11 +225,26 @@ export default defineComponent({
       );
     }
 
+    function renderDeleteMessageButton(messageId: string) {
+      return (
+        <NPopconfirm onPositiveClick={() => props.deleteMessage?.(messageId)}>
+          {{
+            trigger: () => (
+              <NButton type="error" text size="tiny">
+                {t("common.delete")}
+              </NButton>
+            ),
+            default: () => t("chat.message.delete.hint"),
+          }}
+        </NPopconfirm>
+      );
+    }
+
     return (() => (
       <div class="flex-1 flex flex-col overflow-hidden">
         <div class="flex-1 overflow-hidden">
           <NScrollbar ref={scrollRef} class="py-4">
-            <div class="grid gap-6 pb-6">
+            <div class="grid gap-4 pb-6">
               {props.messages.map((message, index) => (
                 <div key={index}>{renderMessage(message)} </div>
               ))}

@@ -80,6 +80,6 @@ export type ErrorData =
       type: "api";
       error: {
         type: string;
-        message: string;
+        message?: string;
       };
     };

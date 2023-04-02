@@ -153,6 +153,13 @@ pub async fn delete_chat(chat_id: Id, chat_service: State<'_, ChatService>) -> R
 }
 
 #[tauri::command]
+pub async fn delete_chat_log(log_id: Id, chat_service: State<'_, ChatService>) -> Result<()> {
+    chat_service.delete_chat_log(log_id)?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn export_markdown(
     chat_id: Uuid,
     path: PathBuf,

@@ -21,6 +21,9 @@ export const messages = {
   "chat.archive": "Archive",
   "chat.busy": "Please wait for the previous response to complete.",
 
+  "chat.message.resend": 'resend',
+  "chat.message.delete.hint": 'Are you sure to delete this message?',
+
   "chat.config.model": "Model",
   "chat.config.model.hint": "ID of the model to use.",
   "chat.config.maxBacktrack": "Max Backtrack",

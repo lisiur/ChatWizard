@@ -23,6 +23,9 @@ const messages: Messages = {
   "chat.archive": "归档",
   "chat.busy": "请等待上一条响应完成",
 
+  "chat.message.resend": '重新发送',
+  "chat.message.delete.hint": '确定要删除此消息吗？',
+
   "chat.config.model": "模型",
   "chat.config.model.hint": "要使用的模型的ID。",
   "chat.config.maxBacktrack": "最大回溯",
