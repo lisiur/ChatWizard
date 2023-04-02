@@ -1,0 +1,12 @@
+{
+  "tauri": {
+    "bundle": {
+      "identifier": "com.lisiur.wizard",
+      "icon": ["icons/macos/icon.icns"]
+    },
+    "systemTray": {
+      "iconPath": "icons/macos/tray-icon.png",
+      "iconAsTemplate": true
+    }
+  }
+}
