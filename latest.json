@@ -1,23 +1,23 @@
 {
-  "version": "0.0.37",
-  "notes": "## [0.0.37](https://github.com/lisiur/askai/compare/v0.0.36...v0.0.37) (2023-04-01)%0A%0A%0A### Features%0A%0A* Optimize user experience ([52edc49](https://github.com/lisiur/askai/commit/52edc49594d21bdfa768c148695120bf3b9c8d6d))",
-  "pub_date": "2023-04-01T15:13:16.979Z",
+  "version": "0.0.38",
+  "notes": "## [0.0.38](https://github.com/lisiur/askai/compare/v0.0.37...v0.0.38) (2023-04-02)%0A%0A%0A### Features%0A%0A* support archive ([2fdbec7](https://github.com/lisiur/askai/commit/2fdbec7272c717be1587d1b87045007afcb7bdd6))",
+  "pub_date": "2023-04-02T05:02:00.356Z",
   "platforms": {
-    "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2F5MC80NGsxTEo0Z29MdUhVWmVWK1RKMTlrdFVOOTBvTm9SdXliT2JsdTBKYVI5T1FpS2s0cjV4Um9pZm9SQkY1ZmovMlJsa2hSRzRBdlVrMnFJQ0E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzYxODkxCWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKMW1NL1o3V01KSTArNVNvSW92czk4ek5JQjFtSWc2Wm45c1ZwNG5UcGVJNEtCT25IRVlieUZsSlRnYWJRV1RkSFQ5TU43T1lxN0E4ZDJ0UWloQXhxQ1E9PQo=",
-      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_x64.app.tar.gz"
-    },
-    "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2JWUHJTaXkxelMyM3FEczZaOFlzL3NnMFdTZTBqTURreUZTVjh4M3dKdW1Ba3NxaU90d0Yrd2xDZjFGNDY1ZVJkUjlzM1U3V3pvY0dDSjZFeUVFcXd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzYxOTAxCWZpbGU6d2l6YXJkXzAuMC4zN19hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKN296eG91WnFLQ3FoUDdrMVNVeDVxbWFiTk50cnkvWld6dXVVTHVHYjNrRldZWFptSlU5LzRWVVVmaThKWTlMQjJHVjZqUzYrcHQ2TlJmSktwQXZBRFE9PQo=",
-      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.37_amd64.AppImage.tar.gz"
-    },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1NteDNsRUZSQks4UUc1Zi9YKzAvRndqSXc3RCtKcXBtTkIvU1dYSUgyRDdoV1ZBcGZJYTYyMzhCQXc4U1hpaHl5OVJnRk1ZdnpGby9QRFZiOXRWZVFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzYxOTM5CWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKZ0hlaFowVFBPL0dUbHczc3FBSG9NWkQ3dDJlT2lhQ29YMEQrYkRHdVkyK0Vtem5KczV3SktkMFd5M0luSzFVcitCY3hPKzVGRlcwNEZnbGU4b0dzRFE9PQo=",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1dRV2lGNzBCRWpodmJiQjBiaFdmSkgvM2FGQnk4TXUxWVNyUWJrdHI3TzQvSnZXbjl2U0JKbWdpeXN5MEpsMDdYWUhHYTZKSlRrak5tU0FXMytjL0FjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNDExMzY5CWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKWVY4N1FYTHZFeEhCcWNzYmlaZS90ejFaY01uR0E0T28rMVFyMXg0MUpndkxJY0t6UW1UVjgyYWQrc09WUmwydUhOamZML3ZiVFdFNjJlSjh6Z3dQQlE9PQo=",
       "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_aarch64.app.tar.gz"
     },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2NxRWVoYlA3WXJwc0N1STk4dU9sMGIranpacG5KL24yVzFzUmRnWCtCa296bDYwMVhzb00zTGJ1REJaSk81bEpUVGVkdWdWZzZQdzZ5TVdzZUdXRHdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNDExNDEyCWZpbGU6d2l6YXJkXzAuMC4zOF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKOEtzbmVhQjJwdStGaThhVkxFL1Q2M0pUSUFUZVhsbFV0ejN4ZkJLd3RpTi91bE9DZklPaHNaMDNaM3JJNnZyVjgvQUF0WmJlWWMya0Uxb3NiNkNPQXc9PQo=",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.38_amd64.AppImage.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1lTVGs3UVkzMlU3SmlqOTNOU2ZjdkJpTHBsTU00UmpQdmFsMWZveUpYelF3WDFFT0lLSXNHT1RxaFVrK2YxYkRpbXo0S1ZlZWd6VEZLTnZkL1g3TndJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNDExNTM5CWZpbGU6d2l6YXJkLmFwcC50YXIuZ3oKaU9BLytMZlBMdG1xOXRVYXN4UmFVZUp3QmlPOGl5QlFKTUoya0lLV0xUNzlicmdGSU5aU21Zc2pwVFpIOEZieXhJYy8xeGkvck1wQ1NvUDROeVlwQnc9PQo=",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_x64.app.tar.gz"
+    },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1cyMWhrM3dqSUlvZTliTEw2cXkzU21aSE1wUTVMOUM2YVhSR3hFVXczWDZZdVdwcVVlc2RvamEwQmxjQ0VFOHZVdnVvMWJweCt2STB4QXVZTXVRZndFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwMzYxOTkzCWZpbGU6d2l6YXJkXzAuMC4zN194NjRfZW4tVVMubXNpLnppcAp5dWxOZzdsczRmZzdCZjZ1WitHWWNobDdZNk1tbUM3MlYrQU1SWGZMdzF0c0crSmI0MExmc2NZak9hUko4TXgwNmRwMnZkeHJvY3pYTStvUWxyMTJDUT09Cg==",
-      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.37_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1hIdFJ1NjFtdDJJTDJIUDhVOENadjJnNkdZWmlMVnJaYmJYem9JQ25xaGpIRzMwdEdXOG5NM0dnUStZLy9TckpGVy9Lem51Z0hsd2twZjVjaW1rbVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNDExNzE1CWZpbGU6d2l6YXJkXzAuMC4zOF94NjRfZW4tVVMubXNpLnppcApwcS9Ec0RDWWF5OHRGMzE3VU1mYUgzRlExQ1dLSDhVYm5nSTVZMmV5ZFdWMmdpdm5DcVY1dXo2a0lqaElaU21rU1djZ0V6SFdkYzcrdTRKTUJJekVBZz09Cg==",
+      "url": "https://github.com/lisiur/wizard/releases/latest/download/wizard_0.0.38_x64_en-US.msi.zip"
     }
   }
 }
