@@ -154,6 +154,7 @@ impl<T: serde::Serialize + fmt::Debug> ToSql<Text, Sqlite> for JsonWrapper<T> {
 }
 
 #[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct PageQueryParams<T, U> {
     pub page: i64,
     pub per_page: i64,
@@ -172,6 +173,48 @@ impl<T: Default, U: Default> Default for PageQueryParams<T, U> {
             sort: Default::default(),
         }
     }
+}
+
+#[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CursorQueryParams<T, U> {
+    pub cursor: Option<Id>,
+    pub direction: CursorDirection,
+    pub size: i64,
+    pub query: T,
+    pub sort: U,
+}
+
+impl<T: Default, U: Default> Default for CursorQueryParams<T, U> {
+    fn default() -> Self {
+        Self {
+            cursor: None,
+            direction: Default::default(),
+            size: 20,
+            query: Default::default(),
+            sort: Default::default(),
+        }
+    }
+}
+
+#[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub enum CursorDirection {
+    Forward,
+    Backward,
+}
+
+impl Default for CursorDirection {
+    fn default() -> Self {
+        Self::Backward
+    }
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CursorQueryResult<T> {
+    pub records: Vec<T>,
+    pub next_cursor: Option<Id>,
 }
 
 #[derive(serde::Serialize, Clone, Debug)]

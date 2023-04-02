@@ -49,6 +49,7 @@ async fn main() {
             commands::get_chat,
             commands::all_chats,
             commands::load_chat,
+            commands::load_chat_log_by_cursor,
             commands::new_chat,
             commands::update_chat,
             commands::delete_chat,

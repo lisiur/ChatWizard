@@ -13,11 +13,11 @@ use wizard_service::services::prompt_market::{
     InstallMarketPromptPayload, MarketPrompt, PromptMarketService,
 };
 use wizard_service::{
-    Chat, ChatService, CreateChatPayload, CreatePromptPayload, DeleteChatPayload, Id,
-    MoveChatPayload, PatchSetting, Prompt, PromptIndex, PromptService, ResendMessagePayload,
-    SearchChatLogPayload, SearchChatPayload, SearchPromptPayload, SendMessagePayload,
-    SettingService, StreamContent, Theme, UpdateChatPayload, UpdatePromptPayload,
-    UpdateSettingPayload,
+    Chat, ChatService, CreateChatPayload, CreatePromptPayload, CursorQueryResult,
+    DeleteChatPayload, GetChatLogByCursorPayload, Id, MoveChatPayload, PatchSetting, Prompt,
+    PromptIndex, PromptService, ResendMessagePayload, SearchChatLogPayload, SearchChatPayload,
+    SearchPromptPayload, SendMessagePayload, SettingService, StreamContent, Theme,
+    UpdateChatPayload, UpdatePromptPayload, UpdateSettingPayload,
 };
 
 use crate::result::Result;
@@ -143,6 +143,24 @@ pub fn load_chat(chat_id: Id, chat_service: State<'_, ChatService>) -> Result<Ve
     })?;
 
     Ok(chat.records)
+}
+
+#[tauri::command]
+pub fn load_chat_log_by_cursor(
+    chat_id: Id,
+    size: i64,
+    cursor: Option<Id>,
+    chat_service: State<'_, ChatService>,
+) -> Result<CursorQueryResult<ChatLog>> {
+    let result = chat_service.get_chat_logs_by_cursor(GetChatLogByCursorPayload {
+        cursor,
+        size,
+        user_id: Id::local(),
+        chat_id: Some(chat_id),
+        ..Default::default()
+    })?;
+
+    Ok(result)
 }
 
 #[tauri::command]

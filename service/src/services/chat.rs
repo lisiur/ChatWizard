@@ -16,6 +16,7 @@ use crate::repositories::setting::SettingRepo;
 use crate::result::Result;
 use crate::types::{PageQueryParams, StreamContent};
 use crate::{database::DbConn, models::chat::ChatConfig, types::Id};
+use crate::{CursorDirection, CursorQueryResult};
 
 #[derive(Clone)]
 pub struct ChatService {
@@ -109,6 +110,28 @@ impl ChatService {
             },
             ..Default::default()
         })
+    }
+
+    pub fn get_chat_logs_by_cursor(
+        &self,
+        payload: GetChatLogByCursorPayload,
+    ) -> Result<CursorQueryResult<ChatLog>> {
+        let chat_id = payload.chat_id;
+        let cursor = payload.cursor;
+        let size = payload.size;
+        let direction = payload.direction;
+
+        let result = self
+            .chat_log_repo
+            .select_by_cursor(crate::CursorQueryParams {
+                cursor,
+                direction,
+                size,
+                query: ChatLogQueryParams { chat_id },
+                ..Default::default()
+            })?;
+
+        Ok(result)
     }
 
     pub fn update_chat(&self, payload: UpdateChatPayload) -> Result<()> {
@@ -428,6 +451,16 @@ pub struct SearchChatLogPayload {
     pub page: Option<i64>,
     pub per_page: Option<i64>,
     pub chat_id: Option<Id>,
+    pub user_id: Id,
+}
+
+#[derive(serde::Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GetChatLogByCursorPayload {
+    pub cursor: Option<Id>,
+    pub direction: CursorDirection,
+    pub chat_id: Option<Id>,
+    pub size: i64,
     pub user_id: Id,
 }
 

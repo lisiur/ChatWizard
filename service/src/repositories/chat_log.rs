@@ -2,8 +2,8 @@ use crate::database::pagination::{Paginate, PaginatedRecords};
 use crate::models::chat_log::{ChatLog, NewChatLog};
 use crate::result::Result;
 use crate::schema::chat_logs;
-use crate::PageQueryParams;
 use crate::{database::DbConn, types::Id};
+use crate::{CursorDirection, CursorQueryParams, CursorQueryResult, PageQueryParams};
 use diesel::prelude::*;
 use serde::Deserialize;
 
@@ -37,6 +37,79 @@ impl ChatLogRepo {
             .paginate(params.page)
             .per_page(params.per_page)
             .load_and_count_pages::<ChatLog>(&mut self.0.conn())?;
+
+        Ok(result)
+    }
+
+    pub fn select_by_cursor(
+        &self,
+        params: CursorQueryParams<ChatLogQueryParams, ()>,
+    ) -> Result<CursorQueryResult<ChatLog>> {
+        let cursor_created_at = params
+            .cursor
+            .map(|id| {
+                chat_logs::table
+                    .filter(chat_logs::id.eq(id))
+                    .select(chat_logs::created_at)
+                    .first::<chrono::NaiveDateTime>(&mut *self.0.conn())
+                    .unwrap()
+            })
+            .unwrap_or_else(|| match params.direction {
+                CursorDirection::Forward => chrono::NaiveDateTime::parse_from_str(
+                    "2000-01-01 00:00:00",
+                    "%Y-%m-%d %H:%M:%S",
+                )
+                .unwrap(),
+                CursorDirection::Backward => chrono::NaiveDateTime::parse_from_str(
+                    "2999-12-31 23:59:59",
+                    "%Y-%m-%d %H:%M:%S",
+                )
+                .unwrap(),
+            });
+
+        let mut query = chat_logs::table.into_boxed();
+
+        if let Some(chat_id) = params.query.chat_id {
+            query = query.filter(chat_logs::chat_id.eq(chat_id));
+        }
+
+        match params.direction {
+            CursorDirection::Forward => {
+                query = query
+                    .filter(chat_logs::created_at.gt(cursor_created_at))
+                    .order(chat_logs::created_at.asc());
+            }
+            CursorDirection::Backward => {
+                query = query
+                    .filter(chat_logs::created_at.lt(cursor_created_at))
+                    .order(chat_logs::created_at.desc());
+            }
+        };
+
+        let mut items = query
+            .limit(params.size + 1)
+            .load::<ChatLog>(&mut *self.0.conn())?;
+
+        let mut items = match params.direction {
+            CursorDirection::Forward => items,
+            CursorDirection::Backward => {
+                items.reverse();
+                items
+            }
+        };
+
+        let next_cursor = if items.len() > params.size as usize {
+            let next_cursor = items.last().unwrap().id;
+            items.pop();
+            Some(next_cursor)
+        } else {
+            None
+        };
+
+        let result = CursorQueryResult {
+            records: items,
+            next_cursor,
+        };
 
         Ok(result)
     }

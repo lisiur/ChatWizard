@@ -22,6 +22,7 @@ export const messages = {
   "chat.busy": "Please wait for the previous response to complete.",
 
   "chat.message.resend": 'resend',
+  "chat.message.delete": 'delete',
   "chat.message.delete.hint": 'Are you sure to delete this message?',
 
   "chat.config.model": "Model",
