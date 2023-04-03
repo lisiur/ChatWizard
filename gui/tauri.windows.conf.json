@@ -2,7 +2,7 @@
   "tauri": {
     "bundle": {
       "identifier": "com.lisiur.wizard",
-      "icon": ["icons/window/icon.ico"]
+      "icon": ["icons/windows/icon.ico"]
     },
     "systemTray": {
       "iconPath": "icons/windows/tray-icon.png",
