@@ -1,22 +1,29 @@
-import { Ref, ref, isRef } from "vue";
+import { Ref, ref, isRef, computed } from "vue";
 import { useWait } from "./wait";
 
 export function useLazyLoad<T>(
-  load: (cursor: string | null) => Promise<{
+  load: (cursor?: string) => Promise<{
     records: T[];
     nextCursor: string | null;
   }>,
   indicator?: Element | Ref<Element | null>
 ) {
+  const firstLoad = ref(false);
+  const firstBatchLoad = ref(true);
   const records = ref<Array<T>>([]);
   const loading = ref(false);
-  const cursor = ref<string | null>("");
+  const cursor = ref<string>();
+  const hasMore = computed(() => {
+    return firstLoad.value === false || cursor.value !== undefined;
+  });
   let destroy = null as null | (() => void);
 
   init();
 
   function init() {
-    cursor.value = "";
+    firstLoad.value = false;
+    firstBatchLoad.value = true;
+    cursor.value = undefined;
     records.value = [];
     destroy?.();
     if (indicator) {
@@ -31,10 +38,8 @@ export function useLazyLoad<T>(
             : indicator;
           const observer = new IntersectionObserver(async (entries) => {
             if (entries[0].intersectionRatio > 0) {
-              loading.value = true;
-              setTimeout(() => {
-                tryLoadNext(ele);
-              }, 300);
+              await tryLoadNext(ele);
+              firstBatchLoad.value = false;
             }
           });
 
@@ -48,36 +53,34 @@ export function useLazyLoad<T>(
   async function loadNext() {
     loading.value = true;
     try {
-      const res = await load(cursor.value);
-      cursor.value = res.nextCursor;
+      const res = await load(cursor.value === "" ? undefined : cursor.value);
+      cursor.value = res.nextCursor ?? undefined;
       records.value = ref(res.records).value.concat(records.value);
+
+      if (cursor.value === undefined) {
+        destroy?.();
+      }
     } finally {
       loading.value = false;
     }
   }
 
   async function tryLoadNext(element: Element) {
-    if (cursor.value && elementVisible(element)) {
+    if (hasMore.value && elementVisible(element)) {
+      firstLoad.value = true;
       await loadNext();
-
-      // wait for the element to be rendered from the DOM
-      await sleep();
-
       await tryLoadNext(element);
     }
   }
 
   return {
-    hasMore: cursor,
+    hasMore,
     loading,
     records,
     loadNext,
-    reload: init,
+    firstBatchLoad,
+    reset: init,
   };
-}
-
-async function sleep(ms = 0) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function elementVisible(ele: Element) {

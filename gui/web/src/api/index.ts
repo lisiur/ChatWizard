@@ -142,6 +142,26 @@ export async function loadChat(chatId: string) {
   return invoke<Array<ChatLog>>("load_chat", { chatId });
 }
 
+export async function loadChatLogByCursor(params: {
+  chatId: string;
+  cursor?: string;
+  size: number;
+}) {
+  debugLog("load_chat_log_by_cursor: " + params.cursor?.slice(-2));
+  const res = await invoke<{
+    records: Array<ChatLog>;
+    nextCursor: string | null;
+  }>("load_chat_log_by_cursor", { ...params });
+  debugLog(
+    "load_chat_log_by_cursor_result: \n -> " +
+      res.nextCursor?.slice(-2) +
+      "\n" +
+      res.records.map((it) => it.id.slice(-2) + ' ' + it.message).join("\n")
+  );
+
+  return res;
+}
+
 export async function updateChat(payload: ChatUpdatePayload) {
   return invoke<void>("update_chat", { payload });
 }

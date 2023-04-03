@@ -150,8 +150,7 @@ export default defineComponent({
 
     async function selectHandler(id: string) {
       const index = allChats.value.find((m) => m.id === id)!;
-      const logs = await api.loadChat(id);
-      const chat = Chat.init(index, logs);
+      const chat = new Chat(index);
       currentChat.value = shallowReactive(chat);
 
       setTimeout(() => {

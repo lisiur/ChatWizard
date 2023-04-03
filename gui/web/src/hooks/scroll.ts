@@ -1,4 +1,5 @@
 import { isRef, Ref, watch } from "vue";
+import { ensure } from "../utils/ensure";
 
 export function useAutoScroll(el: HTMLElement | Ref<HTMLElement>) {
   const interval = 20;
@@ -37,7 +38,7 @@ export function useAutoScroll(el: HTMLElement | Ref<HTMLElement>) {
   }
 
   function start() {
-    autoMode = true
+    autoMode = true;
     scrollToBottom();
     timer = setInterval(() => {
       if (autoMode) {
@@ -64,5 +65,35 @@ export function useAutoScroll(el: HTMLElement | Ref<HTMLElement>) {
     stop,
     destroy,
     scrollToBottom,
+  };
+}
+
+export function useScroll(el: HTMLElement | Ref<HTMLElement>) {
+  let ele!: HTMLElement;
+  ensure(() => {
+    ele = isRef(el) ? el.value : el;
+  }, [el]);
+
+  let lastPosition = 0;
+
+  function getCurrentPosition() {
+    return ele.scrollHeight - ele.scrollTop;
+  }
+
+  function setPosition(position: number) {
+    ele.scrollTop = ele.scrollHeight - position;
+  }
+
+  function savePosition() {
+    lastPosition = getCurrentPosition();
+  }
+
+  function recoverPosition() {
+    setPosition(lastPosition);
+  }
+
+  return {
+    savePosition,
+    recoverPosition,
   };
 }

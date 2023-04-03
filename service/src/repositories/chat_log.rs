@@ -76,12 +76,12 @@ impl ChatLogRepo {
         match params.direction {
             CursorDirection::Forward => {
                 query = query
-                    .filter(chat_logs::created_at.gt(cursor_created_at))
+                    .filter(chat_logs::created_at.ge(cursor_created_at))
                     .order(chat_logs::created_at.asc());
             }
             CursorDirection::Backward => {
                 query = query
-                    .filter(chat_logs::created_at.lt(cursor_created_at))
+                    .filter(chat_logs::created_at.le(cursor_created_at))
                     .order(chat_logs::created_at.desc());
             }
         };
@@ -90,13 +90,13 @@ impl ChatLogRepo {
             .limit(params.size + 1)
             .load::<ChatLog>(&mut *self.0.conn())?;
 
-        let mut items = match params.direction {
-            CursorDirection::Forward => items,
-            CursorDirection::Backward => {
-                items.reverse();
-                items
-            }
-        };
+        // let mut items = match params.direction {
+        //     CursorDirection::Forward => items,
+        //     CursorDirection::Backward => {
+        //         items.reverse();
+        //         items
+        //     }
+        // };
 
         let next_cursor = if items.len() > params.size as usize {
             let next_cursor = items.last().unwrap().id;

@@ -60,6 +60,8 @@ export default defineComponent({
       }
     }
 
+    function loadMessage(cursor?: string) {}
+
     function focusInput() {
       userInputRef.value?.focus();
     }
@@ -100,7 +102,7 @@ export default defineComponent({
 
         <History
           ref={historyRef}
-          messages={props.chat.messages}
+          chat={props.chat}
           resendMessage={resendMessage}
           deleteMessage={props.chat.deleteLog}
         ></History>

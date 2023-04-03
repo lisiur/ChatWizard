@@ -6,11 +6,15 @@ use crate::result::Result;
 pub struct Client {
     headers: Option<reqwest::header::HeaderMap>,
     proxy: Option<reqwest::Proxy>,
+    timeout: Option<Duration>,
 }
 
 impl Client {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(timeout: Option<Duration>) -> Self {
+        Self {
+            timeout,
+            ..Default::default()
+        }
     }
 
     pub fn headers(&mut self, headers: Option<reqwest::header::HeaderMap>) -> &mut Self {
@@ -24,7 +28,12 @@ impl Client {
     }
 
     fn build(&self) -> reqwest::Client {
-        let mut client_builder = reqwest::Client::builder().timeout(Duration::from_secs(10));
+        let mut client_builder = reqwest::Client::builder();
+
+        // set timeout
+        if let Some(duration) = self.timeout {
+            client_builder = client_builder.timeout(duration);
+        }
 
         // set headers
         if let Some(headers) = self.headers.clone() {

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use serde::Serialize;
 
 use crate::{
@@ -43,7 +45,7 @@ impl PromptMarketService {
         let PromptSource { url, r#type, .. } = prompt_source;
 
         let setting = self.setting_repo.select_by_user_id(Id::local())?;
-        let client = setting.create_client();
+        let client = setting.create_client(Some(Duration::from_secs(10)));
 
         let market_prompts = match r#type.as_str() {
             "json" => {

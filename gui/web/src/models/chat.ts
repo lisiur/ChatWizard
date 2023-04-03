@@ -9,6 +9,7 @@ import {
   getChat,
   updateChat,
   deleteChatLog,
+  loadChatLogByCursor,
 } from "../api";
 import {
   AssistantMessage,
@@ -22,41 +23,48 @@ export class Chat {
   busy: Ref<boolean>;
   index: ChatIndex;
   messages: Array<Message>;
-  constructor(index: ChatIndex, messages: Message[] = []) {
+  constructor(index: ChatIndex) {
     this.busy = ref(false);
     this.index = reactive(index);
-    this.messages = reactive(messages);
+    this.messages = reactive([]);
   }
 
-  static init(chat: ChatIndex, logs: Array<ChatLog>) {
-    const messages: Message[] = [];
-    for (let i = 0; i < logs.length; i++) {
-      const log = logs[i];
-      switch (log.role) {
-        case "user": {
-          const msg = new UserMessage(log.message);
-          msg.setId(log.id);
-          msg.finished = logs[i + 1]?.role === "assistant";
-          msg.markHistory();
-          messages.push(msg);
-          break;
-        }
-        case "assistant": {
-          const msg = new AssistantMessage(log.id, log.message);
-          msg.markHistory();
-          messages.push(msg);
-          break;
-        }
+  async loadLogByCursor(cursor?: string) {
+    return loadChatLogByCursor({
+      chatId: this.index.id,
+      size: 10,
+      cursor,
+    });
+  }
+
+  addPreviousLogs(logs: ChatLog[]) {
+    this.messages.unshift(...logs.reverse().map((log) => this.handleLog(log)));
+  }
+
+  handleLog(log: ChatLog) {
+    switch (log.role) {
+      case "user": {
+        const msg = new UserMessage(log.message);
+        msg.setId(log.id);
+        msg.finished = true;
+        msg.markHistory();
+        return msg;
+      }
+      case "assistant": {
+        const msg = new AssistantMessage(log.id, log.message);
+        msg.markHistory();
+        return msg;
+      }
+      default: {
+        throw new Error("Unknown log role");
       }
     }
-
-    return new Chat(chat, messages);
   }
 
   async deleteLog(logId: string) {
     await deleteChatLog(logId);
     const index = this.messages.findIndex((item) => item.id === logId);
-    this.messages.splice(index, 1)
+    this.messages.splice(index, 1);
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {

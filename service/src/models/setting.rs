@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use std::time::Duration;
 
 use crate::api::client::Client;
 use crate::api::openai::chat::OpenAIChatApi;
@@ -39,10 +40,10 @@ impl Setting {
             .and_then(|inner| if inner.is_empty() { None } else { Some(inner) })
     }
 
-    pub fn create_client(&self) -> Client {
+    pub fn create_client(&self, timeout: Option<Duration>) -> Client {
         let proxy = self.proxy().map(|item| reqwest::Proxy::all(item).unwrap());
 
-        let mut client = Client::new();
+        let mut client = Client::new(timeout);
         client.proxy(proxy);
 
         client
@@ -63,7 +64,7 @@ impl Setting {
 
         let proxy = self.proxy().map(|item| reqwest::Proxy::all(item).unwrap());
 
-        let mut client = Client::new();
+        let mut client = Client::new(None);
         client.headers(Some(headers));
         client.proxy(proxy);
 

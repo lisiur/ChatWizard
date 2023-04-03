@@ -1,4 +1,4 @@
-import { NButton, NPopconfirm, NScrollbar, NSpace } from "naive-ui";
+import { NButton, NPopconfirm, NScrollbar, NSpace, NSpin } from "naive-ui";
 import {
   computed,
   defineComponent,
@@ -9,8 +9,11 @@ import {
   ref,
   watch,
 } from "vue";
+import { ChatLog } from "../../api";
 import { useI18n } from "../../hooks/i18n";
-import { useAutoScroll } from "../../hooks/scroll";
+import { useLazyLoad } from "../../hooks/lazyLoad";
+import { useAutoScroll, useScroll } from "../../hooks/scroll";
+import { Chat } from "../../models/chat";
 import {
   AssistantMessage,
   ErrorMessage,
@@ -20,13 +23,14 @@ import {
 import { writeToClipboard } from "../../utils/clipboard";
 import { interceptLink } from "../../utils/interceptLink";
 import mdRender from "../../utils/mdRender";
-import { dialog, message } from "../../utils/prompt";
+import { message } from "../../utils/prompt";
+import { sleep } from "../../utils/sleep";
 
 export default defineComponent({
   props: {
-    messages: {
-      type: Array as PropType<Message[]>,
-      default: () => [],
+    chat: {
+      type: Object as PropType<Chat>,
+      required: true,
     },
     resendMessage: {
       type: Function as PropType<(messageId: string) => void>,
@@ -38,6 +42,7 @@ export default defineComponent({
   setup(props, { expose }) {
     const { t } = useI18n();
 
+    const loadingRef = ref<HTMLElement | null>(null);
     const scrollRef = ref<InstanceType<typeof NScrollbar>>();
     const scrollEle = computed(() => {
       return scrollRef.value?.$el.nextSibling.children[0] as HTMLElement;
@@ -50,8 +55,28 @@ export default defineComponent({
       scrollToBottom,
     } = useAutoScroll(scrollEle);
 
+    const { savePosition, recoverPosition } = useScroll(scrollEle);
+
+    const { hasMore, reset, firstBatchLoad } = useLazyLoad<ChatLog>(
+      async (cursor?: string) => {
+        const res = await props.chat.loadLogByCursor(cursor);
+        savePosition();
+        props.chat.addPreviousLogs(res.records);
+        await nextTick();
+        if (firstBatchLoad.value) {
+          scrollToBottom();
+        } else {
+          recoverPosition();
+        }
+        return res;
+      },
+      loadingRef
+    );
+
+    watch(() => props.chat, reset);
+
     watch(
-      () => props.messages,
+      () => props.chat.messages,
       (messages) => {
         nextTick(() => {
           for (let i = messages.length - 1; i >= 0; i--) {
@@ -85,7 +110,7 @@ export default defineComponent({
     );
 
     watch(
-      () => props.messages,
+      () => props.chat.messages,
       () => {
         nextTick(scrollToBottom);
       }
@@ -124,35 +149,33 @@ export default defineComponent({
       return (
         <div
           key={msg.id}
-          class="flex justify-start items-start pl-4 pr-24 pb-4 group"
+          class="relative flex justify-start items-start pl-4 pr-24 pb-4 group"
           id={`assistant-${msg.id}`}
         >
-          <div class="relative">
-            <div
-              class="markdown-root inline-block px-3 py-2 ml-2 rounded-t-xl rounded-r-xl z-1"
-              style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
-              v-html={html}
-            ></div>
-            {msg.done ? (
-              <div class="group-hover:block hidden absolute bottom-[-1.2rem] left-0 text-xs">
-                <NSpace size="small">
-                  <NButton
-                    type="default"
-                    text
-                    size="tiny"
-                    class="ml-2 text-gray-500"
-                    onClick={async () => {
-                      await writeToClipboard(msg.content);
-                      message.success(t("common.copy.success"));
-                    }}
-                  >
-                    {t("common.copy")}
-                  </NButton>
-                  {renderDeleteMessageButton(msg.id)}
-                </NSpace>
-              </div>
-            ) : null}
-          </div>
+          <div
+            class="markdown-root inline-block px-3 py-2 ml-2 rounded-t-xl rounded-r-xl z-1"
+            style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
+            v-html={html}
+          ></div>
+          {msg.done ? (
+            <div class="group-hover:block hidden absolute bottom-0 left-4 text-xs">
+              <NSpace size="small" wrapItem={false}>
+                <NButton
+                  type="default"
+                  text
+                  size="tiny"
+                  class="ml-2 text-gray-500"
+                  onClick={async () => {
+                    await writeToClipboard(msg.content);
+                    message.success(t("common.copy.success"));
+                  }}
+                >
+                  {t("common.copy")}
+                </NButton>
+                {renderDeleteMessageButton(msg.id)}
+              </NSpace>
+            </div>
+          ) : null}
         </div>
       );
     }
@@ -161,37 +184,33 @@ export default defineComponent({
       return (
         <div
           key={message.id}
-          class="flex justify-end items-start pr-4 pl-24 pb-4 group"
+          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
         >
-          <div class="relative">
-            <div
-              class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
-              style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
-            >
-              <div class="break-words whitespace-pre-line">
-                {message.content}
-              </div>
-            </div>
-            <div class="group-hover:block hidden absolute bottom-[-1.2rem] right-1 text-xs">
-              <NSpace size="small">
-                {(() => {
-                  if (message.finished === false) {
-                    return (
-                      <NButton
-                        type="error"
-                        text
-                        size="tiny"
-                        class="mr-2"
-                        onClick={() => props.resendMessage?.(message.id)}
-                      >
-                        {t("chat.message.resend")}
-                      </NButton>
-                    );
-                  }
-                })()}
-                {renderDeleteMessageButton(message.id)}
-              </NSpace>
-            </div>
+          <div
+            class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
+            style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
+          >
+            <div class="break-words whitespace-pre-line">{message.content}</div>
+          </div>
+          <div class="group-hover:block hidden absolute bottom-0 right-5 text-xs">
+            <NSpace size="small" wrapItem={false}>
+              {(() => {
+                if (message.finished === false) {
+                  return (
+                    <NButton
+                      type="error"
+                      text
+                      size="tiny"
+                      class="mr-2"
+                      onClick={() => props.resendMessage?.(message.id)}
+                    >
+                      {t("chat.message.resend")}
+                    </NButton>
+                  );
+                }
+              })()}
+              {renderDeleteMessageButton(message.id)}
+            </NSpace>
           </div>
         </div>
       );
@@ -241,16 +260,27 @@ export default defineComponent({
     }
 
     return (() => (
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex-1 overflow-hidden">
-          <NScrollbar ref={scrollRef} class="py-4">
+      <div
+        class="flex-1 flex flex-col overflow-hidden"
+        style={{
+          opacity: firstBatchLoad.value ? 0 : 1,
+        }}
+      >
+        <NScrollbar ref={scrollRef} class="py-4">
+          <div class="relative">
+            <div
+              ref={loadingRef}
+              class="absolute top-1 left-1/2 translate-x-[-50%] flex justify-center items-center"
+            >
+              <NSpin size={12} v-show={hasMore.value}></NSpin>
+            </div>
             <div class="grid gap-4 pb-6">
-              {props.messages.map((message, index) => (
-                <div key={index}>{renderMessage(message)} </div>
+              {props.chat.messages.map((message) => (
+                <div key={message.id}>{renderMessage(message)} </div>
               ))}
             </div>
-          </NScrollbar>
-        </div>
+          </div>
+        </NScrollbar>
       </div>
     )) as unknown as typeof publicInstance;
   },
