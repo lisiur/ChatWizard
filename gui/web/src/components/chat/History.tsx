@@ -172,7 +172,7 @@ export default defineComponent({
                 {message.content}
               </div>
             </div>
-            <div class="group-hover:block hidden absolute bottom-[-1.2rem] right-0 text-xs">
+            <div class="group-hover:block hidden absolute bottom-[-1.2rem] right-1 text-xs">
               <NSpace size="small">
                 {(() => {
                   if (message.finished === false) {
