@@ -4,9 +4,27 @@
   <p align="center">OpenAI 聊天桌面客户端 (Windows, MacOS, Linux)</p>
 </p>
 
-[![English badge](https://img.shields.io/badge/%E8%8B%B1%E6%96%87-English-blue)](./README.md)
-![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard)
-[![downloads](https://img.shields.io/github/downloads/lisiur/ChatWizard/total.svg?style=flat-square)](https://github.com/lisiur/ChatWizard/releases)
+<div align=center>
+  <div align=center>
+    <img src="https://img.shields.io/badge/English-Simplified%20Chinese-blue" />
+  </div>
+  <div>
+    <img src="https://img.shields.io/github/package-json/v/lisiur/ChatWizard" />
+    <img style="display: none" src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
+    <img src="https://img.shields.io/github/downloads/lisiur/ChatWizard/total" />
+  </div>
+  <div>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?logo=apple&logoColor=white" />
+    </a>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white" />
+    </a>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white" />
+    </a>
+  </div>
+</div>
 
 ## 声明
 
@@ -14,27 +32,51 @@
 
 ## 截图
 
-![](./assets/live.gif)
-![](./assets/chat.jpeg)
-![](./assets/chat-config.jpeg)
-![](./assets/prompt.jpeg)
-![](./assets/prompt-market.jpeg)
-![](./assets/prompt-market2.jpeg)
-![](./assets/settings.jpeg)
+<details>
+<summary>查看</summary>
+<img src="./assets/live.gif" />
+<img src="./assets/chat.jpeg" />
+<img src="./assets/chat-config.jpeg" />
+<img src="./assets/prompt.jpeg" />
+<img src="./assets/prompt-market.jpeg" />
+<img src="./assets/prompt-market2.jpeg" />
+<img src="./assets/settings.jpeg" />
+</details>
+
 
 ## 特性
 
 - 支持聊天参数配置
+- 支持聊天记录的懒加载
 - 支持本地提示词
-- 支持提示词市场
+- 支持提示词市场（提示词市场源为 github 的地址，国内用户可能需要设置代理）
 - 支持多种语言
 - 支持代理
 - 支持主题
-- 支持转发聊天接口
+- 支持转发 openai 的 api
 
 ## 安装
 
-下载[最新发行版](https://github.com/lisiur/ChatWizard/releases)
+- **Mac**
+
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_aarch64.dmg)
+
+    > MacOS 可能会遇到这个问题: `"ChatWizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
+    > 
+    > 打开终端输入：
+    > 
+    > ```shell
+    > xattr -cr /Applications/ChatWizard.app
+    > ```
+
+- **Windows**: 
+
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_x64_en-US.msi)
+
+- **Linux**
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/chat-wizard_0.0.41_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/chat-wizard_0.0.41_amd64.AppImage)
 
 ## 开发
 
@@ -53,11 +95,4 @@
 
 ## 常见问题
 
--  MacOS 可能会遇到这个问题: `"ChatWizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
-
-    打开终端输入：
-
-    ```shell
-    xattr -cr /Applications/ChatWizard.app
-    ```
 

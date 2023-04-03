@@ -1,12 +1,30 @@
-<p align="center">
+<p align=center>
   <img width="200" src="./assets/logo.png" alt="ChatWizard">
   <h1 align="center">ChatWizard</h1>
   <p align="center">OpenAI chat client Desktop Application (Windows, MacOS, Linux)</p>
 </p>
 
-[![简体中文 badge](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue)](./README-ZH_CN.md)
-![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard)
-[![downloads](https://img.shields.io/github/downloads/lisiur/ChatWizard/total.svg?style=flat-square)](https://github.com/lisiur/ChatWizard/releases)
+<div align=center>
+  <div align=center>
+    <img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue" />
+  </div>
+  <div>
+    <img src="https://img.shields.io/github/package-json/v/lisiur/ChatWizard" />
+    <img style="display: none" src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
+    <img src="https://img.shields.io/github/downloads/lisiur/ChatWizard/total" />
+  </div>
+  <div>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?logo=apple&logoColor=white" />
+    </a>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white" />
+    </a>
+    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+      <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white" />
+    </a>
+  </div>
+</div>
 
 ## Declaration
 
@@ -14,17 +32,21 @@ This project is currently undergoing active development and has only been tested
 
 ## Screenshots
 
-![](./assets/live.gif)
-![](./assets/chat.jpeg)
-![](./assets/chat-config.jpeg)
-![](./assets/prompt.jpeg)
-![](./assets/prompt-market.jpeg)
-![](./assets/prompt-market2.jpeg)
-![](./assets/settings.jpeg)
+<details>
+<summary>View</summary>
+<img src="./assets/live.gif" />
+<img src="./assets/chat.jpeg" />
+<img src="./assets/chat-config.jpeg" />
+<img src="./assets/prompt.jpeg" />
+<img src="./assets/prompt-market.jpeg" />
+<img src="./assets/prompt-market2.jpeg" />
+<img src="./assets/settings.jpeg" />
+</details>
 
 ## Features
 
 - support chat configuration
+- support lazy loading of chat records
 - support local prompt
 - support prompt market
 - support multiple language
@@ -34,7 +56,26 @@ This project is currently undergoing active development and has only been tested
 
 ## Installation
 
-Download [latest release](https://github.com/lisiur/ChatWizard/releases)
+- **Mac**
+
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_aarch64.dmg)
+
+    > MacOS users may encounter this problem: `"ChatWizard.app" is damaged and can't be opened. You should move it to the Trash.`
+    > 
+    > open terminal and execute:
+    > 
+    > ```shell
+    > xattr -cr /Applications/ChatWizard.app
+    > ```
+
+- **Windows**: 
+
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/ChatWizard_0.0.41_x64_en-US.msi)
+
+- **Linux**
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/chat-wizard_0.0.41_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.41/chat-wizard_0.0.41_amd64.AppImage)
 
 ## Development
 
@@ -49,15 +90,5 @@ Download [latest release](https://github.com/lisiur/ChatWizard/releases)
 - dev
     ```bash
     pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
-    ```
-
-## Q&A
-
--  MacOS users may encounter this problem: `"ChatWizard.app" is damaged and can't be opened. You should move it to the Trash.`
-
-    open terminal and execute:
-
-    ```shell
-    xattr -cr /Applications/ChatWizard.app
     ```
 
