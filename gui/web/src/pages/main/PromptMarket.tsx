@@ -130,6 +130,11 @@ export default defineComponent({
           {loadMarketPromptsTask.running ? (
             <NSpin class="mt-4"></NSpin>
           ) : (
+            loadMarketPromptsTask.error ? (
+              <div class="mt-4 text-red-400">
+                {loadMarketPromptsTask.error.toString()}
+              </div>
+            ) :
             <Explorer
               class="flex-1 overflow-auto"
               active={currentPrompt.value?.name}

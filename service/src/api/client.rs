@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::result::Result;
 
 #[derive(Default, Clone)]
@@ -22,7 +24,7 @@ impl Client {
     }
 
     fn build(&self) -> reqwest::Client {
-        let mut client_builder = reqwest::Client::builder();
+        let mut client_builder = reqwest::Client::builder().timeout(Duration::from_secs(10));
 
         // set headers
         if let Some(headers) = self.headers.clone() {
