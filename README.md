@@ -36,17 +36,20 @@ This project is currently undergoing active development and has only been tested
 
 <details>
 <summary>View</summary>
-<img src="./assets/live.gif" />
 <img src="./assets/chat.jpeg" />
+<img src="./assets/chat-menus.jpeg" />
 <img src="./assets/chat-config.jpeg" />
 <img src="./assets/prompt.jpeg" />
+<img src="./assets/prompt-menus.jpeg" />
 <img src="./assets/prompt-market.jpeg" />
-<img src="./assets/prompt-market2.jpeg" />
-<img src="./assets/settings.jpeg" />
+<img src="./assets/prompt-market-menu.jpeg" />
+<img src="./assets/setting.jpeg" />
+<img src="./assets/light-theme.jpeg" />
 </details>
 
 ## Features
 
+- support stream reply
 - support chat configuration
 - support lazy loading of chat records
 - support local prompt

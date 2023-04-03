@@ -33,18 +33,21 @@
 
 <details>
 <summary>查看</summary>
-<img src="./assets/live.gif" />
 <img src="./assets/chat.jpeg" />
+<img src="./assets/chat-menus.jpeg" />
 <img src="./assets/chat-config.jpeg" />
 <img src="./assets/prompt.jpeg" />
+<img src="./assets/prompt-menus.jpeg" />
 <img src="./assets/prompt-market.jpeg" />
-<img src="./assets/prompt-market2.jpeg" />
-<img src="./assets/settings.jpeg" />
+<img src="./assets/prompt-market-menu.jpeg" />
+<img src="./assets/setting.jpeg" />
+<img src="./assets/light-theme.jpeg" />
 </details>
 
 
 ## 特性
 
+- 支持流式回复
 - 支持聊天参数配置
 - 支持聊天记录的懒加载
 - 支持本地提示词
