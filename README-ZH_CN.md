@@ -6,11 +6,10 @@
 
 <div align=center>
   <div align=center>
-    <img src="https://img.shields.io/badge/English-Simplified%20Chinese-blue" />
   </div>
   <div>
     <img src="https://img.shields.io/github/package-json/v/lisiur/ChatWizard" />
-    <img style="display: none" src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
+    <img src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
     <img src="https://img.shields.io/github/downloads/lisiur/ChatWizard/total" />
   </div>
   <div>

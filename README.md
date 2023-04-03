@@ -6,11 +6,13 @@
 
 <div align=center>
   <div align=center>
-    <img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue" />
+    <a href="./README-ZH_CN.md">
+        <img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue" />
+    </a>
   </div>
   <div>
     <img src="https://img.shields.io/github/package-json/v/lisiur/ChatWizard" />
-    <img style="display: none" src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
+    <img src="https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard" />
     <img src="https://img.shields.io/github/downloads/lisiur/ChatWizard/total" />
   </div>
   <div>
