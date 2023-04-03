@@ -91,7 +91,3 @@
     ```bash
     pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
     ```
-
-## 常见问题
-
-
