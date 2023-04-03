@@ -11,7 +11,8 @@ import {
 } from "vue";
 import Draggable from "vuedraggable";
 import { Archive as ArchiveIcon } from "@vicons/fa";
-import { Pin as StickIcon } from '@vicons/tabler'
+import { Pin as StickIcon } from "@vicons/tabler";
+import { useI18n } from "../hooks/i18n";
 
 export type ExplorerMenuItem = DropdownMixedOption & {
   visible?: (data: ExplorerItem) => boolean;
@@ -137,6 +138,8 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
+
     const stickVisible = ref(true);
     const archiveVisible = ref(false);
     const showStickIndicator = computed(() => props.stickList.length > 0);
@@ -253,7 +256,9 @@ export default defineComponent({
                   <StickIcon />
                 </NIcon>
                 <span class="ml-1">
-                  {stickVisible.value ? "Hide Pinned" : "Show Pinned"}
+                  {stickVisible.value
+                    ? t("chat.explorer.hidePinned")
+                    : t("chat.explorer.showPinned")}
                 </span>
               </div>
             </div>
@@ -292,7 +297,9 @@ export default defineComponent({
                   <ArchiveIcon />
                 </NIcon>
                 <span class="ml-1">
-                  {archiveVisible.value ? "Hide Archived" : "Show Archived"}
+                  {archiveVisible.value
+                    ? t("chat.explorer.hideArchived")
+                    : t("chat.explorer.showArchived")}
                 </span>
               </div>
               <div v-show={archiveVisible.value}>

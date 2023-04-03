@@ -21,6 +21,11 @@ export const messages = {
   "chat.archive": "Archive",
   "chat.busy": "Please wait for the previous response to complete.",
 
+  "chat.explorer.hidePinned": "Hide Pinned",
+  "chat.explorer.showPinned": "Show Pinned",
+  "chat.explorer.hideArchived": "Hide Archived",
+  "chat.explorer.showArchived": "Show Archived",
+
   "chat.message.resend": 'resend',
   "chat.message.delete": 'delete',
   "chat.message.delete.hint": 'Are you sure to delete this message?',

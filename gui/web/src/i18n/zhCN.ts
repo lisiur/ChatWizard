@@ -23,6 +23,11 @@ const messages: Messages = {
   "chat.archive": "归档",
   "chat.busy": "请等待上一条响应完成",
 
+  "chat.explorer.hidePinned": "隐藏置顶",
+  "chat.explorer.showPinned": "显示置顶",
+  "chat.explorer.hideArchived": "隐藏归档",
+  "chat.explorer.showArchived": "显示归档",
+
   "chat.message.resend": '重新发送',
   "chat.message.delete": '删除',
   "chat.message.delete.hint": '确定要删除此消息吗？',
