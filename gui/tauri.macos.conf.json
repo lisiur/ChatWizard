@@ -1,7 +1,7 @@
 {
   "tauri": {
     "bundle": {
-      "identifier": "com.lisiur.wizard",
+      "identifier": "com.lisiur.chat-wizard",
       "icon": ["icons/macos/icon.icns"]
     },
     "systemTray": {

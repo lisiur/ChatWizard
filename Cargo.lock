@@ -326,6 +326,68 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chat-wizard"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "chat-wizard-service",
+ "directories",
+ "env_logger",
+ "futures",
+ "futures-util",
+ "log",
+ "open 4.0.1",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "thiserror",
+ "tokio",
+ "toml 0.7.3",
+ "uuid 1.3.0",
+]
+
+[[package]]
+name = "chat-wizard-api"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "futures",
+ "futures-util",
+ "log",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tiktoken-rs",
+ "tokio",
+ "uuid 1.3.0",
+]
+
+[[package]]
+name = "chat-wizard-service"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "csv",
+ "diesel",
+ "diesel_migrations",
+ "dotenvy",
+ "futures",
+ "libsqlite3-sys",
+ "log",
+ "once_cell",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tiktoken-rs",
+ "tokio",
+ "uuid 1.3.0",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4490,68 +4552,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b68db261ef59e9e52806f688020631e987592bd83619edccda9c47d42cde4f6c"
 dependencies = [
  "toml 0.5.11",
-]
-
-[[package]]
-name = "wizard"
-version = "0.0.1"
-dependencies = [
- "async-trait",
- "directories",
- "env_logger",
- "futures",
- "futures-util",
- "log",
- "open 4.0.1",
- "reqwest",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "thiserror",
- "tokio",
- "toml 0.7.3",
- "uuid 1.3.0",
- "wizard-service",
-]
-
-[[package]]
-name = "wizard-api"
-version = "0.1.0"
-dependencies = [
- "dotenv",
- "futures",
- "futures-util",
- "log",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror",
- "tiktoken-rs",
- "tokio",
- "uuid 1.3.0",
-]
-
-[[package]]
-name = "wizard-service"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "csv",
- "diesel",
- "diesel_migrations",
- "dotenvy",
- "futures",
- "libsqlite3-sys",
- "log",
- "once_cell",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror",
- "tiktoken-rs",
- "tokio",
- "uuid 1.3.0",
 ]
 
 [[package]]

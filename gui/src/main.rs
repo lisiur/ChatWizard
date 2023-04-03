@@ -3,11 +3,11 @@
     windows_subsystem = "windows"
 )]
 
-use project::Project;
-use window::{create_window, WindowOptions};
-use wizard_service::{
+use chat_wizard_service::{
     services::prompt_market::PromptMarketService, ChatService, PromptService, SettingService,
 };
+use project::Project;
+use window::{create_window, WindowOptions};
 
 mod commands;
 mod error;
@@ -21,7 +21,7 @@ mod window;
 async fn main() {
     env_logger::init();
     let project = Project::init().await.unwrap();
-    let conn = wizard_service::init(&project.db_url).unwrap();
+    let conn = chat_wizard_service::init(&project.db_url).unwrap();
 
     tauri::Builder::default()
         .system_tray(tray::system_tray())
@@ -34,7 +34,7 @@ async fn main() {
             create_window(
                 "main",
                 WindowOptions {
-                    title: "wizard".to_string(),
+                    title: "chat-wizard".to_string(),
                     url: "".to_string(),
                     width: 860.0,
                     height: 720.0,

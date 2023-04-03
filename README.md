@@ -1,12 +1,12 @@
 <p align="center">
-  <img width="200" src="./assets/logo.png" alt="wizard">
-  <h1 align="center">wizard</h1>
+  <img width="200" src="./assets/logo.png" alt="ChatWizard">
+  <h1 align="center">ChatWizard</h1>
   <p align="center">OpenAI chat client Desktop Application (Windows, MacOS, Linux)</p>
 </p>
 
 [![简体中文 badge](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue)](./README-ZH_CN.md)
-![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.wizard)
-[![downloads](https://img.shields.io/github/downloads/lisiur/wizard/total.svg?style=flat-square)](https://github.com/lisiur/wizard/releases)
+![visitor](https://visitor-badge.glitch.me/badge?page_id=lisiur.ChatWizard)
+[![downloads](https://img.shields.io/github/downloads/lisiur/ChatWizard/total.svg?style=flat-square)](https://github.com/lisiur/ChatWizard/releases)
 
 ## Declaration
 
@@ -34,7 +34,7 @@ This project is currently undergoing active development and has only been tested
 
 ## Installation
 
-Download [latest release](https://github.com/lisiur/wizard/releases)
+Download [latest release](https://github.com/lisiur/ChatWizard/releases)
 
 ## Development
 
@@ -53,11 +53,11 @@ Download [latest release](https://github.com/lisiur/wizard/releases)
 
 ## Q&A
 
--  MacOS users may encounter this problem: `"wizard.app" is damaged and can't be opened. You should move it to the Trash.`
+-  MacOS users may encounter this problem: `"ChatWizard.app" is damaged and can't be opened. You should move it to the Trash.`
 
     open terminal and execute:
 
     ```shell
-    xattr -cr /Applications/wizard.app
+    xattr -cr /Applications/ChatWizard.app
     ```
 

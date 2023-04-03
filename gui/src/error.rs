@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    Service(#[from] wizard_service::Error),
+    Service(#[from] chat_wizard_service::Error),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),

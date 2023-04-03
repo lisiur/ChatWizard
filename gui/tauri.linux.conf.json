@@ -1,7 +1,7 @@
 {
   "tauri": {
     "bundle": {
-      "identifier": "com.lisiur.wizard",
+      "identifier": "com.lisiur.chat-wizard",
       "icon": [
         "icons/linux/32x32.png",
         "icons/linux/128x128.png",
