@@ -7,10 +7,8 @@ import {
   toRefs,
   watch,
 } from "vue";
-import {
-  Settings as SettingIcon,
-  InformationCircleOutline as InfoIcon,
-} from "@vicons/ionicons5";
+import { InformationCircleOutline as InfoIcon } from "@vicons/ionicons5";
+import { Dots as SettingIcon } from "@vicons/tabler";
 import {
   NDrawer,
   NDynamicTags,
@@ -82,11 +80,11 @@ export default defineComponent({
         path: "model",
         tooltip: t("chat.config.model.hint"),
         options: useAsyncData(async () => {
-          const models = await getChatModels()
-          return models.map(model => ({
+          const models = await getChatModels();
+          return models.map((model) => ({
             value: model.name,
-          }))
-        }, []), 
+          }));
+        }, []),
       },
       {
         type: "number",
@@ -127,7 +125,7 @@ export default defineComponent({
     return () => (
       <div>
         <span onClick={showDrawer} class="relative" style="top: .1rem">
-          <NIcon size={20}>
+          <NIcon size={20} color="var(--text-color1)">
             <SettingIcon />
           </NIcon>
         </span>
@@ -157,7 +155,9 @@ export default defineComponent({
                         case "number": {
                           return (
                             <NInputNumber
-                              v-model:value={props.chat.index.config.params[config.path]}
+                              v-model:value={
+                                props.chat.index.config.params[config.path]
+                              }
                               min={config.min}
                               max={config.max}
                               step={config.step}
@@ -168,14 +168,18 @@ export default defineComponent({
                         case "input": {
                           return (
                             <NInput
-                              v-model:value={props.chat.index.config.params[config.path]}
+                              v-model:value={
+                                props.chat.index.config.params[config.path]
+                              }
                             ></NInput>
                           );
                         }
                         case "select": {
                           return (
                             <NSelect
-                              v-model:value={props.chat.index.config.params[config.path]}
+                              v-model:value={
+                                props.chat.index.config.params[config.path]
+                              }
                               options={config.options!.value.map((item) => {
                                 return {
                                   key: item.value,
@@ -189,7 +193,9 @@ export default defineComponent({
                         case "dynamicTags": {
                           return (
                             <NDynamicTags
-                              v-model:value={props.chat.index.config.params[config.path]}
+                              v-model:value={
+                                props.chat.index.config.params[config.path]
+                              }
                             ></NDynamicTags>
                           );
                         }

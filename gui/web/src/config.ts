@@ -1,5 +1,5 @@
-import { ConfigProviderProps, darkTheme, lightTheme } from "naive-ui";
-import { computed } from "vue";
+import { darkTheme, lightTheme } from "naive-ui";
+import { computed, reactive } from "vue";
 import { getTheme, getNaiveUiThemeOverrides } from "./themes";
 import { currentNaiveUiDateLang, currentNaiveUiLang } from "./hooks/i18n";
 
@@ -11,12 +11,9 @@ const naiveTheme = computed(() => {
   }
 });
 const naiveUiOverrides = getNaiveUiThemeOverrides();
-export const configProviderProps = computed(
-  () =>
-    ({
-      theme: naiveTheme.value,
-      themeOverrides: naiveUiOverrides,
-      locale: currentNaiveUiLang.value,
-      dateLocale: currentNaiveUiDateLang.value,
-    } as ConfigProviderProps)
-);
+export const configProviderProps = reactive({
+  theme: naiveTheme,
+  themeOverrides: naiveUiOverrides,
+  locale: currentNaiveUiLang,
+  dateLocale: currentNaiveUiDateLang,
+});

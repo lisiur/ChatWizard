@@ -1,8 +1,8 @@
-import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { getTheme, Theme, showOrCreateWindow, getLocale, debugLog, showWindow } from "./api";
+import { getTheme, Theme, getLocale, showWindow } from "./api";
 import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { window } from "@tauri-apps/api";
@@ -54,7 +54,7 @@ export default defineComponent({
           backgroundColor: "var(--body-color)",
           color: "var(--text-color-base)",
         }}
-        {...configProviderProps.value}
+        {...configProviderProps}
       >
         <RouterView />
       </NConfigProvider>

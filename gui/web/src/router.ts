@@ -26,13 +26,13 @@ export default createRouter({
               name: "promptMarket",
               path: "prompt-market",
               component: () => import("./pages/main/PromptMarket"),
-            }
+            },
+            {
+              name: "setting",
+              path: "setting",
+              component: () => import("./pages/main/Setting"),
+            },
           ],
-        },
-        {
-          name: "setting",
-          path: "setting",
-          component: () => import("./pages/setting/Index"),
         },
       ],
     },

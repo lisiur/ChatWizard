@@ -6,7 +6,8 @@ const messages: Messages = {
   "common.copy": "复制",
   "common.delete": "删除",
   "common.copy.success": "已复制到剪贴板",
-  "common.network.timeout": "网络超时",
+  "common.network.error.timeout": "网络超时",
+  "common.network.error.connect": "网络链接失败",
   "common.newVersion": "新版本",
 
   "window.setting": "设置",

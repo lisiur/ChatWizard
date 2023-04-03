@@ -77,14 +77,14 @@ pub fn init(db_url: &str) -> Result<DbConn> {
     let prompt_sources = vec![
         NewPromptSource {
             id: Id::from("b46134f1-26d4-4644-aba5-02b2796f088a"),
-            name: "awesome-chatgpt-prompts".to_string(),
+            name: "f/awesome-chatgpt-prompts".to_string(),
             description: "https://github.com/f/awesome-chatgpt-prompts".to_string(),
             url: "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv".to_string(),
             r#type: "csv".to_string(),
         },
         NewPromptSource {
             id: Id::from("7af1f226-5a10-492d-b466-8eff82931b57"),
-            name: "awesome-chatgpt-prompts-zh".to_string(),
+            name: "PlexPt/awesome-chatgpt-prompts-zh".to_string(),
             description: "https://github.com/PlexPt/awesome-chatgpt-prompts-zh".to_string(),
             url: "https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json".to_string(),
             r#type: "json".to_string(),

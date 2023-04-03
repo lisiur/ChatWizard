@@ -75,6 +75,8 @@ pub enum ApiError {
 pub enum NetworkError {
     #[error("timeout: {0}")]
     Timeout(String),
+    #[error("connect: {0}")]
+    Connect(String),
     #[error("unknown error: {0}")]
     Unknown(String),
 }
@@ -83,6 +85,8 @@ impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
         Error::Network(if err.is_timeout() {
             NetworkError::Timeout(err.to_string())
+        } else if err.is_connect() {
+            NetworkError::Connect(err.to_string())
         } else {
             NetworkError::Unknown(err.to_string())
         })

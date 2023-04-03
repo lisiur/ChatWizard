@@ -1,16 +1,16 @@
 import { computed, defineComponent } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import {
-  ChatbubbleEllipsesOutline as InactiveChatIcon,
-  ChatbubbleEllipses as ActiveChatIcon,
-  Settings as SettingIcon,
-  TerminalOutline as PromptIcon,
-  Terminal as PromptActiveIcon,
-  StorefrontOutline as StoreIcon,
-  Storefront as StoreActiveIcon,
-} from "@vicons/ionicons5";
+  Chat20Regular as InactiveChatIcon,
+  Chat20Filled as ActiveChatIcon,
+  CommentLightning20Regular as PromptIcon,
+  CommentLightning20Filled as PromptActiveIcon,
+  Apps20Regular as StoreIcon,
+  Apps20Filled as StoreActiveIcon,
+} from "@vicons/fluent"
+
+import { SettingsAdjust as SettingIcon } from '@vicons/carbon'
 import { NBadge, NDropdown, NIcon } from "naive-ui";
-import { showOrCreateWindow } from "../../api";
 import { os } from "@tauri-apps/api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useVersion } from "../../hooks/version";
@@ -29,19 +29,19 @@ export default defineComponent({
         routeName: "chat",
         icon: InactiveChatIcon,
         activeIcon: ActiveChatIcon,
-        size: "2rem",
+        size: "1.8rem",
       },
       {
         routeName: "prompt",
         icon: PromptIcon,
         activeIcon: PromptActiveIcon,
-        size: "1.7rem",
+        size: "1.8rem",
       },
       {
         routeName: "promptMarket",
         icon: StoreIcon,
         activeIcon: StoreActiveIcon,
-        size: "1.7rem",
+        size: "1.8rem",
       },
     ];
 
@@ -54,15 +54,9 @@ export default defineComponent({
     function settingActionHandler(key: string) {
       switch (key) {
         case "setting": {
-          showOrCreateWindow("setting", {
-            title: t("window.setting"),
-            url: `/#${router.resolve({ name: "setting" }).path}`,
-            width: 520,
-            height: 400,
-            resizable: false,
-            alwaysOnTop: false,
-            visible: false,
-          });
+          router.push({
+            name: 'setting',
+          })
           break;
         }
       }
@@ -70,7 +64,7 @@ export default defineComponent({
 
     const Setting = () => (
       <NBadge dot show={hasNewVersion.value}>
-        <NIcon size="2rem" color="var(--switcher-color)">
+        <NIcon size="1.6rem" color="var(--switcher-color)">
           <SettingIcon />
         </NIcon>
       </NBadge>

@@ -6,12 +6,20 @@ const { t } = i18n.global;
 
 const invoke = async <T>(...args: Parameters<typeof _invoke>) => {
   return _invoke<T>(...args).catch((err) => {
+    console.log(err);
     const msg: string = err.toString();
-    if (msg.includes("timed out")) {
-      message.error(t("common.network.timeout"));
-    }
+    let errMsg = (() => {
+      if (msg.startsWith("timeout")) {
+        return t("common.network.error.timeout");
+      } else if (msg.startsWith("connect")) {
+        return t("common.network.error.connect");
+      } else {
+        return msg;
+      }
+    })();
+    message.error(errMsg);
     debugLog(err.toString());
-    return Promise.reject(err);
+    return Promise.reject(errMsg);
   });
 };
 
@@ -156,7 +164,7 @@ export async function loadChatLogByCursor(params: {
     "load_chat_log_by_cursor_result: \n -> " +
       res.nextCursor?.slice(-2) +
       "\n" +
-      res.records.map((it) => it.id.slice(-2) + ' ' + it.message).join("\n")
+      res.records.map((it) => it.id.slice(-2) + " " + it.message).join("\n")
   );
 
   return res;

@@ -75,34 +75,45 @@ export default defineComponent({
 
     watch(() => props.chat, reset);
 
+    const hijackLink = (message: Message) => {
+      if (message instanceof AssistantMessage) {
+        const dom = document.querySelector(
+          `#assistant-${message.id}`
+        ) as HTMLElement;
+        if (dom && dom.dataset.intercepted) {
+          return false;
+        }
+        watch(
+          () => (message as AssistantMessage).done,
+          () => {
+            nextTick(() => {
+              interceptLink(dom);
+              dom.dataset.intercepted = "true";
+            });
+          },
+          {
+            immediate: true,
+          }
+        );
+      }
+    };
     watch(
       () => props.chat.messages,
       (messages) => {
-        nextTick(() => {
+        setTimeout(() => {
           for (let i = messages.length - 1; i >= 0; i--) {
-            let message = messages[i];
-            if (message instanceof AssistantMessage) {
-              const dom = document.querySelector(
-                `#assistant-${message.id}`
-              ) as HTMLElement;
-              if (dom && dom.dataset.intercepted) {
-                break;
-              }
-              watch(
-                () => (message as AssistantMessage).done,
-                () => {
-                  nextTick(() => {
-                    interceptLink(dom);
-                    dom.dataset.intercepted = "true";
-                  });
-                },
-                {
-                  immediate: true,
-                }
-              );
+            let needHijack = hijackLink(messages[i]);
+            if (needHijack === false) {
+              break;
             }
           }
-        });
+          for (let i = 0; i < messages.length; i++) {
+            let needHijack = hijackLink(messages[i]);
+            if (needHijack === false) {
+              break;
+            }
+          }
+        }, 200);
       },
       {
         immediate: true,

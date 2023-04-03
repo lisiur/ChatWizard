@@ -14,13 +14,19 @@ let loadingBar!: LoadingBarApiInjection;
 
 const { t } = i18n.global;
 
+let api: any
+
 watch(
   configProviderProps,
   () => {
-    let api = createDiscreteApi(
+    debugger
+    if (api) {
+      api.unmount();
+    }
+    api = createDiscreteApi(
       ["message", "dialog", "notification", "loadingBar"],
       {
-        configProviderProps: configProviderProps.value,
+        configProviderProps,
         loadingBarProviderProps: {
           loadingBarStyle: {
             loading: "background-color: var(--loading-bar-bg-color)",

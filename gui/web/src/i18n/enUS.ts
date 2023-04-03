@@ -4,7 +4,8 @@ export const messages = {
   "common.copy": "copy",
   "common.delete": "Delete",
   "common.copy.success": "Copied to clipboard",
-  "common.network.timeout": "Network Timeout",
+  "common.network.error.timeout": "Network Timeout",
+  "common.network.error.connect": "Network Connect Error",
   "common.newVersion": "New version",
 
   "window.setting": "Setting",

@@ -1,4 +1,5 @@
 import {
+  NButton,
   NForm,
   NFormItem,
   NInput,
@@ -58,24 +59,20 @@ export default defineComponent({
         <div class="mt-8 pr-12">
           {model.value ? (
             <NForm model={model.value} labelPlacement="left" labelWidth="8rem">
-              <NFormItem label={t("setting.locale")}>
-                <NSelect
+              <NFormItem label={t("setting.locale") + ' :'}>
+                <NRadioGroup
                   v-model:value={model.value.language}
-                  placeholder="Locale"
                   onUpdateValue={changeLocaleHandler}
-                  options={[
-                    {
-                      label: "English",
-                      value: "enUS",
-                    },
-                    {
-                      label: "中文",
-                      value: "zhCN",
-                    },
-                  ]}
-                ></NSelect>
+                >
+                  <NRadioButton value="enUS">
+                    English
+                  </NRadioButton>
+                  <NRadioButton value="zhCN">
+                    中文
+                  </NRadioButton>
+                </NRadioGroup>
               </NFormItem>
-              <NFormItem label={t("setting.theme")}>
+              <NFormItem label={t("setting.theme") + ' :'}>
                 <NRadioGroup
                   v-model:value={model.value.theme}
                   onUpdateValue={changeThemeHandler}
@@ -91,27 +88,30 @@ export default defineComponent({
                   </NRadioButton>
                 </NRadioGroup>
               </NFormItem>
-              <NFormItem label={t("setting.apiKey")}>
+              <NFormItem label={t("setting.apiKey") + ' :'}>
                 <NInput
                   v-model:value={model.value.apiKey}
                   type="password"
+                  showPasswordToggle
                   placeholder={`sk-${"x".repeat(48)}`}
                   onBlur={changeApiKeyHandler}
                 ></NInput>
               </NFormItem>
-              <NFormItem label={t("setting.proxy")}>
+              <NFormItem label={t("setting.proxy") + ' :'}>
                 <NInput
                   v-model:value={model.value.proxy}
                   onBlur={changeProxyHandler}
+                  placeholder="e.g. http://127.0.0.1:1080"
                 ></NInput>
               </NFormItem>
-              <NFormItem label={t("setting.forwardUrl")}>
+              <NFormItem label={t("setting.forwardUrl") + ' :'}>
                 <NInput
                   v-model:value={model.value.forwardUrl}
                   onBlur={changeForwardUrlHandler}
+                  placeholder="e.g. http://your-server:8080"
                 ></NInput>
               </NFormItem>
-              <NFormItem label={t("setting.forwardApiKey")}>
+              <NFormItem label={t("setting.forwardApiKey") + ' :'}>
                 <NSwitch
                   v-model:value={model.value.forwardApiKey}
                   onUpdateValue={changeForwardApiKeyHandler}

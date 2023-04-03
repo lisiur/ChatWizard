@@ -1,10 +1,13 @@
 import { computed, defineComponent, ref, watch } from "vue";
 import * as api from "../../api";
-import { NIcon, NScrollbar, NSelect, NSpin } from "naive-ui";
+import { NIcon, NScrollbar, NSelect, NSpin, NTooltip } from "naive-ui";
 import { useI18n } from "../../hooks/i18n";
 import Explorer, { ExplorerItem } from "../../components/Explorer";
 import DragBar from "../../components/DragBar";
-import { BagAdd as InstallIcon } from "@vicons/ionicons5";
+import {
+  BagAdd as InstallIcon,
+  InformationCircleOutline as InfoIcon,
+} from "@vicons/ionicons5";
 import { message } from "../../utils/prompt";
 import { useTask } from "../../hooks/task";
 import { useRouter } from "vue-router";
@@ -21,6 +24,7 @@ export default defineComponent({
         return {
           value: item.id,
           label: item.name,
+          tooltip: item.description,
         };
       });
     });
@@ -124,17 +128,32 @@ export default defineComponent({
               v-model:value={currentSourceId.value}
               options={sourceOptions.value}
               loading={loadSourcesTask.running}
+              consistentMenuWidth={false}
+              renderOption={({ node, option }) => (
+                <span class="flex items-center pl-2">
+                  <NTooltip>
+                    {{
+                      trigger: () => (
+                        <NIcon color="var(--text-color1)">
+                          <InfoIcon></InfoIcon>
+                        </NIcon>
+                      ),
+                      default: () => (option as any).tooltip,
+                    }}
+                  </NTooltip>
+                  {node}
+                </span>
+              )}
             ></NSelect>
           </div>
           <div class="p-2 text-gray-400">{t("prompt.market.prompts")}</div>
           {loadMarketPromptsTask.running ? (
             <NSpin class="mt-4"></NSpin>
+          ) : loadMarketPromptsTask.error ? (
+            <div class="mt-4 flex justify-center text-error">
+              {loadMarketPromptsTask.error.toString()}
+            </div>
           ) : (
-            loadMarketPromptsTask.error ? (
-              <div class="mt-4 text-red-400">
-                {loadMarketPromptsTask.error.toString()}
-              </div>
-            ) :
             <Explorer
               class="flex-1 overflow-auto"
               active={currentPrompt.value?.name}
