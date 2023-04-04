@@ -1,58 +1,23 @@
-#[derive(thiserror::Error, serde::Serialize, Clone, Debug)]
-#[serde(tag = "type", content = "data", rename_all = "camelCase")]
+#[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("network error: {}", .0.message)]
-    Network(NetworkError),
+    #[error(transparent)]
+    Service(#[from] chat_wizard_service::Error),
 
-    #[error("api error: {}", .0.message)]
-    Api(ApiError),
+    #[error(transparent)]
+    Serde(#[from] serde_json::Error),
 
-    #[error("Invalid API key")]
-    InvalidApiKey,
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
 
-    #[error("not found: {}", .0)]
-    NotFound(String),
+    #[error("Unknown command: {0}")]
+    UnknownCommand(String),
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
-pub struct NetworkError {
-    pub r#type: String,
-    pub message: String,
-}
-
-#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
-pub struct ApiErrorResponse {
-    error: ApiError,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct ApiError {
-    pub message: String,
-    pub r#type: String,
-    pub code: Option<String>,
-}
-
-impl From<reqwest::Error> for Error {
-    fn from(err: reqwest::Error) -> Self {
-        Error::Network(if err.is_timeout() {
-            NetworkError {
-                r#type: "timeout".to_string(),
-                message: err.to_string(),
-            }
-        } else {
-            NetworkError {
-                r#type: "unknown".to_string(),
-                message: err.to_string(),
-            }
-        })
-    }
-}
-
-impl From<ApiErrorResponse> for Error {
-    fn from(err: ApiErrorResponse) -> Self {
-        match err.error.code.as_deref() {
-            Some("invalid_api_key") => Error::InvalidApiKey,
-            _ => Error::Api(err.error),
-        }
+impl serde::Serialize for Error {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_ref())
     }
 }

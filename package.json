@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "install": "cd web && pnpm install",
     "dev": "cd gui && RUST_LOG=debug cargo tauri dev --no-watch",
-    "build": "cd gui && cargo tauri build",
+    "build": "cd web && pnpm build && cd ../gui && cargo tauri build",
+    "icon": "cd gui && cargo tauri icon icons/macos/app-icon.png -o icons/macos && cargo tauri icon icons/windows/app-icon.png -o icons/windows && cargo tauri icon icons/linux/app-icon.png -o icons/linux",
     "release:patch": "node release.js patch",
     "release:minor": "node release.js minor",
     "release:major": "node release.js major",

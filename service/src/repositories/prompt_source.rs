@@ -6,6 +6,7 @@ use crate::schema::prompt_sources;
 use crate::Id;
 use crate::{models::prompt_source::PromptSource, DbConn};
 
+#[derive(Clone)]
 pub struct PromptSourceRepo(DbConn);
 
 impl PromptSourceRepo {

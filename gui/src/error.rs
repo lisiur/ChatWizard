@@ -10,7 +10,13 @@ pub enum Error {
     Request(#[from] reqwest::Error),
 
     #[error(transparent)]
+    Serde(#[from] serde_json::Error),
+
+    #[error(transparent)]
     Tauri(#[from] tauri::Error),
+
+    #[error("Unknown command: {0}")]
+    UnknownCommand(String),
 }
 
 impl serde::Serialize for Error {

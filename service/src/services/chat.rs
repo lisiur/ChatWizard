@@ -29,6 +29,12 @@ pub struct ChatService {
     chat_model_repo: ChatModelRepo,
 }
 
+impl From<DbConn> for ChatService {
+    fn from(conn: DbConn) -> Self {
+        Self::new(conn)
+    }
+}
+
 impl ChatService {
     pub fn new(conn: DbConn) -> Self {
         Self {

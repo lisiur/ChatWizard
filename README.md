@@ -84,16 +84,18 @@ This project is currently undergoing active development and has only been tested
 
 ## Development
 
-- generate icons
+- dev
 
     ```bash
-    cd gui
-    cargo tauri icon icons/macos/app-icon.png -o icons/macos
-    cargo tauri icon icons/linux/app-icon.png -o icons/linux
-    cargo tauri icon icons/windows/app-icon.png -o icons/windows
+    # root
+    pnpm install
+    pnpm run install
+    pnpm run dev
     ```
-- dev
+
+- build
+
     ```bash
-    pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
+    pnpm run build
     ```
 
