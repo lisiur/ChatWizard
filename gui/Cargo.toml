@@ -29,6 +29,7 @@ directories = "5.0.0"
 toml = "0.7.2"
 async-trait = "0.1.67"
 open = "4.0.1"
+axum = "0.6.12"
 
 [features]
 # by default Tauri runs in production mode
