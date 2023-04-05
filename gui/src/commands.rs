@@ -1,13 +1,4 @@
-use chat_wizard_service::commands::{
-    AllArchiveChatsCommand, AllChatsCommand, AllNonStickChatsCommand, AllPromptsCommand,
-    AllStickChatsCommand, CreatePromptCommand, DeleteChatCommand, DeleteChatLogCommand,
-    DeletePromptCommand, GetChatCommand, GetChatModelsCommand, GetLocaleCommand,
-    GetPromptSourcePromptsCommand, GetPromptSourcesCommand, GetSettingsCommand, GetThemeCommand,
-    InstallMarketPromptAndCreateChatCommand, InstallMarketPromptCommand,
-    LoadChatLogByCursorCommand, LoadPromptCommand, MoveNonStickChatCommand, MoveStickChatCommand,
-    NewChatCommand, ResendMessageCommand, SendMessageCommand, SetChatArchiveCommand,
-    SetChatStickCommand, UpdateChatCommand, UpdatePromptCommand, UpdateSettingCommand,
-};
+use chat_wizard_service::commands::*;
 use chat_wizard_service::{DbConn, Result as ServiceResult};
 use serde::Serialize;
 use serde_json::from_value;

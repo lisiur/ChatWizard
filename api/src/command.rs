@@ -1,23 +1,8 @@
-use std::{sync::Arc, collections::HashSet};
+use std::{collections::HashSet, sync::Arc};
 
 use crate::{result::Result, Error};
 use axum::extract::ws::Message;
-use chat_wizard_service::{
-    result::Result as ServiceResult,
-    commands::{
-        AllArchiveChatsCommand, AllChatsCommand, AllNonStickChatsCommand, AllPromptsCommand,
-        AllStickChatsCommand, CreatePromptCommand, DeleteChatCommand, DeleteChatLogCommand,
-        DeletePromptCommand, GetChatCommand, GetChatModelsCommand, GetLocaleCommand,
-        GetPromptSourcePromptsCommand, GetPromptSourcesCommand, GetSettingsCommand,
-        GetThemeCommand, InstallMarketPromptAndCreateChatCommand, InstallMarketPromptCommand,
-        LoadChatLogByCursorCommand, LoadPromptCommand, MoveNonStickChatCommand,
-        MoveStickChatCommand, NewChatCommand, ResendMessageCommand, SendMessageCommand,
-        SetChatArchiveCommand, SetChatStickCommand, UpdateChatCommand, UpdatePromptCommand,
-        UpdateSettingCommand,
-    },
-    Id,
-};
-use futures::SinkExt;
+use chat_wizard_service::{commands::*, result::Result as ServiceResult, Id};
 use serde::Serialize;
 use serde_json::{from_value, json};
 use tokio::sync::Mutex;
@@ -33,8 +18,7 @@ impl<T: Serialize + 'static> IntoResult for ServiceResult<T> {
     }
 }
 
-
-use crate::{AppState};
+use crate::AppState;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,14 +29,12 @@ pub struct CommandPayload {
     pub user_id: Id,
 }
 
-
 pub async fn handle_command(
     params: CommandPayload,
     state: AppState,
     client_id: Id,
 ) -> Result<Box<dyn erased_serde::Serialize>> {
     let conn = &state.conn;
-    let clients = state.clients.clone();
     let users = state.users.clone();
     let CommandPayload {
         command,
@@ -150,14 +132,12 @@ pub async fn handle_command(
             let (mut receiver, message_id, reply_id) = command.exec(conn).await?;
             tokio::spawn(async move {
                 while let Some(content) = receiver.recv().await {
-                    if let Some(socket) = clients.lock().await.get(&user_id) {
-                        let payload = json!({
-                            "eventId": message_id,
-                            "payload": content,
-                        });
-                        let message = Message::Text(serde_json::to_string(&payload).unwrap());
-                        socket.lock().await.send(message).await.unwrap();
-                    }
+                    let payload = json!({
+                        "id": message_id,
+                        "payload": content,
+                    });
+                    let message = Message::Text(serde_json::to_string(&payload).unwrap());
+                    state.send_message(user_id, message).await;
                 }
             });
 
