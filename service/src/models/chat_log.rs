@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use chrono::NaiveDateTime;
-use diesel::sql_types::Text;
 use diesel::*;
 use serde::Serialize;
 
@@ -20,10 +19,10 @@ pub struct ChatLog {
     pub cost: f32,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub finished: bool,
 }
 
-#[derive(AsExpression, Hash, PartialEq, Eq, Clone, Serialize, Debug)]
-#[diesel(sql_type = Text)]
+#[derive(Hash, PartialEq, Eq, Clone, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum Role {
     System,
@@ -64,16 +63,17 @@ impl From<Role> for OpenAIChatRole {
     }
 }
 
-#[derive(AsChangeset)]
+#[derive(AsChangeset, Default)]
 #[diesel(table_name = chat_logs)]
 pub struct PatchChatLog {
     pub id: Id,
     pub chat_id: Option<Id>,
-    pub role: Option<Role>,
+    pub role: Option<TextWrapper<Role>>,
     pub message: Option<String>,
     pub model: Option<String>,
     pub tokens: Option<i32>,
     pub cost: Option<f32>,
+    pub finished: Option<bool>,
 }
 
 #[derive(Insertable)]
@@ -86,4 +86,5 @@ pub struct NewChatLog {
     pub model: String,
     pub tokens: i32,
     pub cost: f32,
+    pub finished: bool,
 }

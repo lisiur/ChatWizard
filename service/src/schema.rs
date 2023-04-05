@@ -11,6 +11,7 @@ diesel::table! {
         cost -> Float,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        finished -> Bool,
     }
 }
 

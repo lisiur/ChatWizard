@@ -23,6 +23,7 @@ export interface ChatLog {
   model: string;
   tokens: number;
   cost: number;
+  finished: boolean;
   createdAt: string;
   updatedAt: string;
 }

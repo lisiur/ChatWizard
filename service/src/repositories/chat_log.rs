@@ -1,5 +1,5 @@
 use crate::database::pagination::{Paginate, PaginatedRecords};
-use crate::models::chat_log::{ChatLog, NewChatLog};
+use crate::models::chat_log::{ChatLog, NewChatLog, PatchChatLog};
 use crate::result::Result;
 use crate::schema::chat_logs;
 use crate::{database::DbConn, types::Id};
@@ -158,6 +158,15 @@ impl ChatLogRepo {
             .execute(&mut *self.0.conn())?;
 
         Ok(size)
+    }
+
+    pub fn update(&self, chat_log: &PatchChatLog) -> Result<()> {
+        diesel::update(chat_logs::table)
+            .filter(chat_logs::id.eq(chat_log.id))
+            .set(chat_log)
+            .execute(&mut *self.0.conn())?;
+
+        Ok(())
     }
 
     pub fn select_last_n(&self, n: i64, chat_id: Id) -> Result<Vec<ChatLog>> {

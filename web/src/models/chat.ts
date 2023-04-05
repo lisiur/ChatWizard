@@ -45,7 +45,7 @@ export class Chat {
       case "user": {
         const msg = new UserMessage(log.message);
         msg.setId(log.id);
-        msg.finished = true;
+        msg.finished = log.finished;
         msg.markHistory();
         return msg;
       }
@@ -82,6 +82,10 @@ export class Chat {
     const index = this.messages.findIndex((item) => {
       return item instanceof UserMessage && item.id === messageId;
     });
+
+    if (index === -1) {
+      return
+    }
 
     const userMessage = this.messages[index] as UserMessage;
 

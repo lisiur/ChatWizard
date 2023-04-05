@@ -6,7 +6,7 @@ use tokio::task::JoinHandle;
 use crate::api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, OpenAIChatRole};
 use crate::database::pagination::PaginatedRecords;
 use crate::models::chat::{Chat, NewChat, PatchChat};
-use crate::models::chat_log::{ChatLog, NewChatLog, Role};
+use crate::models::chat_log::{ChatLog, NewChatLog, PatchChatLog, Role};
 use crate::models::chat_model::ChatModel;
 use crate::repositories::chat::ChatRepo;
 use crate::repositories::chat_log::{ChatLogQueryParams, ChatLogRepo};
@@ -336,6 +336,7 @@ impl ChatService {
             model: model.clone(),
             tokens: user_token as i32,
             cost: chat_model.calc_cost(user_token),
+            finished: false,
         };
         self.chat_log_repo.insert(&user_log)?;
 
@@ -388,6 +389,7 @@ impl ChatService {
                                     model: model.clone(),
                                     tokens: reply_tokens as i32,
                                     cost: total_cost,
+                                    finished: true,
                                 };
                                 if let Err(err) = chat_log_repo.insert(&reply_log) {
                                     send(sender.clone(), StreamContent::Error(err.into())).await;
@@ -395,6 +397,14 @@ impl ChatService {
                                 }
                                 if let Err(err) = chat_repo.add_cost_and_update(chat_id, total_cost)
                                 {
+                                    send(sender.clone(), StreamContent::Error(err.into())).await;
+                                    break;
+                                }
+                                if let Err(err) = chat_log_repo.update(&PatchChatLog {
+                                    id: user_log_id,
+                                    finished: Some(true),
+                                    ..Default::default()
+                                }) {
                                     send(sender.clone(), StreamContent::Error(err.into())).await;
                                     break;
                                 }
