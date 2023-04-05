@@ -62,9 +62,9 @@ This project is currently undergoing active development and has only been tested
 
 ## Todo
 
-[ ] multi user
-[ ] shared chat
-[ ] export pdf/image/markdown
+- [ ] multi user
+- [ ] shared chat
+- [ ] export pdf/image/markdown
 
 ## Installation
 
