@@ -8,6 +8,7 @@ use chat_wizard_service::{
     services::prompt_market::PromptMarketService, ChatService, PromptService, SettingService,
 };
 use project::Project;
+use tauri::Manager;
 use window::{create_window, WindowOptions};
 
 mod commands;
@@ -32,6 +33,13 @@ async fn main() {
     tokio::spawn(app(port, conn.clone()));
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            if let Some(main_window) = app.get_window("main") {
+                main_window.show().unwrap();
+                main_window.unminimize().unwrap();
+                main_window.set_focus().unwrap();
+            }
+        }))
         .system_tray(tray::system_tray())
         .on_system_tray_event(tray::on_system_tray_event)
         .manage(Port(port))

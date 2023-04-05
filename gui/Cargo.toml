@@ -33,6 +33,7 @@ open = "4.0.1"
 axum = "0.6.12"
 portpicker = "0.1.1"
 erased-serde = "0.3.25"
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 
 [features]
 # by default Tauri runs in production mode
