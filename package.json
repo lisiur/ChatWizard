@@ -6,8 +6,9 @@
   "scripts": {
     "install": "cd web && pnpm install",
     "dev": "cd gui && RUST_LOG=debug cargo tauri dev --no-watch",
+    "build:web": "cd web && pnpm build",
     "build:gui": "cd gui && cargo tauri build",
-    "build:server": "cd web && pnpm build && cd ../server && cargo build",
+    "build:server": "pnpm run build:web && cd server && cargo build",
     "icon": "cd gui && cargo tauri icon icons/macos/app-icon.png -o icons/macos && cargo tauri icon icons/windows/app-icon.png -o icons/windows && cargo tauri icon icons/linux/app-icon.png -o icons/linux",
     "version:patch": "node version.js patch",
     "version:minor": "node version.js minor",
