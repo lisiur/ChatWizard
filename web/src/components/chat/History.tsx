@@ -1,4 +1,13 @@
-import { NButton, NPopconfirm, NScrollbar, NSpace, NSpin } from "naive-ui";
+import {
+  NButton,
+  NButtonGroup,
+  NIcon,
+  NPopconfirm,
+  NScrollbar,
+  NSpace,
+  NSpin,
+  NTooltip,
+} from "naive-ui";
 import {
   computed,
   defineComponent,
@@ -22,8 +31,15 @@ import {
 } from "../../models/message";
 import { interceptLink } from "../../utils/interceptLink";
 import mdRender from "../../utils/mdRender";
-import { message } from "../../utils/prompt";
 import { writeToClipboard } from "../../utils/api";
+import {
+  Clipboard20Regular as CopyIcon,
+  ClipboardCheckmark20Regular as CopySuccessIcon,
+  Delete20Regular as DeleteIcon,
+  Checkmark20Regular as ConfirmIcon,
+  Send20Regular as ResendIcon,
+  DocumentEdit20Regular as EditIcon,
+} from "@vicons/fluent";
 
 export default defineComponent({
   props: {
@@ -168,59 +184,35 @@ export default defineComponent({
             v-html={html}
           ></div>
           {msg.done ? (
-            <div class="group-hover:block hidden absolute bottom-0 left-4 text-xs">
-              <NSpace size="small" wrapItem={false}>
-                <NButton
-                  type="default"
-                  text
-                  size="tiny"
-                  class="ml-2 text-gray-500"
-                  onClick={async () => {
-                    await writeToClipboard(msg.content);
-                    message.success(t("common.copy.success"));
-                  }}
-                >
-                  {t("common.copy")}
-                </NButton>
+            <div class="group-hover:block hidden gap-1 absolute bottom-[-.6rem] left-5 text-xs">
+              <NButtonGroup>
+                {renderCopyMessageButton(msg.content)}
                 {renderDeleteMessageButton(msg.id)}
-              </NSpace>
+              </NButtonGroup>
             </div>
           ) : null}
         </div>
       );
     }
 
-    function renderUserMessage(message: UserMessage) {
+    function renderUserMessage(msg: UserMessage) {
       return (
         <div
-          key={message.id}
-          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
+          key={msg.id}
+          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative hover:shadow-md"
         >
           <div
             class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
             style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
           >
-            <div class="break-words whitespace-pre-line">{message.content}</div>
+            <div class="break-words whitespace-pre-line">{msg.content}</div>
           </div>
-          <div class="group-hover:block hidden absolute bottom-0 right-5 text-xs">
-            <NSpace size="small" wrapItem={false}>
-              {(() => {
-                if (message.finished === false) {
-                  return (
-                    <NButton
-                      type="error"
-                      text
-                      size="tiny"
-                      class="mr-2"
-                      onClick={() => props.resendMessage?.(message.id)}
-                    >
-                      {t("chat.message.resend")}
-                    </NButton>
-                  );
-                }
-              })()}
-              {renderDeleteMessageButton(message.id)}
-            </NSpace>
+          <div class="group-hover:block hidden absolute bottom-[-.6rem] right-5 text-xs">
+            {renderDeleteMessageButton(msg.id)}
+            {renderCopyMessageButton(msg.content)}
+            {msg.finished === false
+              ? renderResendMessageButton(msg.id)
+              : null}
           </div>
         </div>
       );
@@ -255,17 +247,114 @@ export default defineComponent({
     }
 
     function renderDeleteMessageButton(messageId: string) {
+      const needConfirm = ref(false);
+      const buttonRef = ref<InstanceType<typeof NButton>>();
+      const unwatch = watch(
+        buttonRef,
+        (button) => {
+          if (button) {
+            unwatch();
+            button.$el.addEventListener("mouseleave", () => {
+              setTimeout(() => {
+                needConfirm.value = false;
+              }, 500);
+            });
+          }
+        },
+        {
+          immediate: true,
+        }
+      );
+      const clickHandler = () => {
+        if (needConfirm.value) {
+          props.deleteMessage?.(messageId);
+          needConfirm.value = false;
+        } else {
+          needConfirm.value = true;
+        }
+      };
       return (
-        <NPopconfirm onPositiveClick={() => props.deleteMessage?.(messageId)}>
+        <NButton
+          ref={buttonRef}
+          text
+          type="error"
+          size="tiny"
+          onClick={clickHandler}
+        >
+          <NIcon size="1.2rem">
+            {needConfirm.value ? <ConfirmIcon /> : <DeleteIcon />}
+          </NIcon>
+        </NButton>
+      );
+    }
+
+    function renderCopyMessageButton(content: string) {
+      const success = ref(false);
+      const buttonRef = ref<InstanceType<typeof NButton>>();
+      const unwatch = watch(
+        buttonRef,
+        (button) => {
+          if (button) {
+            unwatch();
+            button.$el.addEventListener("mouseleave", () => {
+              setTimeout(() => {
+                success.value = false;
+              }, 500);
+            });
+          }
+        },
+        {
+          immediate: true,
+        }
+      );
+      return (
+        <NTooltip placement="bottom" delay={1000} disabled={true}>
           {{
             trigger: () => (
-              <NButton type="error" text size="tiny">
-                {t("chat.message.delete")}
+              <NButton
+                ref={buttonRef}
+                type={success.value ? "success" : "default"}
+                text
+                size="tiny"
+                class="text-gray-500"
+                onClick={async () => {
+                  await writeToClipboard(content);
+                  success.value = true;
+                }}
+              >
+                <NIcon size="1.2rem">
+                  {success.value ? <CopySuccessIcon /> : <CopyIcon />}
+                </NIcon>
               </NButton>
             ),
-            default: () => t("chat.message.delete.hint"),
+            default: () => t("common.copy"),
           }}
-        </NPopconfirm>
+        </NTooltip>
+      );
+    }
+
+    function renderResendMessageButton(id: string) {
+      return (
+        <NTooltip placement="bottom" delay={500}>
+          {{
+            trigger: () => (
+              <NButton
+                type="default"
+                text
+                size="tiny"
+                class="text-gray-500"
+                onClick={() => {
+                  props.resendMessage?.(id);
+                }}
+              >
+                <NIcon size="1.2rem">
+                  <ResendIcon />
+                </NIcon>
+              </NButton>
+            ),
+            default: () => t("chat.message.resend"),
+          }}
+        </NTooltip>
       );
     }
 
