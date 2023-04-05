@@ -4,10 +4,17 @@ use crate::result::Result;
 use crate::{models::setting::Setting, repositories::setting::SettingRepo, DbConn, Id};
 use crate::{PatchSetting, Theme};
 
+#[derive(Clone)]
 pub struct SettingService {
     #[allow(unused)]
     conn: DbConn,
     setting_repo: SettingRepo,
+}
+
+impl From<DbConn> for SettingService {
+    fn from(conn: DbConn) -> Self {
+        Self::new(conn)
+    }
 }
 
 impl SettingService {

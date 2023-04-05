@@ -7,11 +7,18 @@ use crate::{
     repositories::{chat::ChatRepo, prompt::PromptRepo},
 };
 
+#[derive(Clone)]
 pub struct PromptService {
     #[allow(unused)]
     conn: DbConn,
     chat_repo: ChatRepo,
     prompt_repo: PromptRepo,
+}
+
+impl From<DbConn> for PromptService {
+    fn from(conn: DbConn) -> Self {
+        Self::new(conn)
+    }
 }
 
 impl PromptService {

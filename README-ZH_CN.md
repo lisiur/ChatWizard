@@ -82,15 +82,17 @@
 
 ## 开发
 
-- 生成图标
+- 启动
 
     ```bash
-    cd gui
-    cargo tauri icon icons/macos/app-icon.png -o icons/macos
-    cargo tauri icon icons/linux/app-icon.png -o icons/linux
-    cargo tauri icon icons/windows/app-icon.png -o icons/windows
+    # root
+    pnpm install
+    pnpm run install
+    pnpm run dev
     ```
-- 启动开发
+
+- 打包
+
     ```bash
-    pnpm install && cd gui/web && pnpm install && cd .. && pnpm dev
+    pnpm run build
     ```

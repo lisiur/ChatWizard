@@ -11,6 +11,7 @@ use crate::{
     ChatConfig, DbConn, Id, NewChat, NewPrompt,
 };
 
+#[derive(Clone)]
 pub struct PromptMarketService {
     #[allow(unused)]
     conn: DbConn,
@@ -18,6 +19,12 @@ pub struct PromptMarketService {
     setting_repo: SettingRepo,
     prompt_repo: PromptRepo,
     prompt_source_repo: PromptSourceRepo,
+}
+
+impl From<DbConn> for PromptMarketService {
+    fn from(conn: DbConn) -> Self {
+        Self::new(conn)
+    }
 }
 
 impl PromptMarketService {

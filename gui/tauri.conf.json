@@ -1,9 +1,9 @@
 {
   "build": {
-    "beforeDevCommand": "lsof -i:1420 | awk 'NR>1 {print $2}' | xargs kill && pnpm dev",
-    "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "lsof -i:1420 | awk 'NR>1 {print $2}' | xargs kill && cd web && pnpm dev",
+    "beforeBuildCommand": "",
     "devPath": "http://localhost:1420",
-    "distDir": "./web/dist",
+    "distDir": "../web/dist",
     "withGlobalTauri": false
   },
   "package": {
