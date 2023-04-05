@@ -60,6 +60,12 @@ This project is currently undergoing active development and has only been tested
 - i18n
 - dark/light theme
 
+## Todo
+
+[ ] multi user
+[ ] shared chat
+[ ] export pdf/image/markdown
+
 ## Installation
 
 - **Mac**
