@@ -1,14 +1,14 @@
 {
   "build": {
     "beforeDevCommand": "lsof -i:1420 | awk 'NR>1 {print $2}' | xargs kill && cd web && pnpm dev",
-    "beforeBuildCommand": "",
+    "beforeBuildCommand": "cd web && pnpm build",
     "devPath": "http://localhost:1420",
     "distDir": "../web/dist",
     "withGlobalTauri": false
   },
   "package": {
     "productName": "ChatWizard",
-    "version": "0.0.43"
+    "version": "0.0.44"
   },
   "tauri": {
     "allowlist": {

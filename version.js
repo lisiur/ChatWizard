@@ -7,6 +7,8 @@ const commands = {
   patch,
   minor,
   major,
+  release,
+  publish,
 };
 
 function main() {
@@ -35,6 +37,18 @@ function major() {
   bumpVersion(majorVersion);
 }
 
+function release() {
+  const newVersion = changeLogVersionPackage.version;
+  execSync("git add .");
+  execSync(`git commit -m "chore: bump version to ${newVersion}"`);
+  execSync(`git tag -a v${newVersion} -m "v${newVersion}"`);
+}
+
+function publish() {
+  execSync("git push");
+  execSync("git push --tags");
+}
+
 function generateReleaseNote() {
   const [latestChangeLog] = fs
     .readFileSync("./CHANGELOG.md", "utf8")
@@ -60,11 +74,6 @@ function bumpVersion(type) {
   updateVersion(newVersion);
   updateChangeLog();
   generateReleaseNote();
-  execSync("git add .");
-  execSync(`git commit -m "chore: bump version to ${newVersion}"`);
-  execSync(`git tag -a v${newVersion} -m "v${newVersion}"`);
-  execSync("git push");
-  execSync("git push --tags");
 }
 
 function updateChangeLog() {
