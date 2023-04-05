@@ -49,15 +49,16 @@ This project is currently undergoing active development and has only been tested
 
 ## Features
 
-- support stream reply
-- support chat configuration
-- support lazy loading of chat records
-- support local prompt
-- support prompt market
-- support multiple language
-- support proxy
-- support theme
-- support forward openai api
+- local web server
+- stream response
+- network proxy
+- forward api
+- lazy loading of chat records
+- chat configuration
+- prompt market
+- local prompt
+- i18n
+- dark/light theme
 
 ## Installation
 
