@@ -1,23 +1,23 @@
 {
-  "version": "0.0.45",
-  "notes": "## [0.0.45](https://github.com/lisiur/askai/compare/v0.0.42...v0.0.45) (2023-04-05)%0A%0A### Features%0A%0A* support web server",
-  "pub_date": "2023-04-05T04:10:40.999Z",
+  "version": "0.0.46",
+  "notes": "## [0.0.46](https://github.com/lisiur/askai/compare/v0.0.45...v0.0.46) (2023-04-05)%0A%0A%0A### Bug Fixes%0A%0A* fix resend not work on web page ([b86fd4e](https://github.com/lisiur/askai/commit/b86fd4eb3ac39f4c3fc0da227748fa6220f99a72))%0A%0A%0A### Features%0A%0A* add finished filed to chat_logs ([f5d117c](https://github.com/lisiur/askai/commit/f5d117cc878424ba1560f9d77b09b810f95fbc00))%0A* optimize user experience ([18ca282](https://github.com/lisiur/askai/commit/18ca2824cc15865e7a199c7900264e4eb405b6c8))%0A* support edit message ([1be98ef](https://github.com/lisiur/askai/commit/1be98ef4db2d823fd1d2ac229dcf06bf09327b08))",
+  "pub_date": "2023-04-05T10:25:27.608Z",
   "platforms": {
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2NGbkJnblF3YmYyMUxDS0Q2OG1XSTdOemw1dVVqN2NQWXpSZzFobnBrV1ZrS2pNbFpGMWxGdlRRSHVHV01ubERmeTU2YjhSS1g4TS9pc0hvVlU2MHdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjY3NjE4CWZpbGU6Y2hhdC13aXphcmRfMC4wLjQ1X2FtZDY0LkFwcEltYWdlLnRhci5negowZWQ1SDh1bnphbGh6encrNjNsMU5hcTk4MjdVajhhWXRmM1g3NWlxQ2ZPcTdsRFFQaE9qZVduQkdEVGNBVDVyVlBYbzRFNXExaHdiWEcvSC9tSm5BZz09Cg==",
-      "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/chat-wizard_0.0.45_amd64.AppImage.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1N4MmZicXZZYTdEdHBWUjJDR2puaVFMZThUTEV4cTQwcUY5QUFVbUI3UGcrQ0hQNDFzTHNJODlQaTFXV2ZnUGFWa3hzYTJJMHJDclBXdjhDWE1SSUEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjg5Nzk3CWZpbGU6Y2hhdC13aXphcmRfMC4wLjQ2X2FtZDY0LkFwcEltYWdlLnRhci5negpucitad3prTi80NXVuaUpJbU9vUHdOV2daWDUxVlZWKzJLMEZnSVkzOFU3bGlCTXkzbE9RS2dDSk9LV0NEcFpFYm9XWkZURElsM2YreXR2ZC9BbHFBUT09Cg==",
+      "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/chat-wizard_0.0.46_amd64.AppImage.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2RUQnBxL2l2NmpxUUgyOU02dzBaRlREMmlUZGlQcHhYRHlNT3lOaysrMEpmNXFyakN2eEpRQ01JeSt3aE4zbFNORFRxUHBmYk5raWlXcGpZeWduVlFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjY3NjI5CWZpbGU6Q2hhdFdpemFyZC5hcHAudGFyLmd6CjY5MkJxNms3cjdlTjdBd2lOQW14MHNVbzJDQjhJV0xRVGJqWFRyQVl3K2l1cmwrV1MvQS8yYnBoMk5KZ0J1SWEySm5rR3YyZHJuSVI2bFF6RWQ4MUFnPT0K",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2JVdWxkWHlHWFpMcWdHTWpiMHFDWmhrZmEvV1I1MzRlUXVwUVM3eEFKUEZZcnVQc2tuckJReGNPOFgyRm96UHhSaGg1NW1KblAyM3M2dWsvVzNBWVFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjg5ODY0CWZpbGU6Q2hhdFdpemFyZC5hcHAudGFyLmd6CnJmbi9NRm0wcWdrOSt2ZFZqdnlLMkZpZzhnckFGRHhIczUyK1M3djNYdEdDM3RyeVdNVENRY21iM01tT3JFRFE5NU5sMkR5eU5LSmNjMGUzc0dwRUNnPT0K",
       "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/ChatWizard_x64.app.tar.gz"
     },
-    "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2JTYWRmaTJLbjVrMjdHb1NLVkxlbVYzU3I3WUxtYTBwL1lEd1lyVnlzVzNFQzJOVFZtS2QrOEoybWxHSjdOT2FXZWdyNnJtT1VZdVo0dlY3cEFtRUFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjY3Njk0CWZpbGU6Q2hhdFdpemFyZF8wLjAuNDVfeDY0X2VuLVVTLm1zaS56aXAKa1NCUnJaeERMUno3K1gyNFBKOERrMWk1YVJaeDlKcHFMM2p4SUNvd3BOVGxhRG1HRlMyWXdQOFdjQWxnZmZTYklDdGNKcGVlaEFtbm9lZCtUSlJmQWc9PQo=",
-      "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/ChatWizard_0.0.45_x64_en-US.msi.zip"
-    },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL1VyZmVwdzMwMVNqbGQxVXBBelJIUzV0T2h0L3Jscm15NFpXMnN5Z0JFY3lJYWI4Tk5Zak9VSmk2V0VLME1tN0trVDhNT0xaM0NLNkZEcDVkbUFhT2dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjY3ODM3CWZpbGU6Q2hhdFdpemFyZC5hcHAudGFyLmd6CjhHZkdsWGFxY2ZVaHFKSFhnWUdzWVAyUTRJc2NCdXNYdFZZdDUwRzZqZE1hUDlXbDJYV3VveGZiVEQ5WU5Xdy94VGNndGRFVWQwU09xWFpwSTlWQUFBPT0K",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2ZCUHJWOTFCRnVIa2hqMnF4bzBZS2hnWlhhTTNEL2pqa3BDRzYzKzArQzBUNUdFcWRSVjNTRzEvYlFHZUdPVWV2UEYvYXR1S3FHK2IxVm56Y05DTXc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjkwMDQyCWZpbGU6Q2hhdFdpemFyZC5hcHAudGFyLmd6CjA0L2JxS2tWdXlOS2tZK1o3OWdQa0pyMXFCUTJ6eGVRU3lTcDZ0RUQxSDZ6RlNmcXJRMEdGRTQyWTcvcWlJYnRaZTR0WE9kSVFnYm1iTVIxYWl5bEJ3PT0K",
       "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/ChatWizard_aarch64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTQ3lwT1Ird01RL2FBNktnYWYwYll0TzA5N09JaDRnbDN6cWg2dU9HVlZvVnlBbGVkOUVPRElSVmI5QUFlWllaWHZmdUVLVGtYbFpocUNKM3Y5MnphL3VIT0I4NDJvU2cwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgwNjkwMzIyCWZpbGU6Q2hhdFdpemFyZF8wLjAuNDZfeDY0X2VuLVVTLm1zaS56aXAKamJROTh5Umo0dW85UFBPTjBGZENyaW9pbnIyMWxrc1F0alVTRGlaMkZaZVVNZ01JWDVVSmpFRVFkbUhkbGhac0V6MC9ZQm9Ec0JHd3pMTDlkeGFwRFE9PQo=",
+      "url": "https://github.com/lisiur/ChatWizard/releases/latest/download/ChatWizard_0.0.46_x64_en-US.msi.zip"
     }
   }
 }
