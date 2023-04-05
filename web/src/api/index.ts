@@ -176,6 +176,10 @@ export async function moveNonStickChat(from: string, to: string) {
   return execCommand<void>("move_non_stick_chat", { from, to });
 }
 
+export async function updateChatLog(id: string, content: string) {
+  return execCommand<void>("update_chat_log", { id, content });
+}
+
 export async function deleteChatLog(logId: string) {
   return execCommand<void>("delete_chat_log", { logId });
 }

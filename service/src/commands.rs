@@ -1,14 +1,13 @@
 use crate::{
     models::{chat_log::ChatLog, chat_model::ChatModel, prompt_source::PromptSource},
     result::Result,
-    services::prompt_market::{InstallMarketPromptPayload, MarketPrompt, PromptMarketService},
-    Chat, ChatConfig, ChatService, CreateChatPayload, CreatePromptPayload, CursorQueryResult,
-    DbConn, DeleteChatPayload, GetChatLogByCursorPayload, Id, MoveChatPayload, Prompt, PromptIndex,
-    PromptService, ResendMessagePayload, SearchChatPayload, SearchPromptPayload,
-    SendMessagePayload, Setting, SettingService, StreamContent, Theme, UpdateChatPayload,
-    UpdatePromptPayload, UpdateSettingPayload,
+    services::chat::*,
+    services::prompt::*,
+    services::prompt_market::*,
+    services::setting::*,
+    Chat, ChatConfig, CursorQueryResult, DbConn, Id, Prompt, PromptIndex, Setting, StreamContent, Theme,
 };
-use serde::{Deserialize};
+use serde::Deserialize;
 use tokio::sync::mpsc::{self, Receiver};
 
 #[derive(Deserialize)]
@@ -250,6 +249,26 @@ impl DeleteChatCommand {
         let chat_service = ChatService::new(conn.clone());
 
         chat_service.delete_chat(DeleteChatPayload { id: self.chat_id })?;
+
+        Ok(())
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateChatLogCommand {
+    pub id: Id,
+    pub content: String,
+}
+
+impl UpdateChatLogCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<()> {
+        let chat_service = ChatService::new(conn.clone());
+
+        chat_service.update_chat_log(UpdateChatLogPayload {
+            id: self.id,
+            content: self.content,
+        })?;
 
         Ok(())
     }

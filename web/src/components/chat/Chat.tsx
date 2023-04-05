@@ -45,6 +45,10 @@ export default defineComponent({
       }, 20);
     }
 
+    function updateMessage(id: string, content: string) {
+      props.chat.updateLog(id, content)
+    }
+
     async function exportMarkdown() {
       const filePath = await save({
         title: props.chat.index.title,
@@ -104,6 +108,7 @@ export default defineComponent({
           ref={historyRef}
           chat={props.chat}
           resendMessage={resendMessage}
+          updateMessage={updateMessage}
           deleteMessage={props.chat.deleteLog.bind(props.chat)}
         ></History>
 

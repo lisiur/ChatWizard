@@ -245,6 +245,18 @@ impl ChatService {
         Ok(())
     }
 
+    pub fn update_chat_log(&self, payload: UpdateChatLogPayload) -> Result<()> {
+        let patch_chat_log = PatchChatLog {
+            id: payload.id,
+            message: Some(payload.content),
+            ..Default::default()
+        };
+
+        self.chat_log_repo.update(&patch_chat_log)?;
+
+        Ok(())
+    }
+
     pub fn delete_chat_log_since_id(&self, id: Id) -> Result<ChatLog> {
         let chat_log = self.chat_log_repo.delete_since_id(id)?;
 
@@ -509,6 +521,13 @@ pub struct DeleteChatPayload {
 pub struct SendMessagePayload {
     pub chat_id: Id,
     pub message: String,
+}
+
+#[derive(serde::Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateChatLogPayload {
+    pub id: Id,
+    pub content: String,
 }
 
 pub struct ResendMessagePayload {

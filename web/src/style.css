@@ -62,3 +62,14 @@ html, body, #app {
 .n-scrollbar-content {
   height: 100%;
 }
+
+.n-dialog.n-modal {
+  border-radius: .5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.n-dialog__content {
+  flex: 1;
+  overflow: hidden;
+}

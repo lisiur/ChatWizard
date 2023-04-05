@@ -80,6 +80,10 @@ pub async fn exec_command(
             .exec(&conn)
             .into_result(),
 
+        "update_chat_log" => from_value::<UpdateChatLogCommand>(payload)?
+            .exec(&conn)
+            .into_result(),
+
         "delete_chat_log" => from_value::<DeleteChatLogCommand>(payload)?
             .exec(&conn)
             .into_result(),

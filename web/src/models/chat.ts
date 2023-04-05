@@ -6,6 +6,7 @@ import {
   ChatLog,
   getChat,
   updateChat,
+  updateChatLog,
   deleteChatLog,
   loadChatLogByCursor,
 } from "../api";
@@ -60,6 +61,14 @@ export class Chat {
     }
   }
 
+  async updateLog(logId: string, content: string) {
+    await updateChatLog(logId, content);
+    const msg = this.messages.find((item) => item.id === logId);
+    if (msg) {
+      msg.content = content;
+    }
+  }
+
   async deleteLog(logId: string) {
     await deleteChatLog(logId);
     const index = this.messages.findIndex((item) => item.id === logId);
@@ -84,7 +93,7 @@ export class Chat {
     });
 
     if (index === -1) {
-      return
+      return;
     }
 
     const userMessage = this.messages[index] as UserMessage;

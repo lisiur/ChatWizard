@@ -2,6 +2,7 @@ import {
   NButton,
   NButtonGroup,
   NIcon,
+  NInput,
   NPopconfirm,
   NScrollbar,
   NSpace,
@@ -40,6 +41,7 @@ import {
   Send20Regular as ResendIcon,
   DocumentEdit20Regular as EditIcon,
 } from "@vicons/fluent";
+import { dialog } from "../../utils/prompt";
 
 export default defineComponent({
   props: {
@@ -52,6 +54,9 @@ export default defineComponent({
     },
     deleteMessage: {
       type: Function as PropType<(messageId: string) => void>,
+    },
+    updateMessage: {
+      type: Function as PropType<(messageId: string, content: string) => void>,
     },
   },
   setup(props, { expose }) {
@@ -187,6 +192,7 @@ export default defineComponent({
             <div class="group-hover:block hidden gap-1 absolute bottom-[-.6rem] left-5 text-xs">
               <NButtonGroup>
                 {renderCopyMessageButton(msg.content)}
+                {renderEditMessageButton(msg)}
                 {renderDeleteMessageButton(msg.id)}
               </NButtonGroup>
             </div>
@@ -209,10 +215,9 @@ export default defineComponent({
           </div>
           <div class="group-hover:block hidden absolute bottom-[-.6rem] right-5 text-xs">
             {renderDeleteMessageButton(msg.id)}
+            {renderEditMessageButton(msg)}
             {renderCopyMessageButton(msg.content)}
-            {msg.finished === false
-              ? renderResendMessageButton(msg.id)
-              : null}
+            {msg.finished === false ? renderResendMessageButton(msg.id) : null}
           </div>
         </div>
       );
@@ -330,6 +335,55 @@ export default defineComponent({
             default: () => t("common.copy"),
           }}
         </NTooltip>
+      );
+    }
+
+    function editMessageHandler(msg: Message) {
+      const value = ref(msg.content);
+      const dl = dialog.create({
+        style: {
+          width: "80%",
+          height: "80%",
+        },
+        closable: false,
+        closeOnEsc: false,
+        maskClosable: false,
+        showIcon: false,
+        content() {
+          return (
+            <NInput
+              type="textarea"
+              class="h-full"
+              v-model:value={value.value}
+            ></NInput>
+          );
+        },
+        positiveText: t("common.ok"),
+        negativeText: t("common.cancel"),
+        onPositiveClick() {
+          props.updateMessage?.(msg.id, value.value);
+        },
+        onNegativeClick() {
+          dl.destroy();
+        },
+      });
+    }
+
+    function renderEditMessageButton(msg: Message) {
+      return (
+        <NButton
+          type="default"
+          text
+          size="tiny"
+          class="text-gray-500"
+          onClick={() => {
+            editMessageHandler(msg);
+          }}
+        >
+          <NIcon size="1.2rem">
+            <EditIcon />
+          </NIcon>
+        </NButton>
       );
     }
 
