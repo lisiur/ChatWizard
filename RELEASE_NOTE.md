@@ -1,6 +1,6 @@
-## [0.0.42](https://github.com/lisiur/askai/compare/v0.0.41...v0.0.42) (2023-04-03)
+## [0.0.43](https://github.com/lisiur/askai/compare/v0.0.42...v0.0.43) (2023-04-05)
 
 
 ### Features
 
-* optimize user experience ([dda8e74](https://github.com/lisiur/askai/commit/dda8e749797f184783dd6c0ca0f54799a78500ac))
+* support web server ([3ce3eae](https://github.com/lisiur/askai/commit/3ce3eae5ce23500343961d3148899ce06055d618))
