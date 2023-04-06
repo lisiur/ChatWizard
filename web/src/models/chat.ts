@@ -23,25 +23,33 @@ export class Chat {
   busy: Ref<boolean>;
   index: ChatIndex;
   messages: Array<Message>;
+  prevCursor?: string | null; // undefined meas not loaded, null means no more logs
   constructor(index: ChatIndex) {
     this.busy = ref(false);
     this.index = reactive(index);
     this.messages = reactive([]);
   }
 
-  async loadLogByCursor(cursor?: string) {
+  async loadPrevLogs() {
+    const res = await this.loadLogByCursor(this.prevCursor ?? undefined);
+    this.prevCursor = res.nextCursor;
+    this.addPreviousLogs(res.records);
+    return res
+  }
+
+  private async loadLogByCursor(cursor?: string) {
     return loadChatLogByCursor({
       chatId: this.index.id,
-      size: 10,
+      size: 20,
       cursor,
     });
   }
 
-  addPreviousLogs(logs: ChatLog[]) {
+  private addPreviousLogs(logs: ChatLog[]) {
     this.messages.unshift(...logs.reverse().map((log) => this.handleLog(log)));
   }
 
-  handleLog(log: ChatLog) {
+  private handleLog(log: ChatLog) {
     switch (log.role) {
       case "user": {
         const msg = new UserMessage(log.message);
@@ -73,6 +81,51 @@ export class Chat {
     await deleteChatLog(logId);
     const index = this.messages.findIndex((item) => item.id === logId);
     this.messages.splice(index, 1);
+  }
+
+  async getPreviousUserLog(logId?: string): Promise<Message | null> {
+    if (!logId) {
+      const previousLog = this.messages.findLast(
+        (item) => item instanceof UserMessage
+      );
+      return previousLog ?? null;
+    }
+
+    const index = this.messages.findIndex((item) => item.id === logId);
+    if (index === -1) {
+      return null;
+    }
+
+    const previousLog = this.messages.findLast(
+      (item, i) => i < index && item instanceof UserMessage
+    );
+
+    // TODO: Currently can not handle the scroll things. When come up with a solution, uncomment the following code
+    // if (!previousLog) {
+    //   if (this.prevCursor !== null) {
+    //     await this.loadPrevLogs();
+    //     return this.getPreviousUserLog(logId)
+    //   }
+    // }
+
+    return previousLog ?? null;
+  }
+
+  async getNextUserLog(logId?: string) {
+    if (!logId) {
+      return null;
+    }
+
+    const index = this.messages.findIndex((item) => item.id === logId);
+    if (index === -1) {
+      return null;
+    }
+
+    const nextLog = this.messages.find(
+      (item, i) => i > index && item instanceof UserMessage
+    );
+
+    return nextLog ?? null;
   }
 
   async sendMessage(message: string, params?: { onFinish?: () => void }) {

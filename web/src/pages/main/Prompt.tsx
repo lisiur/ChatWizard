@@ -7,6 +7,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "../../hooks/i18n";
 import Explorer, { ExplorerItem } from "../../components/Explorer";
 import DragBar from "../../components/DragBar";
+import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
 
 export default defineComponent({
   setup() {
@@ -166,11 +167,6 @@ export default defineComponent({
       });
     }
 
-    function autoGrowHandler(element: HTMLTextAreaElement) {
-      element.style.height = "5px";
-      element.style.height = element.scrollHeight + "px";
-    }
-
     return () => (
       <div class="h-full flex">
         <div
@@ -229,10 +225,10 @@ export default defineComponent({
                   style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
                   onFocusout={updateHandler}
                   onInput={(e) =>
-                    autoGrowHandler(e.target as HTMLTextAreaElement)
+                    autoGrowTextarea(e.target as HTMLTextAreaElement)
                   }
                   onFocus={(e) =>
-                    autoGrowHandler(e.target as HTMLTextAreaElement)
+                    autoGrowTextarea(e.target as HTMLTextAreaElement)
                   }
                 ></textarea>
               </NScrollbar>

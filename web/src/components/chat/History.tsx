@@ -78,10 +78,9 @@ export default defineComponent({
     const { savePosition, recoverPosition } = useScroll(scrollEle);
 
     const { hasMore, reset, firstBatchLoad } = useLazyLoad<ChatLog>(
-      async (cursor?: string) => {
-        const res = await props.chat.loadLogByCursor(cursor);
+      async () => {
         savePosition();
-        props.chat.addPreviousLogs(res.records);
+        const res = await props.chat.loadPrevLogs()
         await nextTick();
         if (firstBatchLoad.value) {
           scrollToBottom();
