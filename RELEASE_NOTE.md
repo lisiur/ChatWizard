@@ -1,11 +1,11 @@
-## [0.0.50](https://github.com/lisiur/askai/compare/v0.0.49...v0.0.50) (2023-04-06)
+## [0.0.51](https://github.com/lisiur/askai/compare/v0.0.50...v0.0.51) (2023-04-06)
 
 
 ### Bug Fixes
 
-* fix tray icon not response ([be451e9](https://github.com/lisiur/askai/commit/be451e9a2cf33c545262391de2cc44a37527866b))
+* fix first arrow down key not work ([9d0cdce](https://github.com/lisiur/askai/commit/9d0cdce657f1a3dbe941b3cf84c95defbd920e2b))
 
 
 ### Features
 
-* support recover your last input upon typing arrow up/down ([beaab96](https://github.com/lisiur/askai/commit/beaab9614b5beef0d9758f7b2d37b02ea3460e15))
+* update windows/linux icons ([35bac2a](https://github.com/lisiur/askai/commit/35bac2a39780d0abd52a05a48f435c13f4cf87e6))
