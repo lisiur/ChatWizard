@@ -79,7 +79,7 @@ async fn main() {
                         // Since currently skip_taskbar is not supported on macOS,
                         // and tauri doesn't support handle the click event of the dock icon
                         // we need to minimize the window instead of hide it
-                        // or we cannot show the window again from the dock icon, it will be very confusing
+                        // otherwise we cannot show the window again from the dock icon, it will be very confusing
                         win.minimize().unwrap();
                     }
                     #[cfg(not(target_os = "macos"))]
