@@ -30,7 +30,12 @@
 
 ## Declaration
 
-This project is currently undergoing active development and has only been tested on MacOS M1. In the event of any issues, please do not hesitate to submit an issue as they arise, and I will make every effort to address them. Additionally, all contributions in the form of PRs are welcome and greatly appreciated.
+> This project is currently undergoing active development and has only been tested on MacOS M1. In the event of any issues, please do not hesitate to submit an issue as they arise, and I will make every effort to address them. Additionally, all contributions in the form of PRs are welcome and greatly appreciated.
+
+- All data will only be stored locally.
+- Chat logs and API keys will only be used for the OpenAI API and will not be sent to any other destination.
+- If concerned about API key leakage, the in-app forwarding function can be used (which enables storage of the API key on your own server, requiring only a reverse-proxy address to the OpenAI interface).
+
 
 ## Screenshots
 
