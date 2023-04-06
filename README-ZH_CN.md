@@ -13,13 +13,13 @@
     <img src="https://img.shields.io/github/downloads/lisiur/ChatWizard/total" />
   </div>
   <div>
-    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+    <a href="https://github.com/lisiur/ChatWizard/releases/latest">
       <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?logo=apple&logoColor=white" />
     </a>
-    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+    <a href="https://github.com/lisiur/ChatWizard/releases/latest">
       <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white" />
     </a>
-    <a href="https://github.com/Synaptrix/ChatGPT-Desktop/releases/latest">
+    <a href="https://github.com/lisiur/ChatWizard/releases/latest">
       <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white" />
     </a>
   </div>
@@ -72,8 +72,8 @@
 
 - **Mac**
 
-    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.50/ChatWizard_0.0.50_x64.dmg)
-    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.50/ChatWizard_0.0.50_aarch64.dmg)
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.51/ChatWizard_0.0.51_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.51/ChatWizard_0.0.51_aarch64.dmg)
 
     > MacOS 可能会遇到这个问题: `"ChatWizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
     > 
@@ -85,11 +85,11 @@
 
 - **Windows**: 
 
-    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.50/ChatWizard_0.0.50_x64_en-US.msi)
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.51/ChatWizard_0.0.51_x64_en-US.msi)
 
 - **Linux**
-    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.50/chat-wizard_0.0.50_amd64.deb)
-    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.50/chat-wizard_0.0.50_amd64.AppImage)
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.51/chat-wizard_0.0.51_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.51/chat-wizard_0.0.51_amd64.AppImage)
 
 ## 升级
 
