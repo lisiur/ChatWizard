@@ -1,0 +1,6 @@
+.sortable-ghost {
+  background-color: var(--dragging-menu-bg-color);
+}
+.sortable-dragging {
+  opacity: 0;
+}

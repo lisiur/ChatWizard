@@ -11,7 +11,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": {
-        target: "http://localhost:23333",
+        target: "http://127.0.0.1:23333",
         changeOrigin: true,
         ws: true,
         preserveHeaderKeyCase: true,

@@ -19,5 +19,6 @@ export interface ThemeVars extends GlobalThemeOverrides {
     chatBtnColor: string;
     inputBgColor: string;
     codeBgColor: string;
+    draggingMenuBgColor: string;
   };
 }

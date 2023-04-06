@@ -1,4 +1,4 @@
-import { NDropdown, NIcon, NScrollbar } from "naive-ui";
+import { NCollapseTransition, NDropdown, NIcon, NScrollbar } from "naive-ui";
 import { DropdownMixedOption } from "naive-ui/es/dropdown/src/interface";
 import {
   computed,
@@ -9,10 +9,11 @@ import {
   ref,
   watch,
 } from "vue";
-import Draggable from "vuedraggable";
+import Draggable from "./draggable/Draggable";
 import { Archive as ArchiveIcon } from "@vicons/fa";
 import { Pin as StickIcon } from "@vicons/tabler";
 import { useI18n } from "../hooks/i18n";
+import { SortableEvent } from "sortablejs";
 
 export type ExplorerMenuItem = DropdownMixedOption & {
   visible?: (data: ExplorerItem) => boolean;
@@ -141,9 +142,49 @@ export default defineComponent({
     const { t } = useI18n();
 
     const stickVisible = ref(true);
+    const unstickTransition = ref(true);
+
+    watch(stickVisible, () => {
+      unstickTransition.value = false;
+      setTimeout(() => {
+        unstickTransition.value = true;
+      });
+    });
+
     const archiveVisible = ref(false);
     const showStickIndicator = computed(() => props.stickList.length > 0);
     const showArchiveIndicator = computed(() => props.archivedList.length > 0);
+
+    const stickList = ref<ExplorerItem[]>([]);
+    watch(
+      () => props.stickList,
+      () => {
+        stickList.value = [...props.stickList];
+      },
+      {
+        immediate: true,
+      }
+    );
+    const unstickList = ref<ExplorerItem[]>([]);
+    watch(
+      () => props.unstickList,
+      () => {
+        unstickList.value = [...props.unstickList];
+      },
+      {
+        immediate: true,
+      }
+    );
+    const archivedList = ref<ExplorerItem[]>([]);
+    watch(
+      () => props.archivedList,
+      () => {
+        archivedList.value = [...props.archivedList];
+      },
+      {
+        immediate: true,
+      }
+    );
 
     watch(
       () => props.active,
@@ -188,6 +229,7 @@ export default defineComponent({
       }) as Ref<DropdownMixedOption[]>;
       return (
         <Column
+          data-id={`chat-${data.id}`}
           active={props.active}
           item={data}
           menus={menus.value}
@@ -196,27 +238,21 @@ export default defineComponent({
       );
     }
 
-    function stickListDragEndHandler(e: {
-      oldDraggableIndex: number;
-      newDraggableIndex: number;
-    }) {
-      if (e.oldDraggableIndex === e.newDraggableIndex) return;
+    function stickListDragEndHandler(e: SortableEvent) {
+      if (e.oldIndex === e.newIndex) return;
       props.onDarg?.(
         "stick",
-        props.stickList[e.oldDraggableIndex].id,
-        props.stickList[e.newDraggableIndex].id
+        props.stickList[e.oldIndex!].id,
+        props.stickList[e.newIndex!].id
       );
     }
 
-    function unstickListDragEndHandler(e: {
-      oldDraggableIndex: number;
-      newDraggableIndex: number;
-    }) {
-      if (e.oldDraggableIndex === e.newDraggableIndex) return;
+    function unstickListDragEndHandler(e: SortableEvent) {
+      if (e.oldIndex === e.newIndex) return;
       props.onDarg?.(
         "unstick",
-        props.unstickList[e.oldDraggableIndex].id,
-        props.unstickList[e.newDraggableIndex].id
+        props.unstickList[e.oldIndex!].id,
+        props.unstickList[e.newIndex!].id
       );
     }
 
@@ -229,19 +265,22 @@ export default defineComponent({
                 backgroundColor: "var(--explorer-stick-bg-color)",
               }}
             >
-              <Draggable
-                v-show={stickVisible.value}
-                v-model={props.stickList}
-                itemKey="id"
-                //@ts-ignore
-                disabled={!props.onDarg}
-                //@ts-ignore
-                onEnd={stickListDragEndHandler}
-              >
-                {{
-                  item: ({ element }: any) => renderColumn(element),
-                }}
-              </Draggable>
+              <NCollapseTransition show={stickVisible.value}>
+                <Draggable
+                  v-model={stickList.value}
+                  options={{
+                    group: "stickChats",
+                    disabled: !props.onDarg,
+                    onEnd: stickListDragEndHandler,
+                  }}
+                >
+                  {{
+                    item: ({ item }: any) => (
+                      <div key={item.id}>{renderColumn(item)}</div>
+                    ),
+                  }}
+                </Draggable>
+              </NCollapseTransition>
               <div
                 v-show={showStickIndicator.value}
                 onClick={() => (stickVisible.value = !stickVisible.value)}
@@ -265,15 +304,15 @@ export default defineComponent({
 
             <div class="flex-1">
               <Draggable
-                v-model={props.unstickList}
-                itemKey="id"
-                //@ts-ignore
-                disabled={!props.onDarg}
-                //@ts-ignore
-                onEnd={unstickListDragEndHandler}
+                v-model={unstickList.value}
+                options={{
+                  disabled: !props.onDarg,
+                  onEnd: unstickListDragEndHandler,
+                }}
+                transition={unstickTransition.value}
               >
                 {{
-                  item: ({ element }: any) => renderColumn(element),
+                  item: ({ item }: any) => renderColumn(item),
                 }}
               </Draggable>
             </div>
@@ -303,9 +342,19 @@ export default defineComponent({
                 </span>
               </div>
             </div>
-            <div v-show={archiveVisible.value}>
-              {props.archivedList.map((item) => renderColumn(item))}
-            </div>
+            <NCollapseTransition show={archiveVisible.value}>
+              <Draggable
+                v-model={archivedList.value}
+                options={{
+                  disabled: true,
+                  onEnd: unstickListDragEndHandler,
+                }}
+              >
+                {{
+                  item: ({ item }: any) => renderColumn(item),
+                }}
+              </Draggable>
+            </NCollapseTransition>
           </div>
         </NScrollbar>
       </div>

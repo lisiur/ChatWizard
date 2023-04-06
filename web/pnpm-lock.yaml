@@ -10,6 +10,9 @@ dependencies:
   '@types/marked':
     specifier: ^4.0.8
     version: 4.0.8
+  '@types/sortablejs':
+    specifier: ^1.15.1
+    version: 1.15.1
   '@types/uuid':
     specifier: ^9.0.1
     version: 9.0.1
@@ -49,6 +52,9 @@ dependencies:
   postcss:
     specifier: ^8.4.21
     version: 8.4.21
+  sortablejs:
+    specifier: ^1.15.0
+    version: 1.15.0
   tailwindcss:
     specifier: ^3.2.7
     version: 3.2.7(postcss@8.4.21)
@@ -812,6 +818,10 @@ packages:
 
   /@types/node@18.14.1:
     resolution: {integrity: sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==}
+
+  /@types/sortablejs@1.15.1:
+    resolution: {integrity: sha512-g/JwBNToh6oCTAwNS8UGVmjO7NLDKsejVhvE4x1eWiPTC3uCuNsa/TD4ssvX3du+MLiM+SHPNDuijp8y76JzLQ==}
+    dev: false
 
   /@types/uuid@9.0.1:
     resolution: {integrity: sha512-rFT3ak0/2trgvp4yYZo5iKFEPsET7vKydKF+VRCxlQ9bpheehyAJH89dAkaLEq/j/RZXJIqcgsmPJKUP1Z28HA==}
@@ -1658,6 +1668,10 @@ packages:
 
   /sortablejs@1.14.0:
     resolution: {integrity: sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==}
+    dev: false
+
+  /sortablejs@1.15.0:
+    resolution: {integrity: sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==}
     dev: false
 
   /source-map-js@1.0.2:

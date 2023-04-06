@@ -176,11 +176,11 @@ impl ChatService {
                 ..Default::default()
             })?;
         } else {
-            let order = self.chat_repo.select_non_stick_min_order(user_id)?;
+            let order = self.chat_repo.select_non_stick_max_order(user_id)?;
             self.chat_repo.update(&PatchChat {
                 id: chat_id,
                 stick: Some(false),
-                sort: Some(order - 1),
+                sort: Some(order + 1),
                 ..Default::default()
             })?;
         }

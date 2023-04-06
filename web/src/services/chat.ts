@@ -1,8 +1,10 @@
-import { computed, Ref, toRef } from "vue";
+import { computed, ref } from "vue";
 import * as api from "../api";
 import { useTask } from "../hooks/task";
 
 export function useChatService() {
+  const loaded = ref(false);
+
   const loadAllStickChatsTask = useTask(
     async () => {
       return await api.allStickChats();
@@ -30,17 +32,11 @@ export function useChatService() {
     }
   );
 
-  const allStickChats = toRef(loadAllStickChatsTask, "result") as Ref<
-    api.ChatIndex[]
-  >;
-
-  const allNonStickChats = toRef(loadAllNonStickChatsTask, "result") as Ref<
-    api.ChatIndex[]
-  >;
-
-  const allArchiveChats = toRef(loadAllArchiveChatsTask, "result") as Ref<
-    api.ChatIndex[]
-  >;
+  const allStickChats = computed(() => loadAllStickChatsTask.result ?? []);
+  const allNonStickChats = computed(
+    () => loadAllNonStickChatsTask.result ?? []
+  );
+  const allArchiveChats = computed(() => loadAllArchiveChatsTask.result ?? []);
 
   const allChats = computed(() => {
     return allStickChats.value
@@ -49,11 +45,13 @@ export function useChatService() {
   });
 
   async function reload() {
-    return Promise.all([
+    const res = await Promise.all([
       loadAllNonStickChatsTask.exec(),
       loadAllStickChatsTask.exec(),
       loadAllArchiveChatsTask.exec(),
     ]);
+    loaded.value = true;
+    return res;
   }
 
   async function setChatStick(chatId: string, stick: boolean) {
@@ -77,6 +75,7 @@ export function useChatService() {
   }
 
   return {
+    loaded,
     load: reload,
     reload,
     allChats,

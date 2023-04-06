@@ -1,4 +1,7 @@
+import { v4 as uuid } from "uuid";
+
 export class Message {
+  tmpId = uuid(); // for transition group
   id = "";
   content = "";
 }
@@ -68,7 +71,7 @@ export type MessageChunk =
       type: "done";
     };
 
-export type ErrorData = 
+export type ErrorData =
   | {
       type: "network";
       error: {

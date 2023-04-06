@@ -35,6 +35,7 @@ const vars: ThemeVars = {
     chatBtnColor: "#888",
     inputBgColor: "#fff",
     codeBgColor: "#eee",
+    draggingMenuBgColor: "#dedede",
   },
 };
 

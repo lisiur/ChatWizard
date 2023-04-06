@@ -19,6 +19,7 @@ export default defineComponent({
     const chatRef = ref<InstanceType<typeof ChatComp>>();
 
     const {
+      loaded,
       load,
       reload,
       allChats,
@@ -196,6 +197,7 @@ export default defineComponent({
           </div>
           <div class="p-2 text-gray-400">{t("chat.conversations")}</div>
           <Explorer
+            v-show={loaded.value}
             class="flex-1 overflow-auto"
             active={currentChat.value?.index.id}
             menus={[

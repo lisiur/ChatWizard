@@ -42,6 +42,7 @@ import {
   DocumentEdit20Regular as EditIcon,
 } from "@vicons/fluent";
 import { dialog } from "../../utils/prompt";
+import ListTransition from "../listTransition/listTransition";
 
 export default defineComponent({
   props: {
@@ -80,7 +81,7 @@ export default defineComponent({
     const { hasMore, reset, firstBatchLoad } = useLazyLoad<ChatLog>(
       async () => {
         savePosition();
-        const res = await props.chat.loadPrevLogs()
+        const res = await props.chat.loadPrevLogs();
         await nextTick();
         if (firstBatchLoad.value) {
           scrollToBottom();
@@ -105,10 +106,10 @@ export default defineComponent({
         watch(
           () => (message as AssistantMessage).done,
           () => {
-            nextTick(() => {
+            setTimeout(() => {
               interceptLink(dom);
               dom.dataset.intercepted = "true";
-            });
+            }, 200);
           },
           {
             immediate: true,
@@ -259,9 +260,7 @@ export default defineComponent({
           if (button) {
             unwatch();
             button.$el.addEventListener("mouseleave", () => {
-              setTimeout(() => {
-                needConfirm.value = false;
-              }, 500);
+              needConfirm.value = false;
             });
           }
         },
@@ -285,9 +284,20 @@ export default defineComponent({
           size="tiny"
           onClick={clickHandler}
         >
-          <NIcon size="1.2rem">
-            {needConfirm.value ? <ConfirmIcon /> : <DeleteIcon />}
-          </NIcon>
+          <NTooltip
+            show={needConfirm.value}
+            placement="bottom"
+            showArrow={false}
+          >
+            {{
+              trigger: () => (
+                <NIcon size="1.2rem">
+                  {needConfirm.value ? <ConfirmIcon /> : <DeleteIcon />}
+                </NIcon>
+              ),
+              default: () => t("chat.message.delete.hint"),
+            }}
+          </NTooltip>
         </NButton>
       );
     }
@@ -426,11 +436,13 @@ export default defineComponent({
             >
               <NSpin size={12} v-show={hasMore.value}></NSpin>
             </div>
-            <div class="grid gap-4 pb-6">
+            <ListTransition class="grid gap-4 pb-6" absolute={false}>
               {props.chat.messages.map((message) => (
-                <div key={message.id}>{renderMessage(message)} </div>
+                <div key={message.tmpId || message.id}>
+                  {renderMessage(message)}{" "}
+                </div>
               ))}
-            </div>
+            </ListTransition>
           </div>
         </NScrollbar>
       </div>

@@ -1,0 +1,24 @@
+.list-transition-move,
+.list-transition-enter-active,
+.list-transition-leave-active {
+  transition: all 0.2s ease-in;
+}
+.list-transition-enter-from,
+.list-transition-leave-to {
+  transform: translateX(0.4rem);
+  opacity: 0;
+}
+.list-transition-leave-active {
+  position: absolute;
+}
+
+.list-transition-without-absolute-move,
+.list-transition-without-absolute-enter-active,
+.list-transition-without-absolute-leave-active {
+  transition: all 0.2s ease-in;
+}
+.list-transition-without-absolute-enter-from,
+.list-transition-without-absolute-leave-to {
+  transform: translateX(0.4rem);
+  opacity: 0;
+}

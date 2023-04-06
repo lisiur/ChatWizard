@@ -85,6 +85,23 @@ impl ChatRepo {
         }
     }
 
+    pub fn select_non_stick_max_order(&self, user_id: Id) -> Result<i32> {
+        match chats::table
+            .select(chats::sort)
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::archive.eq(false))
+            .filter(chats::stick.eq(false))
+            .order(chats::sort.desc())
+            .first::<i32>(&mut *self.0.conn())
+        {
+            Ok(order) => Ok(order),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Ok(0),
+                _ => Err(err.into()),
+            },
+        }
+    }
+
     pub fn select_stick_min_order(&self, user_id: Id) -> Result<i32> {
         match chats::table
             .select(chats::sort)

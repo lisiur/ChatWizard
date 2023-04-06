@@ -143,6 +143,9 @@ export default defineComponent({
               historyNavigationStack[historyNavigationStack.length - 1];
             historyNavigationMessageId = msg.id;
             setUserMessage(msg.content);
+          } else {
+            historyNavigationMessageId = null;
+            setUserMessage("");
           }
           e.preventDefault();
         }
