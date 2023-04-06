@@ -1,4 +1,4 @@
-## [0.0.49](https://github.com/lisiur/askai/compare/v0.0.48...v0.0.49) (2023-04-06)
+## [0.0.50](https://github.com/lisiur/askai/compare/v0.0.49...v0.0.50) (2023-04-06)
 
 
 ### Bug Fixes
