@@ -73,8 +73,7 @@ impl PromptMarketService {
                 let mut rdr = csv::Reader::from_reader(body.as_bytes());
 
                 let mut prompts = vec![];
-                for result in rdr.records() {
-                    let record = result?;
+                for record in rdr.records().flatten() {
                     let name = record[0].to_string();
                     let content = record[1].to_string();
                     let market_prompt = MarketPrompt { name, content };

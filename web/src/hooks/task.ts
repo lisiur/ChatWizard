@@ -66,6 +66,7 @@ export function useTask<T extends Task>(
     state.running = true;
     state.success = false;
     state.failed = false;
+    state.error = null;
     state.finished = false;
 
     return tasks[0](...params)
