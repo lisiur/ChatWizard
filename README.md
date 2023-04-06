@@ -34,7 +34,7 @@
 
 - All data will only be stored locally.
 - Chat logs and API keys will only be used for the OpenAI API and will not be sent to any other destination.
-- If concerned about API key leakage, the in-app forwarding function can be used (which enables storage of the API key on your own server, requiring only a reverse-proxy address to the OpenAI interface).
+- If concerned about API key leakage, the in-app forwarding function can be used (which enables storage of the API key on your own server, requiring only a reverse-proxy address to the OpenAI API).
 
 
 ## Screenshots
