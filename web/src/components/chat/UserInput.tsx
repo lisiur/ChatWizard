@@ -137,8 +137,10 @@ export default defineComponent({
           }
           e.preventDefault();
         } else if (e.key === "ArrowDown") {
-          const msg = historyNavigationStack.pop();
-          if (msg) {
+          historyNavigationStack.pop();
+          if (historyNavigationStack.length) {
+            const msg =
+              historyNavigationStack[historyNavigationStack.length - 1];
             historyNavigationMessageId = msg.id;
             setUserMessage(msg.content);
           }
