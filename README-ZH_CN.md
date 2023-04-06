@@ -87,6 +87,22 @@
     - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.47/chat-wizard_0.0.47_amd64.deb)
     - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.47/chat-wizard_0.0.47_amd64.AppImage)
 
+## 升级
+
+ChatWizard 支持内置升级，每当你重新启动应用时都会自动查询是否有新版本发布，如果有新版本会在左下角显示小红点。
+
+升级时会从 GitHub 上下载更新包，对于国内用户来说，可能需要设置代理。但同时由于 Tauri 的限制目前尚不支持在应用中使用应用设置的代理升级。此时你可以尝试下面的方法：
+
+- **Mac**
+  
+  退出应用并打开终端输入：
+
+  ```
+  https_proxy=<你的代理地址> /Applications/ChatWizard.app/Contents/MacOS/ChatWizard
+  # 最终的命令像是这样：https_proxy=http://127.0.0.1:7890 /Applications/ChatWizard.app/Contents/MacOS/ChatWizard
+  ```
+  该命令会重新打开应用，此时点击升级会使用你设置的代理。
+
 ## 开发
 
 - 启动

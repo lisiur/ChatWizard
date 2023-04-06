@@ -89,6 +89,10 @@ This project is currently undergoing active development and has only been tested
     - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.47/chat-wizard_0.0.47_amd64.deb)
     - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.47/chat-wizard_0.0.47_amd64.AppImage)
 
+## Upgrade
+
+ChatWizard has built-in upgrade support, and each time you restart the application, it automatically checks for any new releases. If a new version is available, a small red dot will be displayed in the lower left corner.
+
 ## Development
 
 - dev
