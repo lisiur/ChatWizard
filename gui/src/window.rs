@@ -72,7 +72,6 @@ pub fn create_window(label: &str, options: WindowOptions, handle: AppHandle) -> 
         .min_inner_size(min_size[0], min_size[1])
         .max_inner_size(max_size[0], max_size[1])
         .resizable(options.resizable)
-        .skip_taskbar(true)
         .visible(false);
 
     #[cfg(target_os = "macos")]
