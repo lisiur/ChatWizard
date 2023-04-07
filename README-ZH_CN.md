@@ -75,8 +75,8 @@
 
 - **Mac**
 
-    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_x64.dmg)
-    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_aarch64.dmg)
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.56/ChatWizard_0.0.56_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.56/ChatWizard_0.0.56_aarch64.dmg)
 
     > MacOS 可能会遇到这个问题: `"ChatWizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
     > 
@@ -88,11 +88,11 @@
 
 - **Windows**: 
 
-    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_x64_en-US.msi)
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.56/ChatWizard_0.0.56_x64_en-US.msi)
 
 - **Linux**
-    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/chat-wizard_0.0.55_amd64.deb)
-    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/chat-wizard_0.0.55_amd64.AppImage)
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.56/chat-wizard_0.0.56_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.56/chat-wizard_0.0.56_amd64.AppImage)
 
 ## 升级
 
