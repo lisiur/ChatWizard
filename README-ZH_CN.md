@@ -71,6 +71,8 @@
 
 ## 安装
 
+> 如果在点击下载链接时出现404错误页面，可能是由于应用程序当前正在打包的缘故。请稍后再试，或者直接从[这里](https://github.com/lisiur/ChatWizard/releases/latest)下载当前最新版本。
+
 - **Mac**
 
     - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_x64.dmg)

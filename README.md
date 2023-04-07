@@ -74,10 +74,12 @@
 
 ## Installation
 
+> If a 404 error page appears when clicking the download link, this may be due to the application being packaged at the moment. Please try again later or alternatively, download the most up-to-date version directly from [here](https://github.com/lisiur/ChatWizard/releases/latest).
+
 - **Mac**
 
-    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.53/ChatWizard_0.0.53_x64.dmg)
-    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.53/ChatWizard_0.0.53_aarch64.dmg)
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_aarch64.dmg)
 
     > MacOS users may encounter this problem: `"ChatWizard.app" is damaged and can't be opened. You should move it to the Trash.`
     > 
@@ -89,11 +91,11 @@
 
 - **Windows**: 
 
-    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.53/ChatWizard_0.0.53_x64_en-US.msi)
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/ChatWizard_0.0.55_x64_en-US.msi)
 
 - **Linux**
-    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.53/chat-wizard_0.0.53_amd64.deb)
-    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.53/chat-wizard_0.0.53_amd64.AppImage)
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/chat-wizard_0.0.55_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.55/chat-wizard_0.0.55_amd64.AppImage)
 
 ## Upgrade
 
