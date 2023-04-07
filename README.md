@@ -28,8 +28,6 @@
   </div>
 </div>
 
-[中文文档](./README-ZH_CN.md)
-
 ## Declaration
 
 > This project is currently undergoing active development and has only been tested on MacOS M1. In the event of any issues, please do not hesitate to submit an issue as they arise, and I will make every effort to address them. Additionally, all contributions in the form of PRs are welcome and greatly appreciated.
@@ -58,6 +56,7 @@
 
 - local web server
 - stream response
+- stop replying
 - network proxy
 - forward api
 - lazy loading of chat records
