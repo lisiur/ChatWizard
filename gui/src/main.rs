@@ -6,7 +6,7 @@
 use tokio::sync::mpsc::{channel, Sender};
 
 use chat_wizard_api::app;
-use chat_wizard_service::commands::CommandEvent;
+use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use project::Project;
 use tauri::{AppHandle, Manager};
 use window::{create_window, WindowOptions};
@@ -62,6 +62,7 @@ async fn main() {
         .on_system_tray_event(tray::on_system_tray_event)
         .manage(Port(port))
         .manage(conn)
+        .manage(CommandExecutor::new())
         .setup(|app| {
             let app_handle = app.handle();
             app.manage(EventBus::new(app_handle));

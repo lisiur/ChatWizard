@@ -10,6 +10,7 @@ use crate::{
 };
 use serde::Deserialize;
 use tokio::sync::mpsc::{self, Receiver};
+use tokio::sync::oneshot::{self, Sender};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -277,10 +278,11 @@ pub struct SendMessageCommand {
 }
 
 impl SendMessageCommand {
-    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Id, Id)> {
+    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
         let chat_service = ChatService::new(conn.clone());
 
         let (sender, receiver) = mpsc::channel::<StreamContent>(20);
+        let (stop_sender, stop_receiver) = oneshot::channel::<()>();
         let (message_id, reply_id, _) = chat_service
             .send_message(
                 SendMessagePayload {
@@ -288,9 +290,10 @@ impl SendMessageCommand {
                     message: self.message,
                 },
                 sender,
+                stop_receiver,
             )
             .await?;
-        Ok((receiver, message_id, reply_id))
+        Ok((receiver, stop_sender, message_id, reply_id))
     }
 }
 
@@ -301,20 +304,28 @@ pub struct ResendMessageCommand {
 }
 
 impl ResendMessageCommand {
-    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Id, Id)> {
+    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
         let chat_service = ChatService::new(conn.clone());
 
         let (sender, receiver) = mpsc::channel::<StreamContent>(20);
+        let (stop_sender, stop_receiver) = oneshot::channel::<()>();
         let (message_id, reply_id, _) = chat_service
             .resend_message(
                 ResendMessagePayload {
                     id: self.message_id,
                 },
                 sender,
+                stop_receiver,
             )
             .await?;
-        Ok((receiver, message_id, reply_id))
+        Ok((receiver, stop_sender, message_id, reply_id))
     }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StopReplyCommand {
+    pub message_id: Id,
 }
 
 #[derive(Deserialize)]

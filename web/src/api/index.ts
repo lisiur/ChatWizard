@@ -188,6 +188,10 @@ export function resendMessage(messageId: string) {
   return execCommand<[string, string]>("resend_message", { messageId });
 }
 
+export function stopReply(messageId: string) {
+  return execCommand<void>("stop_reply", { messageId });
+}
+
 export function getChatModels() {
   return execCommand<Array<ChatModel>>("get_chat_models");
 }

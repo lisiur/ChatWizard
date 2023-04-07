@@ -31,6 +31,7 @@ export const messages = {
   "chat.message.resend": 'resend',
   "chat.message.delete": 'delete',
   "chat.message.delete.hint": 'Are you sure to delete this message?',
+  "chat.message.stopReply": 'Stop replying',
 
   "chat.config.model": "Model",
   "chat.config.model.hint": "ID of the model to use.",

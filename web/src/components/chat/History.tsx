@@ -59,6 +59,9 @@ export default defineComponent({
     updateMessage: {
       type: Function as PropType<(messageId: string, content: string) => void>,
     },
+    stopReply: {
+      type: Function as PropType<() => void>,
+    },
   },
   setup(props, { expose }) {
     const { t } = useI18n();
@@ -427,7 +430,7 @@ export default defineComponent({
 
     return (() => (
       <div
-        class="flex-1 flex flex-col overflow-hidden"
+        class="flex-1 flex flex-col overflow-hidden relative"
         style={{
           opacity: firstBatchLoad.value ? 0 : 1,
         }}
@@ -453,6 +456,20 @@ export default defineComponent({
             </ListTransition>
           </div>
         </NScrollbar>
+        <div
+          class="absolute bottom-2 flex w-full justify-center items-center"
+          v-show={props.chat.busy.value}
+        >
+          <NButton
+            type="error"
+            size="small"
+            round
+            secondary
+            onClick={() => props.stopReply?.()}
+          >
+            {t("chat.message.stopReply")}
+          </NButton>
+        </div>
       </div>
     )) as unknown as typeof publicInstance;
   },

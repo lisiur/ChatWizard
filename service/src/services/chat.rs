@@ -1,6 +1,7 @@
 use chrono::Utc;
 use futures::StreamExt;
 use tokio::sync::mpsc::Sender;
+use tokio::sync::oneshot::Receiver;
 use tokio::task::JoinHandle;
 
 use crate::api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, OpenAIChatRole};
@@ -254,6 +255,7 @@ impl ChatService {
         &self,
         payload: ResendMessagePayload,
         sender: Sender<StreamContent>,
+        stop_receiver: Receiver<()>,
     ) -> Result<(Id, Id, JoinHandle<()>)> {
         let message_id = payload.id;
         let chat_log = self.delete_chat_log_since_id(message_id)?;
@@ -264,6 +266,7 @@ impl ChatService {
                 message: chat_log.message,
             },
             sender,
+            stop_receiver,
         )
         .await
     }
@@ -272,6 +275,7 @@ impl ChatService {
         &self,
         payload: SendMessagePayload,
         sender: Sender<StreamContent>,
+        mut stop_receiver: Receiver<()>,
     ) -> Result<(Id, Id, JoinHandle<()>)> {
         let SendMessagePayload { chat_id, message } = payload;
 
@@ -358,6 +362,37 @@ impl ChatService {
         };
 
         let handle = tokio::spawn(async move {
+            let save_reply = |reply_message: &str, finished: bool| {
+                let reply_tokens =
+                    OpenAIChatMessage::calc_tokens(&OpenAIChatRole::Assistant, reply_message);
+                let reply_cost = chat_model.calc_cost(reply_tokens);
+                let total_cost = question_cost + reply_cost;
+                let reply_log = NewChatLog {
+                    id: reply_log_id,
+                    chat_id,
+                    role: Role::Assistant.into(),
+                    message: reply_message.to_string(),
+                    model: model.clone(),
+                    tokens: reply_tokens as i32,
+                    cost: total_cost,
+                    finished,
+                };
+
+                // Add reply log to database
+                chat_log_repo.insert(&reply_log).unwrap();
+
+                // Update chat cost
+                chat_repo.add_cost_and_update(chat_id, total_cost).unwrap();
+
+                // Mark user log as finished
+                chat_log_repo
+                    .update(&PatchChatLog {
+                        id: user_log_id,
+                        finished: Some(true),
+                        ..Default::default()
+                    })
+                    .unwrap();
+            };
             let stream = api.send_message(api_params).await;
             match stream {
                 Ok(mut stream) => {
@@ -368,44 +403,19 @@ impl ChatService {
                                 None => unreachable!(),
                             },
                             StreamContent::Done => {
-                                let reply_tokens = OpenAIChatMessage::calc_tokens(
-                                    &OpenAIChatRole::Assistant,
-                                    reply.as_deref().unwrap_or_default(),
-                                );
-                                let reply_cost = chat_model.calc_cost(reply_tokens);
-                                let total_cost = question_cost + reply_cost;
-                                let reply_log = NewChatLog {
-                                    id: reply_log_id,
-                                    chat_id,
-                                    role: Role::Assistant.into(),
-                                    message: reply.take().unwrap(),
-                                    model: model.clone(),
-                                    tokens: reply_tokens as i32,
-                                    cost: total_cost,
-                                    finished: true,
-                                };
-                                if let Err(err) = chat_log_repo.insert(&reply_log) {
-                                    send(sender.clone(), StreamContent::Error(err.into())).await;
-                                    break;
-                                }
-                                if let Err(err) = chat_repo.add_cost_and_update(chat_id, total_cost)
-                                {
-                                    send(sender.clone(), StreamContent::Error(err.into())).await;
-                                    break;
-                                }
-                                if let Err(err) = chat_log_repo.update(&PatchChatLog {
-                                    id: user_log_id,
-                                    finished: Some(true),
-                                    ..Default::default()
-                                }) {
-                                    send(sender.clone(), StreamContent::Error(err.into())).await;
-                                    break;
-                                }
+                                save_reply(reply.as_deref().unwrap_or_default(), true);
+                                break;
                             }
                             _ => {}
                         }
                         send(sender.clone(), content).await;
+
+                        if stop_receiver.try_recv().is_ok() {
+                            save_reply(reply.as_deref().unwrap_or_default(), false);
+                            break;
+                        }
                     }
+                    drop(stream);
                 }
                 Err(err) => send(sender.clone(), StreamContent::Error(err.into())).await,
             }
@@ -518,6 +528,7 @@ pub struct ResendMessagePayload {
 #[cfg(test)]
 mod tests {
     use tokio::sync::mpsc::channel;
+    use tokio::sync::oneshot;
 
     use crate::{
         models::chat::ChatConfig,
@@ -542,6 +553,7 @@ mod tests {
         })?;
 
         let (sender, mut receiver) = channel::<StreamContent>(20);
+        let (_stop_sender, stop_receiver) = oneshot::channel::<()>();
 
         let (user_log_id, reply_log_id, handle) = chat_service
             .send_message(
@@ -550,6 +562,7 @@ mod tests {
                     message: "reply Hi! to me, no more other words".to_string(),
                 },
                 sender,
+                stop_receiver,
             )
             .await
             .unwrap();

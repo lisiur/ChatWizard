@@ -4,7 +4,7 @@ use std::{
 };
 
 use axum::extract::ws::{Message, WebSocket};
-use chat_wizard_service::{DbConn, Id};
+use chat_wizard_service::{DbConn, Id, commands::CommandExecutor};
 use futures::{stream::SplitSink};
 use tokio::sync::Mutex;
 
@@ -16,4 +16,5 @@ pub struct AppState {
     pub conn: DbConn,
     pub clients: ClientsMap,
     pub users: UsersMap,
+    pub executor: CommandExecutor,
 }

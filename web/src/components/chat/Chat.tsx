@@ -111,6 +111,7 @@ export default defineComponent({
           resendMessage={resendMessage}
           updateMessage={updateMessage}
           deleteMessage={props.chat.deleteLog.bind(props.chat)}
+          stopReply={props.chat.stopReply.bind(props.chat)}
         ></History>
 
         <UserInput

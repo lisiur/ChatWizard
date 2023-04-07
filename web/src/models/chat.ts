@@ -1,4 +1,4 @@
-import { reactive, ref, Ref } from "vue";
+import { reactive, ref, Ref, watch } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -9,6 +9,7 @@ import {
   updateChatLog,
   deleteChatLog,
   loadChatLogByCursor,
+  stopReply,
 } from "../api";
 import {
   AssistantMessage,
@@ -24,6 +25,7 @@ export class Chat {
   index: ChatIndex;
   messages: Array<Message>;
   prevCursor?: string | null; // undefined meas not loaded, null means no more logs
+  stopReplyHandler?: () => void;
   constructor(index: ChatIndex) {
     this.busy = ref(false);
     this.index = reactive(index);
@@ -34,7 +36,7 @@ export class Chat {
     const res = await this.loadLogByCursor(this.prevCursor ?? undefined);
     this.prevCursor = res.nextCursor;
     this.addPreviousLogs(res.records);
-    return res
+    return res;
   }
 
   private async loadLogByCursor(cursor?: string) {
@@ -74,6 +76,20 @@ export class Chat {
     const msg = this.messages.find((item) => item.id === logId);
     if (msg) {
       msg.content = content;
+    }
+  }
+
+  async stopReply() {
+    let user_message_id = this.messages.findLast(
+      (item) => item instanceof UserMessage
+    )?.id;
+    if (user_message_id) {
+      await stopReply(user_message_id);
+
+      // To avoid the stop reply message is sent before the stop reply command
+      setTimeout(() => {
+        this.stopReplyHandler?.();
+      }, 1000)
     }
   }
 
@@ -221,6 +237,16 @@ export class Chat {
         }
       }
     });
+
+    this.stopReplyHandler = () => {
+      endLoading();
+      unListen();
+      this.busy.value = false;
+      if (!this.messages[this.messages.length - 1]?.content) {
+        this.messages.pop();
+      }
+      this.stopReplyHandler = undefined;
+    };
   }
 }
 

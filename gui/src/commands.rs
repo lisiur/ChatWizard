@@ -1,4 +1,4 @@
-use chat_wizard_service::commands::{exec_command as _exec_command, CommandEvent};
+use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use chat_wizard_service::DbConn;
 use tauri::{AppHandle, State, Window};
 
@@ -12,6 +12,7 @@ pub async fn exec_command(
     payload: serde_json::Value,
     conn: State<'_, DbConn>,
     event_bus: State<'_, EventBus>,
+    executor: State<'_, CommandExecutor>,
 ) -> Result<Box<dyn erased_serde::Serialize>> {
     let sender = event_bus.sender.clone();
     let send = move |event: CommandEvent| {
@@ -21,7 +22,7 @@ pub async fn exec_command(
             Ok(())
         }
     };
-    let result = _exec_command(command, payload, &conn, send).await?;
+    let result = executor.exec_command(command, payload, &conn, send).await?;
 
     Ok(result)
 }

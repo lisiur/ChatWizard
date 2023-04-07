@@ -13,7 +13,7 @@ use axum::http::{Method, Uri};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post, Router};
 use axum::Json;
-use chat_wizard_service::commands::{exec_command, CommandEvent};
+use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use dist::StaticFile;
 
 use chat_wizard_service::{DbConn, Id};
@@ -35,6 +35,7 @@ pub async fn app(port: u16, conn: DbConn) {
         conn,
         clients: Arc::new(Mutex::new(HashMap::new())),
         users: Arc::new(Mutex::new(HashMap::new())),
+        executor: CommandExecutor::new(),
     };
 
     let app = Router::new()
@@ -86,6 +87,7 @@ pub struct CommandPayload {
     pub user_id: Id,
 }
 
+#[axum::debug_handler]
 async fn command_handler(
     State(state): State<AppState>,
     Json(params): Json<CommandPayload>,
@@ -93,21 +95,24 @@ async fn command_handler(
     let user_id = Id::local();
     let users = state.users.clone();
     let clients = state.clients.clone();
+    let executor = state.executor.clone();
     let send = move |event: CommandEvent| {
-        let users = users.clone();
-        let clients = clients.clone();
         let payload = json!({
             "id": event.name,
             "payload": event.payload,
         });
         let message = Message::Text(serde_json::to_string(&payload).unwrap());
+
+        let users = users.clone();
+        let clients = clients.clone();
         async move {
             send_message(users, clients, user_id, message).await;
             Ok(())
         }
     };
 
-    let result = exec_command(params.command, params.payload, &state.conn, send)
+    let result = executor
+        .exec_command(params.command, params.payload, &state.conn, send)
         .await
         .map_err(Error::Service);
 
