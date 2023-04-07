@@ -72,8 +72,19 @@ function bumpVersion(type) {
   ensureGitStatusClean();
   const oldVersion = currentVersion();
   const newVersion = type(oldVersion);
+
+  updateVersionInFile("./README.md", oldVersion, newVersion);
+  updateVersionInFile("./README-ZH_CN.md", oldVersion, newVersion);
+
   updateVersion(newVersion);
   updateChangeLog();
+}
+
+function updateVersionInFile(filePath, oldVersion, newVersion) {
+  const readme = fs.readFileSync(filePath, "utf8");
+  const reg = new RegExp(oldVersion.replace(/\./g, "\\."), "g");
+  const newReadme = readme.replace(reg, newVersion);
+  fs.writeFileSync(filePath, newReadme);
 }
 
 function updateChangeLog() {

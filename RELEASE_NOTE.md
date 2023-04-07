@@ -1,6 +1,6 @@
-## [0.0.55](https://github.com/lisiur/ChatWizard/compare/v0.0.54...v0.0.55) (2023-04-07)
+## [0.0.56](https://github.com/lisiur/ChatWizard/compare/v0.0.55...v0.0.56) (2023-04-07)
 
 
-### Features
+### Bug Fixes
 
-* support stop replying ([d18c73e](https://github.com/lisiur/ChatWizard/commit/d18c73e0fe06625bc948da2ebae2e6c71023cd5d))
+* fix new chat now jumping ([04d4849](https://github.com/lisiur/ChatWizard/commit/04d4849de689afe8fbae967aaf81da7905137814))
