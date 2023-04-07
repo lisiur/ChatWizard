@@ -1,6 +1,7 @@
-## [0.0.53](https://github.com/lisiur/ChatWizard/compare/v0.0.52...v0.0.53) (2023-04-07)
+## [0.0.54](https://github.com/lisiur/ChatWizard/compare/v0.0.53...v0.0.54) (2023-04-07)
 
 
-### Features
+### Bug Fixes
 
-* Support casual chat ([6c9e94e](https://github.com/lisiur/ChatWizard/commit/6c9e94e4e9d29301c4426214f85afaf7630da263))
+* change tray menu 'Show' to 'Main Window' to avoid misunderstanding' ([da69823](https://github.com/lisiur/ChatWizard/commit/da698239f8d7ea9cd74ec66f87af1c2f5baca342))
+* fix ui bugs ([8911b2c](https://github.com/lisiur/ChatWizard/commit/8911b2c69a480cb3aa1c4d9a288f8129fed2ca7c))
