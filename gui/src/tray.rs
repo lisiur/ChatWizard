@@ -5,7 +5,7 @@ use tauri::{
 
 pub fn system_tray() -> SystemTray {
     let tray_menu = SystemTrayMenu::new()
-        .add_item(CustomMenuItem::new("show", "Show"))
+        .add_item(CustomMenuItem::new("show", "Main Window"))
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(CustomMenuItem::new("quit", "Quit"));
 
