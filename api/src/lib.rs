@@ -1,4 +1,3 @@
-mod command;
 mod dist;
 mod error;
 mod result;
@@ -10,21 +9,23 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::extract::{Query, State};
-use axum::http::{HeaderMap, Method, Uri};
+use axum::http::{Method, Uri};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post, Router};
 use axum::Json;
-use command::{handle_command, CommandPayload};
+use chat_wizard_service::commands::{exec_command, CommandEvent};
 use dist::StaticFile;
 
 use chat_wizard_service::{DbConn, Id};
 pub use error::Error;
+use futures::SinkExt;
 pub use result::IntoResultResponse;
 pub use result::Result;
 
-use axum::extract::ws::WebSocketUpgrade;
+use axum::extract::ws::{Message, WebSocketUpgrade};
 use serde::{Deserialize, Serialize};
-use state::AppState;
+use serde_json::json;
+use state::{AppState, ClientsMap, UsersMap};
 use tokio::sync::Mutex;
 use tower_http::cors::{Any, CorsLayer};
 use websocket::handle_socket;
@@ -76,24 +77,49 @@ async fn not_found_handler() -> Html<&'static str> {
     Html("<h1>404</h1><p>Not Found</p>")
 }
 
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CommandPayload {
+    pub command: String,
+    pub payload: serde_json::Value,
+    #[serde(default)]
+    pub user_id: Id,
+}
+
 async fn command_handler(
-    headers: HeaderMap,
     State(state): State<AppState>,
     Json(params): Json<CommandPayload>,
 ) -> impl IntoResponse {
-    let client_id = headers
-        .get("x-client-id")
-        .map(|v| Id::from(v.to_str().unwrap()))
-        .unwrap();
-    handle_command(params, state, client_id)
+    let user_id = Id::local();
+    let users = state.users.clone();
+    let clients = state.clients.clone();
+    let send = move |event: CommandEvent| {
+        let users = users.clone();
+        let clients = clients.clone();
+        let payload = json!({
+            "id": event.name,
+            "payload": event.payload,
+        });
+        let message = Message::Text(serde_json::to_string(&payload).unwrap());
+        async move {
+            send_message(users, clients, user_id, message).await;
+            Ok(())
+        }
+    };
+
+    let result = exec_command(params.command, params.payload, &state.conn, send)
         .await
-        .into_response()
+        .map_err(Error::Service);
+
+    result.into_response()
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WebSocketUpgradeQuery {
     client_id: Id,
+    #[serde(default)]
+    user_id: Id,
 }
 
 async fn ws_handler(
@@ -101,5 +127,29 @@ async fn ws_handler(
     Query(query): Query<WebSocketUpgradeQuery>,
     State(state): State<AppState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, query.client_id, state.clients))
+    ws.on_upgrade(move |socket| {
+        handle_socket(
+            socket,
+            query.user_id,
+            query.client_id,
+            state.users,
+            state.clients,
+        )
+    })
+}
+
+pub async fn send_message(users: UsersMap, clients: ClientsMap, user_id: Id, message: Message) {
+    let users = users.lock().await;
+    let user_clients = users.get(&user_id);
+    if let Some(user_clients) = user_clients {
+        let user_clients = user_clients.lock().await;
+        // TODO: send concurrent
+        for client in user_clients.iter() {
+            let clients = clients.lock().await;
+            if let Some(client) = clients.get(client) {
+                let mut client = client.lock().await;
+                client.send(message.clone()).await.unwrap();
+            }
+        }
+    }
 }

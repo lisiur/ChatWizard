@@ -25,9 +25,7 @@ function init() {
     `ws://${window.location.host}/api/ws?clientId=${clientId}`
   );
 
-  websocket.onopen = () => {
-    execCommand("connect");
-  };
+  websocket.send(JSON.stringify({ type: "connect" }));
 
   websocket.onmessage = (event) => {
     const { id, payload } = JSON.parse(event.data);

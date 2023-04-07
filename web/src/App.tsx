@@ -7,7 +7,7 @@ import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { setupLifeCycle } from "./utils/setupLifeCycle";
 import { setLocale } from "./hooks/i18n";
-import { currentWindow, getPlatform } from "./utils/api";
+import { listen } from "./utils/api";
 import { isTauri } from "./utils/env";
 
 export default defineComponent({
@@ -21,17 +21,16 @@ export default defineComponent({
           setTheme(theme ?? Theme.System);
 
           if (isTauri) {
-
             // show window after theme is set
             // to avoid flash of unstyled content
             if (windowLabel) {
               showWindow(windowLabel);
             }
 
-            const unListen = await currentWindow()
-              .listen("theme-changed", (e) => {
-                setTheme(e.payload as Theme);
-              });
+            const unListen = await listen("theme-changed", (e) => {
+              console.log(e);
+              setTheme(e.payload as Theme);
+            });
             ctx.onBeforeUnmount(unListen);
           }
         });
@@ -41,12 +40,10 @@ export default defineComponent({
           const locale = _locale || "enUS";
           setLocale(locale);
 
-          const currentPlatform = await getPlatform();
           if (isTauri) {
-            const unListen = await currentWindow()
-              .listen("locale-changed", (e) => {
-                setLocale(e.payload as string);
-              });
+            const unListen = await listen("locale-changed", (e) => {
+              setLocale(e.payload as string);
+            });
             ctx.onBeforeUnmount(unListen);
           }
         });

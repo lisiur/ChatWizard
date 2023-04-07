@@ -3,12 +3,12 @@
     windows_subsystem = "windows"
 )]
 
+use tokio::sync::mpsc::{channel, Sender};
+
 use chat_wizard_api::app;
-use chat_wizard_service::{
-    services::prompt_market::PromptMarketService, ChatService, PromptService, SettingService,
-};
+use chat_wizard_service::commands::CommandEvent;
 use project::Project;
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 use window::{create_window, WindowOptions};
 
 mod commands;
@@ -20,6 +20,24 @@ mod utils;
 mod window;
 
 pub struct Port(u16);
+pub struct EventBus {
+    pub sender: Sender<CommandEvent>,
+}
+
+impl EventBus {
+    fn new(app_handle: AppHandle) -> Self {
+        let (sender, mut receiver) = channel::<CommandEvent>(20);
+
+        tokio::spawn(async move {
+            while let Some(event) = receiver.recv().await {
+                log::debug!("{:?}", &event);
+                app_handle.emit_all(&event.name, event.payload).unwrap();
+            }
+        });
+
+        Self { sender }
+    }
+}
 
 #[tokio::main]
 async fn main() {
@@ -43,12 +61,11 @@ async fn main() {
         .system_tray(tray::system_tray())
         .on_system_tray_event(tray::on_system_tray_event)
         .manage(Port(port))
-        .manage(SettingService::new(conn.clone()))
-        .manage(ChatService::new(conn.clone()))
-        .manage(PromptService::new(conn.clone()))
-        .manage(PromptMarketService::new(conn.clone()))
         .manage(conn)
         .setup(|app| {
+            let app_handle = app.handle();
+            app.manage(EventBus::new(app_handle));
+
             create_window(
                 "main",
                 WindowOptions {

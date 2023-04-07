@@ -14,9 +14,6 @@ pub enum Error {
 
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
-
-    #[error("Unknown command: {0}")]
-    UnknownCommand(String),
 }
 
 impl serde::Serialize for Error {

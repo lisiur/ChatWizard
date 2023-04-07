@@ -1,16 +1,15 @@
-use std::{collections::HashSet, sync::Arc};
-
-use crate::{result::Result, Error};
-use axum::extract::ws::Message;
-use chat_wizard_service::{commands::*, result::Result as ServiceResult, Id};
 use serde::Serialize;
-use serde_json::{from_value, json};
-use tokio::sync::Mutex;
+use serde_json::{from_value, to_value};
+use std::future::Future;
+
+use super::cmd::*;
+use crate::result::Result;
+use crate::{DbConn, Error};
 pub trait IntoResult {
     fn into_result(self) -> Result<Box<dyn erased_serde::Serialize>>;
 }
 
-impl<T: Serialize + 'static> IntoResult for ServiceResult<T> {
+impl<T: Serialize + 'static> IntoResult for Result<T> {
     fn into_result(self) -> Result<Box<dyn erased_serde::Serialize>> {
         let value = self?;
 
@@ -18,41 +17,22 @@ impl<T: Serialize + 'static> IntoResult for ServiceResult<T> {
     }
 }
 
-use crate::AppState;
-
-#[derive(serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CommandPayload {
-    pub command: String,
+#[derive(serde::Serialize, Debug)]
+pub struct CommandEvent {
+    pub name: String,
     pub payload: serde_json::Value,
-    #[serde(default)]
-    pub user_id: Id,
 }
 
-pub async fn handle_command(
-    params: CommandPayload,
-    state: AppState,
-    client_id: Id,
-) -> Result<Box<dyn erased_serde::Serialize>> {
-    let conn = &state.conn;
-    let users = state.users.clone();
-    let CommandPayload {
-        command,
-        payload,
-        user_id,
-    } = params;
-
+pub async fn exec_command<Fut>(
+    command: String,
+    payload: serde_json::Value,
+    conn: &DbConn,
+    send: impl Fn(CommandEvent) -> Fut + Send + 'static,
+) -> Result<Box<dyn erased_serde::Serialize>>
+where
+    Fut: Future<Output = Result<()>> + Send,
+{
     match command.as_ref() {
-        "connect" => {
-            let user_id = Id::local();
-            let mut map = users.lock().await;
-            map.entry(user_id)
-                .or_insert_with(|| Arc::new(Mutex::new(HashSet::new())));
-            map.get(&user_id).unwrap().lock().await.insert(client_id);
-
-            Ok(Box::new(()))
-        }
-
         "new_chat" => from_value::<NewChatCommand>(payload)?
             .exec(conn)
             .into_result(),
@@ -109,13 +89,13 @@ pub async fn handle_command(
             let command = from_value::<SendMessageCommand>(payload)?;
             let (mut receiver, message_id, reply_id) = command.exec(conn).await?;
             tokio::spawn(async move {
+                let event_id = message_id.to_string();
                 while let Some(content) = receiver.recv().await {
-                    let payload = json!({
-                        "id": message_id,
-                        "payload": content,
+                    let result = send(CommandEvent {
+                        name: event_id.clone(),
+                        payload: to_value(&content).unwrap(),
                     });
-                    let message = Message::Text(serde_json::to_string(&payload).unwrap());
-                    state.send_message(user_id, message).await;
+                    result.await.unwrap();
                 }
             });
 
@@ -123,17 +103,16 @@ pub async fn handle_command(
         }
 
         "resend_message" => {
-            let user_id = Id::local();
             let command = from_value::<ResendMessageCommand>(payload)?;
             let (mut receiver, message_id, reply_id) = command.exec(conn).await?;
             tokio::spawn(async move {
+                let event_id = message_id.to_string();
                 while let Some(content) = receiver.recv().await {
-                    let payload = json!({
-                        "id": message_id,
-                        "payload": content,
+                    let result = send(CommandEvent {
+                        name: event_id.clone(),
+                        payload: to_value(&content).unwrap(),
                     });
-                    let message = Message::Text(serde_json::to_string(&payload).unwrap());
-                    state.send_message(user_id, message).await;
+                    result.await.unwrap();
                 }
             });
 
@@ -191,14 +170,34 @@ pub async fn handle_command(
             .exec(conn)
             .into_result(),
 
-        "update_settings" => from_value::<UpdateSettingCommand>(payload)?
-            .exec(conn)
-            .into_result(),
+        "update_settings" => {
+            let command = from_value::<UpdateSettingCommand>(payload)?;
+
+            if let Some(theme) = &command.payload.theme {
+                send(CommandEvent {
+                    name: "theme-changed".to_string(),
+                    payload: to_value(theme).unwrap(),
+                })
+                .await
+                .unwrap();
+            }
+
+            if let Some(local) = &command.payload.language {
+                send(CommandEvent {
+                    name: "locale-changed".to_string(),
+                    payload: to_value(local).unwrap(),
+                })
+                .await
+                .unwrap();
+            }
+
+            command.exec(conn).into_result()
+        }
 
         "get_locale" => from_value::<GetLocaleCommand>(payload)?
             .exec(conn)
             .into_result(),
 
-        _ => Err(Error::UnknownCommand(command)),
+        _ => Err(Error::Unknown(command)),
     }
 }
