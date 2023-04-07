@@ -38,6 +38,7 @@ function major() {
 }
 
 function release() {
+  generateReleaseNote();
   const newVersion = changeLogVersionPackage.version;
   execSync("git add .");
   execSync(`git commit -m "chore: bump version to ${newVersion}"`);
@@ -73,7 +74,6 @@ function bumpVersion(type) {
   const newVersion = type(oldVersion);
   updateVersion(newVersion);
   updateChangeLog();
-  generateReleaseNote();
 }
 
 function updateChangeLog() {
