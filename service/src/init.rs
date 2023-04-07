@@ -1,7 +1,9 @@
+use crate::NewChat;
 use crate::error::Error;
 use crate::models::chat_model::NewChatModel;
 use crate::models::prompt_source::NewPromptSource;
 use crate::models::setting::{NewSetting, Theme};
+use crate::repositories::chat::ChatRepo;
 use crate::repositories::chat_model::ChatModelRepo;
 use crate::repositories::prompt_source::PromptSourceRepo;
 use crate::repositories::setting::SettingRepo;
@@ -34,6 +36,14 @@ pub fn init(db_url: &str) -> Result<DbConn> {
         password: "".to_string(),
     };
     user_repo.insert_if_not_exist(&local_user)?;
+
+    // Create casual chat
+    let chat_repo = ChatRepo::new(conn.clone());
+    let casual_chat = NewChat {
+        id: Id::local(),
+        ..Default::default()
+    };
+    chat_repo.insert_if_not_exist(&casual_chat)?;
 
     // Create local setting
     let setting_repo = SettingRepo::new(conn.clone());

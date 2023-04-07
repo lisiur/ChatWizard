@@ -13,6 +13,7 @@ const messages: Messages = {
   "window.setting": "设置",
 
   "chat.new": "新建对话",
+  "chat.casual.title": "闲聊",
   "chat.new.defaultTitle": "新对话",
   "chat.conversations": "对话列表",
   "chat.inputNameHint": "请输入对话标题",

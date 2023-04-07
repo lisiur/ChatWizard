@@ -74,35 +74,16 @@ impl ChatService {
         Ok(chat)
     }
 
-    pub fn search_chats(&self, payload: SearchChatPayload) -> Result<PaginatedRecords<Chat>> {
-        let params = payload.into();
-        let records = self.chat_repo.select_index(params)?;
+    pub fn get_casual_chat(&self, user_id: Id) -> Result<Chat> {
+        let chat = self.chat_repo.select_casual(user_id)?;
+
+        Ok(chat)
+    }
+
+    pub fn get_all_chats_except_casual(&self, user_id: Id) -> Result<Vec<Chat>> {
+        let records = self.chat_repo.select_all_except_casual(user_id)?;
 
         Ok(records)
-    }
-
-    pub fn get_non_stick_chats(
-        &self,
-        payload: SearchChatPayload,
-    ) -> Result<PaginatedRecords<Chat>> {
-        let params = payload.into();
-        let records = self.chat_repo.select_non_stick(&params)?;
-
-        Ok(records)
-    }
-
-    pub fn get_stick_chats(&self, payload: SearchChatPayload) -> Result<Vec<Chat>> {
-        let params = payload.into();
-        let records = self.chat_repo.select_stick(&params)?;
-
-        Ok(records.records)
-    }
-
-    pub fn get_archive_chats(&self, payload: SearchChatPayload) -> Result<Vec<Chat>> {
-        let params = payload.into();
-        let records = self.chat_repo.select_archived(&params)?;
-
-        Ok(records.records)
     }
 
     pub fn search_chat_logs(

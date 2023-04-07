@@ -144,20 +144,16 @@ export async function newChat(params?: { promptId?: string; title?: string }) {
   return execCommand<string>("new_chat", params);
 }
 
+export async function allChatsExceptCasual() {
+  return execCommand<Array<ChatIndex>>("all_chats_except_casual", {});
+}
+
+export async function casualChat() {
+  return execCommand<ChatIndex>("casual_chat", {});
+}
+
 export async function deleteChat(chatId: string) {
   return execCommand<void>("delete_chat", { chatId });
-}
-
-export async function allNonStickChats() {
-  return execCommand<Array<ChatIndex>>("all_non_stick_chats");
-}
-
-export async function allStickChats() {
-  return execCommand<Array<ChatIndex>>("all_stick_chats");
-}
-
-export async function allArchiveChats() {
-  return execCommand<Array<ChatIndex>>("all_archive_chats");
 }
 
 export async function setChatArchive(chatId: string) {

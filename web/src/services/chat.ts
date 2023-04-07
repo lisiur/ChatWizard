@@ -5,51 +5,28 @@ import { useTask } from "../hooks/task";
 export function useChatService() {
   const loaded = ref(false);
 
-  const loadAllStickChatsTask = useTask(
+  const loadAllChatsExceptCasualTask = useTask(
     async () => {
-      return await api.allStickChats();
+      return await api.allChatsExceptCasual();
     },
     {
       default: [],
     }
   );
 
-  const loadAllNonStickChatsTask = useTask(
-    async () => {
-      return await api.allNonStickChats();
-    },
-    {
-      default: [],
-    }
+  const allChats = computed(() => loadAllChatsExceptCasualTask.result ?? []);
+  const allStickChats = computed(() =>
+    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => it.stick)
   );
-
-  const loadAllArchiveChatsTask = useTask(
-    async () => {
-      return await api.allArchiveChats();
-    },
-    {
-      default: [],
-    }
+  const allNonStickChats = computed(() =>
+    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => !it.stick)
   );
-
-  const allStickChats = computed(() => loadAllStickChatsTask.result ?? []);
-  const allNonStickChats = computed(
-    () => loadAllNonStickChatsTask.result ?? []
+  const allArchiveChats = computed(() =>
+    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => it.archive)
   );
-  const allArchiveChats = computed(() => loadAllArchiveChatsTask.result ?? []);
-
-  const allChats = computed(() => {
-    return allStickChats.value
-      .concat(allNonStickChats.value)
-      .concat(allArchiveChats.value);
-  });
 
   async function reload() {
-    const res = await Promise.all([
-      loadAllNonStickChatsTask.exec(),
-      loadAllStickChatsTask.exec(),
-      loadAllArchiveChatsTask.exec(),
-    ]);
+    const res = await loadAllChatsExceptCasualTask.exec();
     loaded.value = true;
     return res;
   }

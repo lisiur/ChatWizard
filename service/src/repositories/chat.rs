@@ -1,8 +1,6 @@
-use crate::database::pagination::*;
 use crate::models::chat::{NewChat, PatchChat};
 use crate::result::Result;
 use crate::schema::chats;
-use crate::types::PageQueryParams;
 use crate::{database::DbConn, models::chat::Chat, types::Id};
 use diesel::prelude::*;
 use diesel::query_builder::AsQuery;
@@ -24,47 +22,57 @@ impl ChatRepo {
             .map_err(Into::into)
     }
 
-    pub fn select_non_stick(
-        &self,
-        params: &PageQueryParams<(), ()>,
-    ) -> Result<PaginatedRecords<Chat>> {
+    pub fn select_casual(&self, user_id: Id) -> Result<Chat> {
         chats::table
             .as_query()
-            .filter(chats::user_id.eq(params.user_id))
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.eq(chats::user_id))
+            .first::<Chat>(&mut *self.0.conn())
+            .map_err(Into::into)
+    }
+
+    pub fn select_all_except_casual(&self, user_id: Id) -> Result<Vec<Chat>> {
+        let stick_chats = self.select_stick(user_id)?;
+        let nonstick_chats = self.select_non_stick(user_id)?;
+        let archived = self.select_archived(user_id)?;
+
+        let all_chats = stick_chats.into_iter().chain(nonstick_chats).chain(archived).collect();
+
+        Ok(all_chats)
+    }
+
+    pub fn select_non_stick(&self, user_id: Id) -> Result<Vec<Chat>> {
+        chats::table
+            .as_query()
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(false))
             .order(chats::sort.asc())
-            .paginate(params.page)
-            .per_page(params.per_page)
-            .load_and_count_pages::<Chat>(&mut self.0.conn())
+            .load::<Chat>(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
 
-    pub fn select_stick(&self, params: &PageQueryParams<(), ()>) -> Result<PaginatedRecords<Chat>> {
+    pub fn select_stick(&self, user_id: Id) -> Result<Vec<Chat>> {
         chats::table
             .as_query()
-            .filter(chats::user_id.eq(params.user_id))
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(true))
             .order(chats::sort.asc())
-            .paginate(params.page)
-            .per_page(params.per_page)
-            .load_and_count_pages::<Chat>(&mut self.0.conn())
+            .load::<Chat>(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
 
-    pub fn select_archived(
-        &self,
-        params: &PageQueryParams<(), ()>,
-    ) -> Result<PaginatedRecords<Chat>> {
+    pub fn select_archived(&self, user_id: Id) -> Result<Vec<Chat>> {
         chats::table
             .as_query()
-            .filter(chats::user_id.eq(params.user_id))
+            .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(true))
             .order(chats::archived_at.desc())
-            .paginate(params.page)
-            .per_page(params.per_page)
-            .load_and_count_pages::<Chat>(&mut self.0.conn())
+            .load::<Chat>(&mut *self.0.conn())
             .map_err(|e| e.into())
     }
 
@@ -72,6 +80,7 @@ impl ChatRepo {
         match chats::table
             .select(chats::sort)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(false))
             .order(chats::sort.asc())
@@ -89,6 +98,7 @@ impl ChatRepo {
         match chats::table
             .select(chats::sort)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(false))
             .order(chats::sort.desc())
@@ -106,6 +116,7 @@ impl ChatRepo {
         match chats::table
             .select(chats::sort)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(true))
             .order(chats::sort.asc())
@@ -122,6 +133,7 @@ impl ChatRepo {
     pub fn decrease_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
         diesel::update(chats::table)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(true))
             .filter(chats::sort.ge(from))
@@ -134,6 +146,7 @@ impl ChatRepo {
     pub fn increase_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
         diesel::update(chats::table)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(true))
             .filter(chats::sort.ge(from))
@@ -146,6 +159,7 @@ impl ChatRepo {
     pub fn decrease_non_stick_order(&self, user_id: Id, from: i32, to: i32) -> Result<usize> {
         diesel::update(chats::table)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(false))
             .filter(chats::sort.ge(from))
@@ -164,6 +178,7 @@ impl ChatRepo {
         );
         diesel::update(chats::table)
             .filter(chats::user_id.eq(user_id))
+            .filter(chats::id.ne(user_id))
             .filter(chats::archive.eq(false))
             .filter(chats::stick.eq(false))
             .filter(chats::sort.ge(from))
@@ -171,18 +186,6 @@ impl ChatRepo {
             .set(chats::sort.eq(chats::sort + 1))
             .execute(&mut *self.0.conn())
             .map_err(|e| e.into())
-    }
-
-    pub fn select_index(&self, params: PageQueryParams<(), ()>) -> Result<PaginatedRecords<Chat>> {
-        let result = chats::table
-            .as_query()
-            .filter(chats::user_id.eq(params.user_id))
-            .order(chats::created_at.desc())
-            .paginate(params.page)
-            .per_page(params.per_page)
-            .load_and_count_pages::<Chat>(&mut self.0.conn())?;
-
-        Ok(result)
     }
 
     pub fn select_by_id(&self, id: Id) -> Result<Chat> {
@@ -203,6 +206,17 @@ impl ChatRepo {
         let size = diesel::insert_into(chats::table)
             .values(chat)
             .execute(&mut *self.0.conn())?;
+        Ok(size)
+    }
+
+    pub fn insert_if_not_exist(&self, chat: &NewChat) -> Result<usize> {
+
+        let size = diesel::insert_into(chats::table)
+            .values(chat)
+            .on_conflict(chats::id)
+            .do_nothing()
+            .execute(&mut *self.0.conn())?;
+
         Ok(size)
     }
 

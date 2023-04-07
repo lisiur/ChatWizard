@@ -10,6 +10,9 @@ import { save } from "../../utils/api";
 export default defineComponent({
   name: "Chat",
   props: {
+    defaultTitle: {
+      type: String,
+    },
     chat: {
       type: Object as PropType<Chat>,
       required: true,
@@ -46,7 +49,7 @@ export default defineComponent({
     }
 
     function updateMessage(id: string, content: string) {
-      props.chat.updateLog(id, content)
+      props.chat.updateLog(id, content);
     }
 
     async function exportMarkdown() {
@@ -63,8 +66,6 @@ export default defineComponent({
         // TODO
       }
     }
-
-    function loadMessage(cursor?: string) {}
 
     function focusInput() {
       userInputRef.value?.focus();
@@ -102,7 +103,7 @@ export default defineComponent({
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
-        <Header chat={props.chat}></Header>
+        <Header chat={props.chat} defaultTitle={props.defaultTitle}></Header>
 
         <History
           ref={historyRef}

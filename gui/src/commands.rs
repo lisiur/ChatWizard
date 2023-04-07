@@ -36,7 +36,11 @@ pub async fn exec_command(
             .exec(&conn)
             .into_result(),
 
-        "all_chats" => from_value::<AllChatsCommand>(payload)?
+        "all_chats_except_casual" => from_value::<AllChatsExceptCasualCommand>(payload)?
+            .exec(&conn)
+            .into_result(),
+
+        "casual_chat" => from_value::<CasualChatCommand>(payload)?
             .exec(&conn)
             .into_result(),
 
@@ -49,18 +53,6 @@ pub async fn exec_command(
             .into_result(),
 
         "delete_chat" => from_value::<DeleteChatCommand>(payload)?
-            .exec(&conn)
-            .into_result(),
-
-        "all_non_stick_chats" => from_value::<AllNonStickChatsCommand>(payload)?
-            .exec(&conn)
-            .into_result(),
-
-        "all_stick_chats" => from_value::<AllStickChatsCommand>(payload)?
-            .exec(&conn)
-            .into_result(),
-
-        "all_archive_chats" => from_value::<AllArchiveChatsCommand>(payload)?
             .exec(&conn)
             .into_result(),
 

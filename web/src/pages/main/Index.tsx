@@ -1,12 +1,14 @@
 import { computed, defineComponent } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import {
-  Chat20Regular as InactiveChatIcon,
-  Chat20Filled as ActiveChatIcon,
+  Chat20Regular as ChatIcon,
+  Chat20Filled as ChatActiveIcon,
   CommentLightning20Regular as PromptIcon,
   CommentLightning20Filled as PromptActiveIcon,
   Apps20Regular as StoreIcon,
   Apps20Filled as StoreActiveIcon,
+  Lightbulb20Regular as CasualChatIcon,
+  LightbulbFilament20Filled as CasualActiveIcon,
 } from "@vicons/fluent";
 
 import { SettingsAdjust as SettingIcon } from "@vicons/carbon";
@@ -26,9 +28,15 @@ export default defineComponent({
 
     const topMenus = [
       {
+        routeName: "casual-chat",
+        icon: CasualChatIcon,
+        activeIcon: CasualActiveIcon,
+        size: "2.0rem",
+      },
+      {
         routeName: "chat",
-        icon: InactiveChatIcon,
-        activeIcon: ActiveChatIcon,
+        icon: ChatIcon,
+        activeIcon: ChatActiveIcon,
         size: "1.8rem",
       },
       {

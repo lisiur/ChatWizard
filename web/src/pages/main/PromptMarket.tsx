@@ -103,7 +103,7 @@ export default defineComponent({
     async function newChatHandler(prompt: api.MarketPrompt) {
       const chatId = await api.installMarketPromptAndCreateChat(prompt);
       router.push({
-        name: "chat",
+        name: "contact",
         query: {
           id: chatId,
         },

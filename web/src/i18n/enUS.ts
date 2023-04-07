@@ -11,6 +11,7 @@ export const messages = {
   "window.setting": "Setting",
 
   "chat.new": "New Chat",
+  "chat.casual.title": "Casual Chat",
   "chat.new.defaultTitle": "New Chat",
   "chat.conversations": "Conversations",
   "chat.inputNameHint": "Please input chat name",

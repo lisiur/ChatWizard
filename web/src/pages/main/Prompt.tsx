@@ -118,7 +118,7 @@ export default defineComponent({
         title: act,
       });
       router.push({
-        name: "chat",
+        name: "contact",
         query: {
           id: chatId,
         },

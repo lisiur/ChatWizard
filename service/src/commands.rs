@@ -5,7 +5,8 @@ use crate::{
     services::prompt::*,
     services::prompt_market::*,
     services::setting::*,
-    Chat, ChatConfig, CursorQueryResult, DbConn, Id, Prompt, PromptIndex, Setting, StreamContent, Theme,
+    Chat, ChatConfig, CursorQueryResult, DbConn, Id, Prompt, PromptIndex, Setting, StreamContent,
+    Theme,
 };
 use serde::Deserialize;
 use tokio::sync::mpsc::{self, Receiver};
@@ -69,57 +70,35 @@ impl GetChatCommand {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AllChatsCommand;
+pub struct AllChatsExceptCasualCommand {
+    #[serde(default)]
+    user_id: Id,
+}
 
-impl AllChatsCommand {
+impl AllChatsExceptCasualCommand {
     pub fn exec(self, conn: &DbConn) -> Result<Vec<Chat>> {
         let chat_service = ChatService::new(conn.clone());
 
-        let result = chat_service.search_chats(SearchChatPayload::default())?;
+        let result = chat_service.get_all_chats_except_casual(self.user_id)?;
 
-        Ok(result.records)
+        Ok(result)
     }
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AllNonStickChatsCommand;
-
-impl AllNonStickChatsCommand {
-    pub fn exec(self, conn: &DbConn) -> Result<Vec<Chat>> {
-        let chat_service = ChatService::new(conn.clone());
-
-        let result = chat_service.get_non_stick_chats(SearchChatPayload::default())?;
-
-        Ok(result.records)
-    }
+pub struct CasualChatCommand {
+    #[serde(default)]
+    user_id: Id,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AllStickChatsCommand;
-
-impl AllStickChatsCommand {
-    pub fn exec(self, conn: &DbConn) -> Result<Vec<Chat>> {
+impl CasualChatCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<Chat> {
         let chat_service = ChatService::new(conn.clone());
 
-        let records = chat_service.get_stick_chats(SearchChatPayload::default())?;
+        let result = chat_service.get_casual_chat(self.user_id)?;
 
-        Ok(records)
-    }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AllArchiveChatsCommand;
-
-impl AllArchiveChatsCommand {
-    pub fn exec(self, conn: &DbConn) -> Result<Vec<Chat>> {
-        let chat_service = ChatService::new(conn.clone());
-
-        let records = chat_service.get_archive_chats(SearchChatPayload::default())?;
-
-        Ok(records)
+        Ok(result)
     }
 }
 
