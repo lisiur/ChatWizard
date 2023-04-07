@@ -69,6 +69,8 @@ export default defineComponent({
       return scrollRef.value?.$el.nextSibling.children[0] as HTMLElement;
     });
 
+    const disabledTransition = ref(false);
+
     const {
       start: startAutoScroll,
       stop: stopAutoScroll,
@@ -81,6 +83,7 @@ export default defineComponent({
     const { hasMore, reset, firstBatchLoad } = useLazyLoad<ChatLog>(
       async () => {
         savePosition();
+        disabledTransition.value = true;
         const res = await props.chat.loadPrevLogs();
         await nextTick();
         if (firstBatchLoad.value) {
@@ -88,6 +91,7 @@ export default defineComponent({
         } else {
           recoverPosition();
         }
+        disabledTransition.value = false;
         return res;
       },
       loadingRef
@@ -205,7 +209,7 @@ export default defineComponent({
       return (
         <div
           key={msg.id}
-          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative hover:shadow-md"
+          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
         >
           <div
             class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
@@ -436,7 +440,11 @@ export default defineComponent({
             >
               <NSpin size={12} v-show={hasMore.value}></NSpin>
             </div>
-            <ListTransition class="grid gap-4 pb-6" absolute={false}>
+            <ListTransition
+              class="grid gap-4 pb-6"
+              disabled={disabledTransition.value}
+              absolute={false}
+            >
               {props.chat.messages.map((message) => (
                 <div key={message.tmpId || message.id}>
                   {renderMessage(message)}{" "}
