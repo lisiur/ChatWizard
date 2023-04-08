@@ -1,4 +1,4 @@
-## [0.0.58](https://github.com/lisiur/ChatWizard/compare/v0.0.57...v0.0.58) (2023-04-08)
+## [0.0.59](https://github.com/lisiur/ChatWizard/compare/v0.0.58...v0.0.59) (2023-04-08)
 
 
 ### Features
