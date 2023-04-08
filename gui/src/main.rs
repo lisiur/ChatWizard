@@ -8,7 +8,9 @@ use tokio::sync::mpsc::{channel, Sender};
 use chat_wizard_api::app;
 use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use project::Project;
-use tauri::{AppHandle, Manager, TitleBarStyle};
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
+use tauri::{AppHandle, Manager};
 use window::{create_window, WindowOptions};
 
 mod commands;
@@ -88,16 +90,15 @@ async fn main() {
             #[cfg(not(target_os = "macos"))]
             {
                 create_window(
+                    &app.handle(),
                     "main",
                     WindowOptions {
                         title: "ChatWizard".to_string(),
                         url: "index.html".to_string(),
                         width: 860.0,
                         height: 720.0,
-                        title_bar_style: Some(TitleBarStyle::Visible),
                         ..Default::default()
                     },
-                    &app.handle(),
                 )
                 .unwrap();
             }

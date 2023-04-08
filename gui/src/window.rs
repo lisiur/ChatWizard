@@ -1,4 +1,6 @@
-use tauri::{AppHandle, Manager, TitleBarStyle, Window, WindowBuilder, WindowUrl};
+use tauri::{AppHandle, Manager, Window, WindowBuilder, WindowUrl};
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
 
 use crate::result::Result;
 
@@ -15,6 +17,7 @@ pub struct WindowOptions {
     pub position: Option<[f64; 2]>,
     pub min_size: Option<[f64; 2]>,
     pub max_size: Option<[f64; 2]>,
+    #[cfg(target_os = "macos")]
     pub title_bar_style: Option<TitleBarStyle>,
     pub decorations: Option<bool>,
     pub transparent: Option<bool>,
@@ -33,6 +36,7 @@ impl Default for WindowOptions {
             position: None,
             min_size: None,
             max_size: None,
+            #[cfg(target_os = "macos")]
             title_bar_style: Some(TitleBarStyle::Visible),
             decorations: Some(true),
             transparent: Some(false),
@@ -74,7 +78,6 @@ pub fn create_window(handle: &AppHandle, label: &str, options: WindowOptions) ->
     let url = WindowUrl::App(options.url.into());
     log::debug!("creating window {} with url {}", label, url.to_string());
 
-    let title_bar_style = options.title_bar_style.unwrap_or(TitleBarStyle::Visible);
     let mut builder = WindowBuilder::new(handle, label, url)
         .title(&options.title)
         .always_on_top(options.always_on_top)
@@ -82,10 +85,16 @@ pub fn create_window(handle: &AppHandle, label: &str, options: WindowOptions) ->
         .min_inner_size(min_size[0], min_size[1])
         .max_inner_size(max_size[0], max_size[1])
         .resizable(options.resizable)
-        .title_bar_style(title_bar_style)
         .decorations(options.decorations.unwrap_or(true))
         .transparent(options.transparent.unwrap_or(false))
         .visible(false);
+
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(title_bar_style) = options.title_bar_style {
+            builder = builder.title_bar_style(title_bar_style);
+        }
+    }
 
     if let Some(position) = options.position {
         builder = builder.position(position[0], position[1]);

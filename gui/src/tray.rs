@@ -1,6 +1,8 @@
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
 use tauri::{
     AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem, TitleBarStyle,
+    SystemTrayMenuItem,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -30,22 +32,21 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
                     window.set_focus().unwrap();
                 }
             } else {
-                let window = show_or_create_window(
-                    app,
-                    "casual-chat",
-                    WindowOptions {
-                        title: "".to_string(),
-                        url: "index.html/#/casual-chat".to_string(),
-                        width: 460.0,
-                        height: 720.0,
-                        always_on_top: true,
-                        title_bar_style: Some(TitleBarStyle::Transparent),
-                        decorations: Some(false),
-                        transparent: Some(true),
-                        ..Default::default()
-                    },
-                )
-                .unwrap();
+                let mut window_options = WindowOptions {
+                    title: "".to_string(),
+                    url: "index.html/#/casual-chat".to_string(),
+                    width: 460.0,
+                    height: 720.0,
+                    always_on_top: true,
+                    decorations: Some(false),
+                    transparent: Some(true),
+                    ..Default::default()
+                };
+                #[cfg(target_os = "macos")]
+                {
+                    window_options.title_bar_style = Some(TitleBarStyle::Transparent);
+                }
+                let window = show_or_create_window(app, "casual-chat", window_options).unwrap();
                 window.move_window(Position::TrayCenter).unwrap();
             }
         }
