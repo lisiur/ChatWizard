@@ -404,7 +404,6 @@ impl ChatService {
                             },
                             StreamContent::Done => {
                                 save_reply(reply.as_deref().unwrap_or_default(), true);
-                                break;
                             }
                             _ => {}
                         }

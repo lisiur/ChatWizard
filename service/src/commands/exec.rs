@@ -154,13 +154,11 @@ impl CommandExecutor {
             "stop_reply" => {
                 let command = from_value::<StopReplyCommand>(payload)?;
                 let message_id = command.message_id;
-                self.stop_reply_sender_map
-                    .lock()
-                    .await
-                    .remove(&message_id)
-                    .unwrap()
-                    .send(())
-                    .unwrap_or_default();
+                let sender = self.stop_reply_sender_map.lock().await.remove(&message_id);
+
+                if let Some(sender) = sender {
+                    sender.send(()).unwrap();
+                }
                 Ok(Box::new(()))
             }
 
