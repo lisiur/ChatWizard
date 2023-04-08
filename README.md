@@ -39,17 +39,15 @@
 
 ## Screenshots
 
+<img src="./assets/casual-chat.png" />
+
 <details>
-<summary>View</summary>
-<img src="./assets/chat.jpeg" />
-<img src="./assets/chat-menus.jpeg" />
-<img src="./assets/chat-config.jpeg" />
-<img src="./assets/prompt.jpeg" />
-<img src="./assets/prompt-menus.jpeg" />
-<img src="./assets/prompt-market.jpeg" />
-<img src="./assets/prompt-market-menu.jpeg" />
-<img src="./assets/setting.jpeg" />
-<img src="./assets/light-theme.jpeg" />
+<summary>View More</summary>
+<img src="./assets/chat.png" />
+<img src="./assets/prompt.png" />
+<img src="./assets/prompt-market.png" />
+<img src="./assets/setting.png" />
+<img src="./assets/tray-window.png" />
 </details>
 
 ## Features
@@ -57,6 +55,7 @@
 - local web server
 - stream response
 - stop replying
+- tray window
 - network proxy
 - forward api
 - lazy loading of chat records

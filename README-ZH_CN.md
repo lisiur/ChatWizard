@@ -35,17 +35,15 @@
 
 ## 截图
 
+<img src="./assets/casual-chat.png" />
+
 <details>
-<summary>查看</summary>
-<img src="./assets/chat.jpeg" />
-<img src="./assets/chat-menus.jpeg" />
-<img src="./assets/chat-config.jpeg" />
-<img src="./assets/prompt.jpeg" />
-<img src="./assets/prompt-menus.jpeg" />
-<img src="./assets/prompt-market.jpeg" />
-<img src="./assets/prompt-market-menu.jpeg" />
-<img src="./assets/setting.jpeg" />
-<img src="./assets/light-theme.jpeg" />
+<summary>查看更多</summary>
+<img src="./assets/chat.png" />
+<img src="./assets/prompt.png" />
+<img src="./assets/prompt-market.png" />
+<img src="./assets/setting.png" />
+<img src="./assets/tray-window.png" />
 </details>
 
 
@@ -54,6 +52,7 @@
 - 本地浏览器网页
 - 流式回复
 - 停止回复
+- 托盘窗口
 - 网络代理
 - 接口转发
 - 聊天记录的懒加载
