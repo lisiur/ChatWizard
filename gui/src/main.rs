@@ -8,7 +8,7 @@ use tokio::sync::mpsc::{channel, Sender};
 use chat_wizard_api::app;
 use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use project::Project;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, TitleBarStyle};
 use window::{create_window, WindowOptions};
 
 mod commands;
@@ -51,6 +51,7 @@ async fn main() {
     tokio::spawn(app(port, conn.clone()));
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             if let Some(main_window) = app.get_window("main") {
                 main_window.show().unwrap();
@@ -67,18 +68,40 @@ async fn main() {
             let app_handle = app.handle();
             app.manage(EventBus::new(app_handle));
 
-            create_window(
-                "main",
-                WindowOptions {
-                    title: "ChatWizard".to_string(),
-                    url: "".to_string(),
-                    width: 860.0,
-                    height: 720.0,
-                    ..Default::default()
-                },
-                app.handle(),
-            )
-            .unwrap();
+            #[cfg(target_os = "macos")]
+            {
+                create_window(
+                    &app.handle(),
+                    "main",
+                    WindowOptions {
+                        title: "".to_string(),
+                        url: "index.html".to_string(),
+                        width: 860.0,
+                        height: 720.0,
+                        title_bar_style: Some(TitleBarStyle::Overlay),
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                create_window(
+                    "main",
+                    WindowOptions {
+                        title: "ChatWizard".to_string(),
+                        url: "index.html".to_string(),
+                        width: 860.0,
+                        height: 720.0,
+                        title_bar_style: Some(TitleBarStyle::Visible),
+                        ..Default::default()
+                    },
+                    &app.handle(),
+                )
+                .unwrap();
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -5,6 +5,7 @@
       "icon": ["icons/windows/icon.ico"]
     },
     "systemTray": {
+      "menuOnLeftClick": false,
       "iconPath": "icons/windows/tray-icon.png",
       "iconAsTemplate": true
     }

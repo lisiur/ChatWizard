@@ -20,5 +20,6 @@ export interface ThemeVars extends GlobalThemeOverrides {
     inputBgColor: string;
     codeBgColor: string;
     draggingMenuBgColor: string;
+    windowBorderColor: string,
   };
 }

@@ -5,8 +5,10 @@
       "icon": ["icons/macos/icon.icns"]
     },
     "systemTray": {
+      "menuOnLeftClick": false,
       "iconPath": "icons/macos/tray-icon.png",
       "iconAsTemplate": true
-    }
+    },
+    "macOSPrivateApi": true
   }
 }

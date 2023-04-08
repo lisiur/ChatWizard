@@ -36,6 +36,7 @@ const vars: ThemeVars = {
     inputBgColor: "#2c2c2c",
     codeBgColor: "#111111",
     draggingMenuBgColor: "#363636",
+    windowBorderColor: "#444",
   },
 };
 

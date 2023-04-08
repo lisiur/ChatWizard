@@ -1,0 +1,5 @@
+html, body {
+  overflow: hidden;
+  border-radius: .5rem;
+  border: .01rem solid var(--window-border-color);
+}

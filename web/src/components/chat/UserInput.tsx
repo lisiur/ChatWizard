@@ -168,7 +168,7 @@ export default defineComponent({
               })} */}
           </div>
         </div>
-        <div class="h-[10rem] px-4 pt-2 pb-6">
+        <div class="h-[8rem] px-4 pt-2 pb-6">
           <NScrollbar class="h-full">
             <textarea
               ref={inputRef}

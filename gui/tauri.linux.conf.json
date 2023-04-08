@@ -9,6 +9,7 @@
       ]
     },
     "systemTray": {
+      "menuOnLeftClick": false,
       "iconPath": "icons/linux/tray-icon.png",
       "iconAsTemplate": true
     }

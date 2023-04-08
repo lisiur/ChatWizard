@@ -1,7 +1,10 @@
 use tauri::{
     AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
+    SystemTrayMenuItem, TitleBarStyle,
 };
+use tauri_plugin_positioner::{Position, WindowExt};
+
+use crate::window::{show_or_create_window, WindowOptions};
 
 pub fn system_tray() -> SystemTray {
     let tray_menu = SystemTrayMenu::new()
@@ -13,7 +16,39 @@ pub fn system_tray() -> SystemTray {
 }
 
 pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
+    tauri_plugin_positioner::on_tray_event(app, &event);
+
     match event {
+        SystemTrayEvent::LeftClick { .. } => {
+            if let Some(window) = app.get_window("casual-chat") {
+                window.move_window(Position::TrayCenter).unwrap();
+                if window.is_visible().unwrap() {
+                    window.hide().unwrap();
+                } else {
+                    window.show().unwrap();
+                    window.unminimize().unwrap();
+                    window.set_focus().unwrap();
+                }
+            } else {
+                let window = show_or_create_window(
+                    app,
+                    "casual-chat",
+                    WindowOptions {
+                        title: "".to_string(),
+                        url: "index.html/#/casual-chat".to_string(),
+                        width: 460.0,
+                        height: 720.0,
+                        always_on_top: true,
+                        title_bar_style: Some(TitleBarStyle::Transparent),
+                        decorations: Some(false),
+                        transparent: Some(true),
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                window.move_window(Position::TrayCenter).unwrap();
+            }
+        }
         SystemTrayEvent::MenuItemClick { id, .. } => {
             if id == "show" {
                 show_main_window(app);
@@ -21,8 +56,6 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
                 app.exit(0);
             }
         }
-        SystemTrayEvent::LeftClick { ..} => {},
-        SystemTrayEvent::RightClick { ..} => {},
         _ => {}
     }
 }

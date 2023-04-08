@@ -1,3 +1,4 @@
+import './style.css'
 import { computed, defineComponent } from "vue";
 import ChatComp from "../../components/chat/Chat";
 import { Chat } from "../../models/chat";

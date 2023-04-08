@@ -39,11 +39,10 @@ pub async fn show_window(label: &str, window: Window) -> Result<()> {
 pub async fn show_or_create_window(
     label: &str,
     options: WindowOptions,
-    window: Window,
     handle: AppHandle,
 ) -> Result<()> {
     log::debug!("show_or_create_window: {} {:?}", label, options);
-    window::show_or_create_window(label, window, handle, options)?;
+    window::show_or_create_window(&handle, label, options)?;
 
     Ok(())
 }
@@ -51,7 +50,7 @@ pub async fn show_or_create_window(
 #[tauri::command]
 pub async fn create_window(label: &str, options: WindowOptions, handle: AppHandle) -> Result<()> {
     log::debug!("create_window: {} {:?}", label, options);
-    window::create_window(label, options, handle)?;
+    window::create_window(&handle, label, options)?;
 
     Ok(())
 }
