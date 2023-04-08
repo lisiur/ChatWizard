@@ -1,6 +1,6 @@
-## [0.0.57](https://github.com/lisiur/ChatWizard/compare/v0.0.56...v0.0.57) (2023-04-08)
+## [0.0.58](https://github.com/lisiur/ChatWizard/compare/v0.0.57...v0.0.58) (2023-04-08)
 
 
-### Bug Fixes
+### Features
 
-* fix stop replying not work ([39ba039](https://github.com/lisiur/ChatWizard/commit/39ba039f6c440053cdc6dfc565bb034967d1a425))
+* support tray window ([c58b419](https://github.com/lisiur/ChatWizard/commit/c58b41939d5e09a401e9b1b279bef00f83affd97))
