@@ -1,6 +1,6 @@
-## [0.0.60](https://github.com/lisiur/ChatWizard/compare/v0.0.59...v0.0.60) (2023-04-09)
+## [0.0.61](https://github.com/lisiur/ChatWizard/compare/v0.0.60...v0.0.61) (2023-04-09)
 
 
 ### Bug Fixes
 
-* fix some bugs ([ea7f06b](https://github.com/lisiur/ChatWizard/commit/ea7f06b9e77c009af9197af6795b5167017b16c6))
+* fix the issue of being unable to open external links ([8a7442d](https://github.com/lisiur/ChatWizard/commit/8a7442d34591a0d829c9f46327fb5f9bbdb28a92))
