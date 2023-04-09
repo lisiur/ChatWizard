@@ -78,6 +78,9 @@ const messages: Messages = {
   "setting.upgrade.downloading": "正在下载...",
   "setting.upgrade.relaunch": "重启",
   "setting.upgrade.later": "稍后重启",
+  "setting.upgrade.download.success": "下载成功",
+  "setting.upgrade.restart.hint": "请重启应用以应用更新。",
+
 
   "setting.locale": "语言",
   "setting.apiKey": "密钥",

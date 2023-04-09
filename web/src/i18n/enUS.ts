@@ -72,6 +72,9 @@ export const messages = {
   "setting.upgrade.downloading": "Downloading...",
   "setting.upgrade.relaunch": "Restart",
   "setting.upgrade.later": "Later",
+  "setting.upgrade.download.success": "Download success",
+  "setting.upgrade.restart.hint": "Please restart the app to apply the update.",
+
 
   "setting.locale": "Language",
   "setting.apiKey": "Api Key",

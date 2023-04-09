@@ -39,8 +39,8 @@ export default defineComponent({
                     .then(() => {
                       dl.destroy();
                       dialog.success({
-                        title: "Download Success",
-                        content: "Please restart the app to apply the update.",
+                        title: t("setting.upgrade.download.success"),
+                        content: t("setting.upgrade.restart.hint"),
                         positiveText: t("setting.upgrade.relaunch"),
                         negativeText: t("setting.upgrade.later"),
                         onPositiveClick: relaunch,
