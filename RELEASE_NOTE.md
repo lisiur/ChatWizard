@@ -1,6 +1,6 @@
-## [0.0.59](https://github.com/lisiur/ChatWizard/compare/v0.0.58...v0.0.59) (2023-04-08)
+## [0.0.60](https://github.com/lisiur/ChatWizard/compare/v0.0.59...v0.0.60) (2023-04-09)
 
 
-### Features
+### Bug Fixes
 
-* support tray window ([c58b419](https://github.com/lisiur/ChatWizard/commit/c58b41939d5e09a401e9b1b279bef00f83affd97))
+* fix some bugs ([ea7f06b](https://github.com/lisiur/ChatWizard/commit/ea7f06b9e77c009af9197af6795b5167017b16c6))
