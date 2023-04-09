@@ -16,10 +16,10 @@ export function useChatService() {
 
   const allChats = computed(() => loadAllChatsExceptCasualTask.result ?? []);
   const allStickChats = computed(() =>
-    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => it.stick)
+    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => it.stick && !it.archive)
   );
   const allNonStickChats = computed(() =>
-    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => !it.stick)
+    (loadAllChatsExceptCasualTask.result ?? []).filter((it) => !it.stick && !it.archive)
   );
   const allArchiveChats = computed(() =>
     (loadAllChatsExceptCasualTask.result ?? []).filter((it) => it.archive)
