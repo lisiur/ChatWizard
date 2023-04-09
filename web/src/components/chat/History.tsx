@@ -125,8 +125,9 @@ export default defineComponent({
       }
     };
     watch(
-      () => props.chat.messages,
-      (messages) => {
+      () => props.chat.messages.length,
+      () => {
+        const messages = props.chat.messages;
         setTimeout(() => {
           for (let i = messages.length - 1; i >= 0; i--) {
             let needHijack = hijackLink(messages[i]);
