@@ -1,6 +1,5 @@
 import { EventCallback } from "@tauri-apps/api/event";
 import { v4 as uuid } from "uuid";
-import { execCommand } from "./api";
 import { isWeb } from "./env";
 
 export const clientId = uuid();
@@ -25,15 +24,17 @@ function init() {
     `ws://${window.location.host}/api/ws?clientId=${clientId}`
   );
 
-  websocket.send(JSON.stringify({ type: "connect" }));
+  websocket.onopen = () => {
+    websocket.send(JSON.stringify({ type: "connect", payload: null }));
+  };
 
   websocket.onmessage = (event) => {
     const { id, payload } = JSON.parse(event.data);
     if (eventCallbacks[id]) {
       eventCallbacks[id].forEach((callback) =>
         callback({
-          event: '',
-          windowLabel: '',
+          event: "",
+          windowLabel: "",
           id,
           payload,
         })

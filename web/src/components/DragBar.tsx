@@ -1,22 +1,31 @@
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref, watch, watchEffect } from "vue";
 
 export default defineComponent({
   props: {
     title: String,
+    disabled: Boolean,
   },
   setup(props, { slots }) {
+    const dragRegion = ref<HTMLElement>();
+
+    onMounted(() => {
+      watchEffect(() => {
+        if (!props.disabled) {
+          dragRegion.value!.dataset["tauriDragRegion"] = "true";
+        } else {
+          delete dragRegion.value!.dataset["tauriDragRegion"];
+        }
+      });
+    });
     return () => (
-      <div
-        class="px-4 py-3 border-b border-color flex items-center"
-        data-tauri-drag-region
-      >
+      <div class="border-b border-color flex items-center">
         <span
-          class="text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-          data-tauri-drag-region
+          ref={dragRegion}
+          class="px-4 py-3 text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap cursor-default"
         >
           {props.title}
         </span>
-        {slots["right-panel"]?.()}
+        <span class="pr-4 flex items-center">{slots["right-panel"]?.()}</span>
       </div>
     );
   },

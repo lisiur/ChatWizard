@@ -24,6 +24,7 @@ export default defineComponent({
           <ChatComp
             chat={chat.value}
             defaultTitle={t("chat.casual.title")}
+            draggable
           ></ChatComp>
         ) : null}
       </div>

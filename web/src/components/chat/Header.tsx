@@ -15,13 +15,24 @@ export default defineComponent({
       type: Object as PropType<Chat>,
       required: true,
     },
+    draggable: {
+      type: Boolean,
+      default: true,
+    },
   },
   setup(props) {
     const { t } = useI18n();
     const prompt = usePrompt(computed(() => props.chat.index.promptId));
 
     return () => (
-      <DragBar title={props.chat.index.title || props.defaultTitle || t("chat.new.defaultTitle")}>
+      <DragBar
+        title={
+          props.chat.index.title ||
+          props.defaultTitle ||
+          t("chat.new.defaultTitle")
+        }
+        disabled={!props.draggable}
+      >
         {{
           "right-panel": () => (
             <>

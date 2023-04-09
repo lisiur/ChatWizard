@@ -20,6 +20,9 @@ export default defineComponent({
     onMessage: {
       type: Function as PropType<(message: Message) => void>,
     },
+    draggable: {
+      type: Boolean,
+    },
   },
   setup(props, { expose }) {
     const historyRef = ref<InstanceType<typeof History>>();
@@ -103,7 +106,11 @@ export default defineComponent({
         class="h-full flex flex-col"
         style="background-color: var(--body-color)"
       >
-        <Header chat={props.chat} defaultTitle={props.defaultTitle}></Header>
+        <Header
+          chat={props.chat}
+          defaultTitle={props.defaultTitle}
+          draggable={props.draggable}
+        ></Header>
 
         <History
           ref={historyRef}

@@ -22,14 +22,15 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
 
     match event {
         SystemTrayEvent::LeftClick { .. } => {
-            if let Some(window) = app.get_window("casual-chat") {
-                window.move_window(Position::TrayCenter).unwrap();
+            let window = if let Some(window) = app.get_window("casual-chat") {
                 if window.is_visible().unwrap() {
                     window.hide().unwrap();
+                    window
                 } else {
                     window.show().unwrap();
                     window.unminimize().unwrap();
                     window.set_focus().unwrap();
+                    window
                 }
             } else {
                 let mut window_options = WindowOptions {
@@ -46,8 +47,15 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
                 {
                     window_options.title_bar_style = Some(TitleBarStyle::Transparent);
                 }
-                let window = show_or_create_window(app, "casual-chat", window_options).unwrap();
-                window.move_window(Position::TrayCenter).unwrap();
+                show_or_create_window(app, "casual-chat", window_options).unwrap()
+            };
+            #[cfg(target_os = "macos")]
+            {
+                window.move_window(Position::TopRight).unwrap();
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                window.move_window(Position::BottomRight).unwrap();
             }
         }
         SystemTrayEvent::MenuItemClick { id, .. } => {

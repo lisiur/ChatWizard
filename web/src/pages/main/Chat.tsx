@@ -12,6 +12,7 @@ import Explorer, { ExplorerItem } from "../../components/Explorer";
 import { useChatService } from "../../services/chat";
 
 export default defineComponent({
+  name: "ChatPage",
   setup() {
     const { t } = useI18n();
     const route = useRoute();
@@ -250,6 +251,7 @@ export default defineComponent({
               ref={chatRef}
               chat={currentChat.value}
               onMessage={messageHandler}
+              draggable
             ></ChatComp>
           ) : (
             <div class="h-full" data-tauri-drag-region></div>

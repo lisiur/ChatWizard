@@ -35,6 +35,7 @@ pub async fn handle_socket(
         if let Ok(msg) = msg {
             match msg {
                 Message::Text(text) => {
+                    dbg!(&text);
                     if let Ok(message) = serde_json::from_str::<SocketMessage>(&text) {
                         match message {
                             SocketMessage::Connect => {

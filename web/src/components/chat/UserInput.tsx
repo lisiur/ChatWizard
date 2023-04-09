@@ -1,4 +1,11 @@
-import { defineComponent, nextTick, PropType, ref, watch } from "vue";
+import {
+  defineComponent,
+  nextTick,
+  onMounted,
+  PropType,
+  ref,
+  watch,
+} from "vue";
 import { useComposition } from "../../hooks/composition";
 import { useI18n } from "../../hooks/i18n";
 import { Chat } from "../../models/chat";
@@ -37,6 +44,10 @@ export default defineComponent({
       focus,
     };
     expose(publicInstance);
+
+    onMounted(() => {
+      inputRef.value?.focus();
+    });
 
     watch(userMessage, (msg) => {
       if (!msg) {
