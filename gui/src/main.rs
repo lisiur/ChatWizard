@@ -3,15 +3,19 @@
     windows_subsystem = "windows"
 )]
 
-use tokio::sync::mpsc::{channel, Sender};
+use std::sync::Arc;
 
-use chat_wizard_api::app;
-use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
+use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::Mutex;
+
+use chat_wizard_api::app as api_app;
+use chat_wizard_service::{
+    commands::{CommandEvent, CommandExecutor},
+    Id, Setting, SettingService,
+};
 use project::Project;
-#[cfg(target_os = "macos")]
-use tauri::TitleBarStyle;
 use tauri::{AppHandle, Manager};
-use window::{create_window, WindowOptions};
+use window::{create_tray_window_in_background, show_or_create_main_window};
 
 mod commands;
 mod error;
@@ -25,6 +29,7 @@ pub struct Port(u16);
 pub struct EventBus {
     pub sender: Sender<CommandEvent>,
 }
+pub struct AppSetting(Arc<Mutex<Setting>>);
 
 impl EventBus {
     fn new(app_handle: AppHandle) -> Self {
@@ -32,7 +37,6 @@ impl EventBus {
 
         tokio::spawn(async move {
             while let Some(event) = receiver.recv().await {
-                log::debug!("{:?}", &event);
                 app_handle.emit_all(&event.name, event.payload).unwrap();
             }
         });
@@ -47,10 +51,14 @@ async fn main() {
     let project = Project::init().await.unwrap();
     let conn = chat_wizard_service::init(&project.db_url).unwrap();
 
-    // let port = portpicker::pick_unused_port().unwrap();
-    let port = 23333;
+    let setting = SettingService::new(conn.clone())
+        .get_setting(Id::local())
+        .unwrap();
 
-    tokio::spawn(app(port, conn.clone()));
+    let enable_web_server = setting.enable_web_server;
+    let hide_main_window = setting.hide_main_window;
+
+    let app_setting = AppSetting(Arc::new(Mutex::new(setting)));
 
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
@@ -63,45 +71,31 @@ async fn main() {
         }))
         .system_tray(tray::system_tray())
         .on_system_tray_event(tray::on_system_tray_event)
-        .manage(Port(port))
-        .manage(conn)
+        .manage(conn.clone())
         .manage(CommandExecutor::new())
-        .setup(|app| {
+        .manage(app_setting)
+        .setup(move |app| {
             let app_handle = app.handle();
-            app.manage(EventBus::new(app_handle));
+            app.manage(EventBus::new(app_handle.clone()));
 
-            #[cfg(target_os = "macos")]
-            {
-                create_window(
-                    &app.handle(),
-                    "main",
-                    WindowOptions {
-                        title: "".to_string(),
-                        url: "index.html".to_string(),
-                        width: 860.0,
-                        height: 720.0,
-                        title_bar_style: Some(TitleBarStyle::Overlay),
-                        ..Default::default()
-                    },
-                )
-                .unwrap();
+            // start web server
+            let port = 23333;
+            app.manage(Port(port));
+            if enable_web_server {
+                // let port = portpicker::pick_unused_port().unwrap();
+                tokio::spawn(api_app(port, conn));
             }
 
-            #[cfg(not(target_os = "macos"))]
-            {
-                create_window(
-                    &app.handle(),
-                    "main",
-                    WindowOptions {
-                        title: "ChatWizard".to_string(),
-                        url: "index.html".to_string(),
-                        width: 860.0,
-                        height: 720.0,
-                        ..Default::default()
-                    },
-                )
-                .unwrap();
+            // show main window
+            if !hide_main_window {
+                let handle = app_handle.clone();
+                tokio::spawn(async move {
+                    show_or_create_main_window(&handle).await.unwrap();
+                });
             }
+
+            // create tray window
+            create_tray_window_in_background(&app_handle).unwrap();
 
             Ok(())
         })

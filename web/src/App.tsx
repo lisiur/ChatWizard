@@ -24,11 +24,12 @@ export default defineComponent({
             // show window after theme is set
             // to avoid flash of unstyled content
             if (windowLabel) {
-              showWindow(windowLabel);
+              if (!("background" in route.query)) {
+                showWindow(windowLabel);
+              }
             }
 
             const unListen = await listen("theme-changed", (e) => {
-              console.log(e);
               setTheme(e.payload as Theme);
             });
             ctx.onBeforeUnmount(unListen);

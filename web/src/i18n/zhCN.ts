@@ -93,6 +93,10 @@ const messages: Messages = {
   "setting.forwardApiKey": "转发密钥",
   "setting.port": "端口",
   "setting.webPage": "网页版",
+  "setting.enableWebServer": "启用 Web 服务",
+  "setting.hideTaskbar": "隐藏任务栏图标",
+  "setting.hideMainWindow": "隐藏主窗口",
+  "setting.needRestart.hint": "下面的设置需要重启应用才能生效",
 };
 
 export default messages;

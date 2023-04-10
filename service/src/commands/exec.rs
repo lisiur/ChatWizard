@@ -46,6 +46,7 @@ impl CommandExecutor {
     where
         Fut: Future<Output = Result<()>> + Send,
     {
+        log::debug!("exec_command: {} {:?}", command, payload);
         match command.as_ref() {
             "new_chat" => from_value::<NewChatCommand>(payload)?
                 .exec(conn)

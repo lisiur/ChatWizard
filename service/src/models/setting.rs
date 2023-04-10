@@ -19,6 +19,9 @@ pub struct Setting {
     pub proxy: Option<String>,
     pub forward_url: Option<String>,
     pub forward_api_key: bool,
+    pub enable_web_server: bool,
+    pub hide_main_window: bool,
+    pub hide_taskbar: bool,
 }
 
 impl Setting {
@@ -129,4 +132,7 @@ pub struct PatchSetting {
     pub proxy: Option<String>,
     pub forward_url: Option<String>,
     pub forward_api_key: Option<bool>,
+    pub hide_main_window: Option<bool>,
+    pub hide_taskbar: Option<bool>,
+    pub enable_web_server: Option<bool>,
 }

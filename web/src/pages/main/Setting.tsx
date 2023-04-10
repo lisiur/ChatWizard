@@ -1,14 +1,16 @@
 import {
   NButton,
+  NDivider,
   NForm,
   NFormItem,
   NInput,
   NRadioButton,
   NRadioGroup,
+  NScrollbar,
   NSwitch,
 } from "naive-ui";
 import { defineComponent, nextTick } from "vue";
-import { getSettings, updateSettings, Theme } from "../../api";
+import { getSettings, updateSettings, Theme, Settings } from "../../api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
 import { openUrl } from "../../utils/api";
@@ -22,35 +24,11 @@ export default defineComponent({
       return getSettings();
     }, {});
 
-    const webServer = "http://localhost:23333";
-
-    async function changeLocaleHandler() {
+    async function updateSettingHandler(key: keyof Settings) {
       nextTick().then(async () => {
-        await updateSettings({ language: model.value.language });
-      });
-    }
-
-    async function changeApiKeyHandler() {
-      await updateSettings({ apiKey: model.value.apiKey ?? "" });
-    }
-
-    async function changeProxyHandler() {
-      await updateSettings({ proxy: model.value.proxy ?? "" });
-    }
-
-    async function changeThemeHandler() {
-      nextTick().then(async () => {
-        await updateSettings({ theme: model.value.theme ?? Theme.System });
-      });
-    }
-
-    async function changeForwardUrlHandler() {
-      await updateSettings({ forwardUrl: model.value.forwardUrl ?? "" });
-    }
-
-    async function changeForwardApiKeyHandler() {
-      await updateSettings({
-        forwardApiKey: model.value.forwardApiKey ?? false,
+        await updateSettings({
+          [key]: model.value[key],
+        });
       });
     }
 
@@ -59,76 +37,110 @@ export default defineComponent({
         data-tauri-drag-region
         class="h-full p-8 flex flex-col justify-center"
       >
-        <div class="mt-8 pr-12">
-          {model.value ? (
-            <NForm model={model.value} labelPlacement="left" labelWidth="8rem">
-              <NFormItem label={t("setting.locale") + " :"}>
-                <NRadioGroup
-                  v-model:value={model.value.language}
-                  onUpdateValue={changeLocaleHandler}
-                >
-                  <NRadioButton value="enUS">English</NRadioButton>
-                  <NRadioButton value="zhCN">中文</NRadioButton>
-                </NRadioGroup>
-              </NFormItem>
-              <NFormItem label={t("setting.theme") + " :"}>
-                <NRadioGroup
-                  v-model:value={model.value.theme}
-                  onUpdateValue={changeThemeHandler}
-                >
-                  <NRadioButton value="system">
-                    {t("setting.theme.system")}
-                  </NRadioButton>
-                  <NRadioButton value="light">
-                    {t("setting.theme.light")}
-                  </NRadioButton>
-                  <NRadioButton value="dark">
-                    {t("setting.theme.dark")}
-                  </NRadioButton>
-                </NRadioGroup>
-              </NFormItem>
-              <NFormItem label={t("setting.apiKey") + " :"}>
-                <NInput
-                  v-model:value={model.value.apiKey}
-                  type="password"
-                  showPasswordOn="click"
-                  placeholder={`sk-${"x".repeat(48)}`}
-                  onBlur={changeApiKeyHandler}
-                ></NInput>
-              </NFormItem>
-              <NFormItem label={t("setting.proxy") + " :"}>
-                <NInput
-                  v-model:value={model.value.proxy}
-                  onBlur={changeProxyHandler}
-                  placeholder="e.g. http://127.0.0.1:1080"
-                ></NInput>
-              </NFormItem>
-              <NFormItem label={t("setting.forwardUrl") + " :"}>
-                <NInput
-                  v-model:value={model.value.forwardUrl}
-                  onBlur={changeForwardUrlHandler}
-                  placeholder="e.g. http://your-server:8080"
-                ></NInput>
-              </NFormItem>
-              <NFormItem label={t("setting.forwardApiKey") + " :"}>
-                <NSwitch
-                  v-model:value={model.value.forwardApiKey}
-                  onUpdateValue={changeForwardApiKeyHandler}
-                ></NSwitch>
-              </NFormItem>
-              {isTauri ? (
-                <NFormItem label={t("setting.webPage") + " :"}>
-                  <NButton
-                    text
-                    onClick={() => openUrl("http://127.0.0.1:23333")}
+        <NScrollbar>
+          <div class="mt-8 pr-12">
+            {model.value ? (
+              <NForm
+                model={model.value}
+                labelPlacement="left"
+                labelWidth="10rem"
+              >
+                <NFormItem label={t("setting.locale") + " :"}>
+                  <NRadioGroup
+                    v-model:value={model.value.language}
+                    onUpdateValue={() => updateSettingHandler("language")}
                   >
-                    http://127.0.0.1:23333
-                  </NButton>
+                    <NRadioButton value="enUS">English</NRadioButton>
+                    <NRadioButton value="zhCN">中文</NRadioButton>
+                  </NRadioGroup>
                 </NFormItem>
-              ) : null}
-            </NForm>
-          ) : null}
-        </div>
+                <NFormItem label={t("setting.theme") + " :"}>
+                  <NRadioGroup
+                    v-model:value={model.value.theme}
+                    onUpdateValue={() => updateSettingHandler("theme")}
+                  >
+                    <NRadioButton value="system">
+                      {t("setting.theme.system")}
+                    </NRadioButton>
+                    <NRadioButton value="light">
+                      {t("setting.theme.light")}
+                    </NRadioButton>
+                    <NRadioButton value="dark">
+                      {t("setting.theme.dark")}
+                    </NRadioButton>
+                  </NRadioGroup>
+                </NFormItem>
+                <NFormItem label={t("setting.apiKey") + " :"}>
+                  <NInput
+                    v-model:value={model.value.apiKey}
+                    type="password"
+                    showPasswordOn="click"
+                    placeholder={`sk-${"x".repeat(48)}`}
+                    onBlur={() => updateSettingHandler("apiKey")}
+                  ></NInput>
+                </NFormItem>
+                <NFormItem label={t("setting.proxy") + " :"}>
+                  <NInput
+                    v-model:value={model.value.proxy}
+                    onBlur={() => updateSettingHandler("proxy")}
+                    placeholder="e.g. http://127.0.0.1:1080"
+                  ></NInput>
+                </NFormItem>
+                <NFormItem label={t("setting.forwardUrl") + " :"}>
+                  <NInput
+                    v-model:value={model.value.forwardUrl}
+                    onBlur={() => updateSettingHandler("forwardUrl")}
+                    placeholder="e.g. http://your-server:8080"
+                  ></NInput>
+                </NFormItem>
+                <NFormItem label={t("setting.forwardApiKey") + " :"}>
+                  <NSwitch
+                    v-model:value={model.value.forwardApiKey}
+                    onUpdateValue={() => updateSettingHandler("forwardApiKey")}
+                  ></NSwitch>
+                </NFormItem>
+                <NDivider>{t("setting.needRestart.hint")}</NDivider>
+                {isTauri ? (
+                  <NFormItem label={t("setting.hideMainWindow") + " :"}>
+                    <NSwitch
+                      v-model:value={model.value.hideMainWindow}
+                      onUpdateValue={() =>
+                        updateSettingHandler("hideMainWindow")
+                      }
+                    ></NSwitch>
+                  </NFormItem>
+                ) : null}
+                {isTauri ? (
+                  <NFormItem label={t("setting.hideTaskbar") + " :"}>
+                    <NSwitch
+                      v-model:value={model.value.hideTaskbar}
+                      onUpdateValue={() => updateSettingHandler("hideTaskbar")}
+                    ></NSwitch>
+                  </NFormItem>
+                ) : null}
+                {isTauri ? (
+                  <NFormItem label={t("setting.enableWebServer") + " :"}>
+                    <NSwitch
+                      v-model:value={model.value.enableWebServer}
+                      onUpdateValue={() =>
+                        updateSettingHandler("enableWebServer")
+                      }
+                    ></NSwitch>
+                    {model.value.enableWebServer ? (
+                      <NButton
+                        class="ml-4"
+                        text
+                        onClick={() => openUrl("http://127.0.0.1:23333")}
+                      >
+                        http://127.0.0.1:23333
+                      </NButton>
+                    ) : null}
+                  </NFormItem>
+                ) : null}
+              </NForm>
+            ) : null}
+          </div>
+        </NScrollbar>
       </div>
     );
   },

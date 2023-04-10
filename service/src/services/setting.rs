@@ -40,6 +40,9 @@ impl SettingService {
             proxy: payload.proxy,
             forward_url: payload.forward_url,
             forward_api_key: payload.forward_api_key,
+            hide_main_window: payload.hide_main_window,
+            hide_taskbar: payload.hide_taskbar,
+            enable_web_server: payload.enable_web_server,
         })?;
 
         Ok(())
@@ -56,4 +59,7 @@ pub struct UpdateSettingPayload {
     pub proxy: Option<String>,
     pub forward_url: Option<String>,
     pub forward_api_key: Option<bool>,
+    pub hide_main_window: Option<bool>,
+    pub hide_taskbar: Option<bool>,
+    pub enable_web_server: Option<bool>,
 }

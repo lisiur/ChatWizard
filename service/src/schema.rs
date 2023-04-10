@@ -80,6 +80,9 @@ diesel::table! {
         proxy -> Nullable<Text>,
         forward_url -> Nullable<Text>,
         forward_api_key -> Bool,
+        enable_web_server -> Bool,
+        hide_main_window -> Bool,
+        hide_taskbar -> Bool,
     }
 }
 

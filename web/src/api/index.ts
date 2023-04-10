@@ -96,6 +96,9 @@ export interface Settings {
   language?: string;
   forwardUrl?: string;
   forwardApiKey?: boolean;
+  enableWebServer?: boolean;
+  hideMainWindow?: boolean;
+  hideTaskbar?: boolean;
 }
 
 export enum Theme {

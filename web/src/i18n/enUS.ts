@@ -87,6 +87,10 @@ export const messages = {
   "setting.forwardApiKey": "Forward Api Key",
   "setting.port": "Port",
   "setting.webPage": "Web Page",
+  "setting.enableWebServer": "Enable Web Server",
+  "setting.hideTaskbar": "Hide Taskbar",
+  "setting.hideMainWindow": "Hide Main Window",
+  "setting.needRestart.hint": "The following settings will take effect after restarting the app",
 };
 
 export default messages;
