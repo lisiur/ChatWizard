@@ -77,8 +77,8 @@
 
 - **Mac**
 
-    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.62/ChatWizard_0.0.62_x64.dmg)
-    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.62/ChatWizard_0.0.62_aarch64.dmg)
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.63/ChatWizard_0.0.63_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.63/ChatWizard_0.0.63_aarch64.dmg)
 
     > MacOS users may encounter this problem: `"ChatWizard.app" is damaged and can't be opened. You should move it to the Trash.`
     > 
@@ -90,11 +90,11 @@
 
 - **Windows**: 
 
-    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.62/ChatWizard_0.0.62_x64_en-US.msi)
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.0.63/ChatWizard_0.0.63_x64_en-US.msi)
 
 - **Linux**
-    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.62/chat-wizard_0.0.62_amd64.deb)
-    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.62/chat-wizard_0.0.62_amd64.AppImage)
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.63/chat-wizard_0.0.63_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.63/chat-wizard_0.0.63_amd64.AppImage)
 
     > It is not surprising for the app to fail to launch on a Linux system. This is likely because the two packages were built on the Ubuntu20. Perhaps you could consider building them locally.
 
