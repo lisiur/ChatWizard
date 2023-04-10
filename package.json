@@ -1,6 +1,6 @@
 {
   "name": "chat-wizard",
-  "version": "0.0.61",
+  "version": "0.0.62",
   "description": "",
   "main": "index.js",
   "scripts": {
