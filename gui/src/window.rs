@@ -135,7 +135,7 @@ pub async fn show_or_create_main_window(handle: &AppHandle) -> Result<Window> {
     #[cfg(not(target_os = "macos"))]
     {
         let window = show_or_create_window_in_background(
-            &app.handle(),
+            handle,
             "main",
             WindowOptions {
                 title: "ChatWizard".to_string(),
