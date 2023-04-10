@@ -93,6 +93,20 @@
     - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.61/chat-wizard_0.0.61_amd64.deb)
     - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.61/chat-wizard_0.0.61_amd64.AppImage)
 
+    > 如果 linux 版的应用无法启动并不奇怪。这是因为这两个包都是在 ubuntu20 上构建的。或许你可以尝试在自己本地构建。
+
+- **从源码构建**
+    1. 首先你需要安装[Tauri 开发环境](https://tauri.app/v1/guides/getting-started/prerequisites)和[pnpm](https://pnpm.io/installation)
+    2. 然后执行下面的指令进行构建
+        ```bash
+        git clone https://github.com/lisiur/ChatWizard.git
+        cd ChatWizard
+        pnpm install
+        pnpm run install
+        pnpm run build
+        ```
+    3. 你的本地构建版本会在 target/release/bundle/<本地系统> 文件夹里
+
 ## 升级
 
 ChatWizard 支持内置升级，每当你重新启动应用时都会自动查询是否有新版本发布，如果有新版本会在左下角显示小红点。

@@ -96,6 +96,22 @@
     - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.0.61/chat-wizard_0.0.61_amd64.deb)
     - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.0.61/chat-wizard_0.0.61_amd64.AppImage)
 
+    > It is not surprising for the app to fail to launch on a Linux system. This is likely because the two packages were built on the Ubuntu20. Perhaps you could consider building them locally.
+
+- **From Source**
+
+  1. First you need to install [Tauri development environment](https://tauri.app/v1/guides/getting-started/prerequisites) and [pnpm](https://pnpm.io/installation)
+  2. Next, use the following command to build.
+      ```bash
+      git clone https://github.com/lisiur/ChatWizard.git
+      cd ChatWizard
+      pnpm install
+      pnpm run install
+      pnpm run build
+      ```
+  3. Your local build version will be located at target/release/bundle/<your platform>
+
+
 ## Upgrade
 
 ChatWizard has built-in upgrade support, and each time you restart the application, it automatically checks for any new releases. If a new version is available, a small red dot will be displayed in the lower left corner.
