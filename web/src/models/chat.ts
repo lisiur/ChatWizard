@@ -1,4 +1,4 @@
-import { reactive, ref, Ref, watch } from "vue";
+import { reactive, ref, Ref } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -10,6 +10,7 @@ import {
   deleteChatLog,
   loadChatLogByCursor,
   stopReply,
+  removeChatPrompt,
 } from "../api";
 import {
   AssistantMessage,
@@ -90,7 +91,7 @@ export class Chat {
       // To avoid the stop reply message is sent before the stop reply command
       setTimeout(() => {
         this.stopReplyHandler?.();
-      }, 1000)
+      }, 1000);
     }
   }
 
@@ -98,6 +99,19 @@ export class Chat {
     await deleteChatLog(logId);
     const index = this.messages.findIndex((item) => item.id === logId);
     this.messages.splice(index, 1);
+  }
+
+  async changePrompt(promptId: string) {
+    await updateChat({
+      id: this.index.id,
+      promptId,
+    });
+    this.index.promptId = promptId;
+  }
+
+  async removePrompt() {
+    this.index.promptId = undefined;
+    await removeChatPrompt(this.index.id);
   }
 
   async getPreviousUserLog(logId?: string): Promise<Message | null> {

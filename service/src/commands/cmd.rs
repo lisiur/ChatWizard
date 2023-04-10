@@ -196,6 +196,22 @@ impl UpdateChatCommand {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct RemoveChatPromptCommand {
+    id: Id,
+}
+
+impl RemoveChatPromptCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<()> {
+        let chat_service = ChatService::new(conn.clone());
+
+        chat_service.remove_prompt(self.id)?;
+
+        Ok(())
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LoadChatLogByCursorCommand {
     pub chat_id: Id,
     pub size: i64,

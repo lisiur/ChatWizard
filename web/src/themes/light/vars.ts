@@ -37,6 +37,7 @@ const vars: ThemeVars = {
     codeBgColor: "#eee",
     draggingMenuBgColor: "#dedede",
     windowBorderColor: "#bbb",
+    commandPanelBgColor: "#bbb",
   },
 };
 

@@ -36,7 +36,11 @@ impl ChatRepo {
         let nonstick_chats = self.select_non_stick(user_id)?;
         let archived = self.select_archived(user_id)?;
 
-        let all_chats = stick_chats.into_iter().chain(nonstick_chats).chain(archived).collect();
+        let all_chats = stick_chats
+            .into_iter()
+            .chain(nonstick_chats)
+            .chain(archived)
+            .collect();
 
         Ok(all_chats)
     }
@@ -210,7 +214,6 @@ impl ChatRepo {
     }
 
     pub fn insert_if_not_exist(&self, chat: &NewChat) -> Result<usize> {
-
         let size = diesel::insert_into(chats::table)
             .values(chat)
             .on_conflict(chats::id)
@@ -227,6 +230,15 @@ impl ChatRepo {
             .set(chat)
             .execute(&mut *self.0.conn())?;
         Ok(size)
+    }
+
+    pub fn remove_prompt(&self, id: Id) -> Result<()> {
+        diesel::update(chats::table)
+            .filter(chats::id.eq(id))
+            .set(chats::prompt_id.eq(Option::<Id>::None))
+            .execute(&mut *self.0.conn())?;
+
+        Ok(())
     }
 
     pub fn add_cost_and_update(&self, id: Id, cost: f32) -> Result<usize> {

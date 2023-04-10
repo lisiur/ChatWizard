@@ -143,6 +143,10 @@ export async function updateChat(payload: ChatUpdatePayload) {
   return execCommand<void>("update_chat", { payload });
 }
 
+export async function removeChatPrompt(chatId: string) {
+  return execCommand<void>("remove_chat_prompt", { id: chatId });
+}
+
 export async function newChat(params?: { promptId?: string; title?: string }) {
   return execCommand<string>("new_chat", params);
 }

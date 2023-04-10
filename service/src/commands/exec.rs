@@ -72,6 +72,10 @@ impl CommandExecutor {
                 .exec(conn)
                 .into_result(),
 
+            "remove_chat_prompt" => from_value::<RemoveChatPromptCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
             "delete_chat" => from_value::<DeleteChatCommand>(payload)?
                 .exec(conn)
                 .into_result(),

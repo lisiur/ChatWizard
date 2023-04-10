@@ -40,7 +40,15 @@ export default defineComponent({
                 <NTooltip contentStyle="max-width: 30rem">
                   {{
                     trigger: () => (
-                      <NTag size="small" round type="primary">
+                      <NTag
+                        size="small"
+                        round
+                        type="primary"
+                        closable
+                        onClose={() => {
+                          props.chat.removePrompt();
+                        }}
+                      >
                         {prompt.value?.name}
                       </NTag>
                     ),

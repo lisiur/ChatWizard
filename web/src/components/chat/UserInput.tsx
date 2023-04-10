@@ -13,8 +13,11 @@ import { Message, UserMessage } from "../../models/message";
 import { message } from "../../utils/prompt";
 import Backtrack from "./Backtrack";
 import Cost from "./Cost";
-import { NScrollbar } from "naive-ui";
+import { NScrollbar, useMessage } from "naive-ui";
 import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
+import { usePromptService } from "../../services/prompt";
+import { PromptIndex } from "../../api";
+import CommandPanel from "./commandPanel";
 
 export default defineComponent({
   props: {
@@ -36,9 +39,15 @@ export default defineComponent({
     const inputRef = ref<HTMLTextAreaElement>();
     const { isComposition } = useComposition(inputRef);
     const userMessage = ref("");
-    const inputStatus = ref<"normal" | "historyNavigation">("normal");
+    const inputStatus = ref<"normal" | "command" | "historyNavigation">(
+      "normal"
+    );
     let historyNavigationMessageId = null as string | null;
     const historyNavigationStack = [] as Message[];
+
+    const { fuzzySearchPrompts } = usePromptService();
+    const filteredPrompts = ref<Array<PromptIndex>>([]);
+    const selectedPromptIndex = ref(0);
 
     const publicInstance = {
       focus,
@@ -47,12 +56,6 @@ export default defineComponent({
 
     onMounted(() => {
       inputRef.value?.focus();
-    });
-
-    watch(userMessage, (msg) => {
-      if (!msg) {
-        inputStatus.value = "normal";
-      }
     });
 
     function setUserMessage(content: string) {
@@ -72,61 +75,93 @@ export default defineComponent({
       });
     }
 
-    async function keydownHandler(e: KeyboardEvent) {
-      if (
-        inputStatus.value === "normal" &&
-        ["ArrowUp", "ArrowDown"].includes(e.key)
-      ) {
-        inputStatus.value = "historyNavigation";
-        historyNavigationStack.length = 0;
-      }
-
-      if (
-        inputStatus.value === "historyNavigation" &&
-        !["ArrowUp", "ArrowDown"].includes(e.key)
-      ) {
+    watch(userMessage, (msg) => {
+      if (!msg) {
         inputStatus.value = "normal";
-        historyNavigationMessageId = null;
-        historyNavigationStack.length = 0;
+        filteredPrompts.value = [];
+      } else if (msg.startsWith("/")) {
+        inputStatus.value = "command";
+        filteredPrompts.value = fuzzySearchPrompts(userMessage.value.slice(1));
+        selectedPromptIndex.value = 0;
       }
+    });
 
-      if (e.key === "Tab") {
-        // Expand tab to 4 spaces
-        e.preventDefault();
-        const start = inputRef.value?.selectionStart;
-        const end = inputRef.value?.selectionEnd;
-        if (start !== undefined && end !== undefined) {
-          userMessage.value =
-            userMessage.value.substring(0, start) +
-            "  " +
-            userMessage.value.substring(end);
-          nextTick(() => {
-            inputRef.value?.setSelectionRange(start + 4, start + 4);
-          });
+    async function keydownHandler(e: KeyboardEvent) {
+      if (inputStatus.value === "normal") {
+        if (e.key === "/") {
+          inputStatus.value = "command";
+          return;
+        } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+          inputStatus.value = "historyNavigation";
+          historyNavigationStack.length = 0;
+        } else if (e.key === "Tab") {
+          // Expand tab to 4 spaces
+          e.preventDefault();
+          const start = inputRef.value?.selectionStart;
+          const end = inputRef.value?.selectionEnd;
+          if (start !== undefined && end !== undefined) {
+            userMessage.value =
+              userMessage.value.substring(0, start) +
+              "  " +
+              userMessage.value.substring(end);
+            nextTick(() => {
+              inputRef.value?.setSelectionRange(start + 4, start + 4);
+            });
+          }
+        } else if (
+          e.key === "Enter" &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.shiftKey &&
+          !isComposition.value
+        ) {
+          // Send message
+
+          // Check if the reply is finished
+          if (props.chat.busy.value) {
+            message.warning(t("chat.busy"));
+            e.preventDefault();
+            return;
+          }
+
+          props.onMessage?.(new UserMessage(userMessage.value));
+          props.sendMessage(userMessage.value);
+          userMessage.value = "";
+
+          e.preventDefault();
         }
-      } else if (
-        e.key === "Enter" &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.shiftKey &&
-        !isComposition.value
-      ) {
-        // Send message
-
-        // Check if the reply is finished
-        if (props.chat.busy.value) {
-          message.warning(t("chat.busy"));
+      } else if (inputStatus.value === "command") {
+        if (e.key === "ArrowUp") {
+          selectedPromptIndex.value = Math.max(
+            0,
+            selectedPromptIndex.value - 1
+          );
           e.preventDefault();
           return;
+        } else if (e.key === "ArrowDown") {
+          selectedPromptIndex.value = Math.min(
+            filteredPrompts.value.length - 1,
+            selectedPromptIndex.value + 1
+          );
+          e.preventDefault();
+          return;
+        } else if (e.key === "Enter") {
+          if (filteredPrompts.value.length > 0) {
+            inputStatus.value = "normal";
+            props.chat.changePrompt(
+              filteredPrompts.value[selectedPromptIndex.value]!.id
+            );
+            userMessage.value = "";
+            e.preventDefault();
+            return;
+          }
         }
-
-        props.onMessage?.(new UserMessage(userMessage.value));
-        props.sendMessage(userMessage.value);
-        userMessage.value = "";
-
-        e.preventDefault();
       } else if (inputStatus.value === "historyNavigation") {
-        if (e.key === "ArrowUp") {
+        if (!["ArrowUp", "ArrowDown"].includes(e.key)) {
+          inputStatus.value = "normal";
+          historyNavigationMessageId = null;
+          historyNavigationStack.length = 0;
+        } else if (e.key === "ArrowUp") {
           let msg = await props.chat.getPreviousUserLog(
             historyNavigationMessageId ?? undefined
           );
@@ -179,7 +214,16 @@ export default defineComponent({
               })} */}
           </div>
         </div>
-        <div class="h-[8rem] px-4 pt-2 pb-6">
+        <div class="h-[8rem] px-4 pt-2 pb-6 relative">
+          <CommandPanel
+            v-show={filteredPrompts.value.length > 0}
+            list={filteredPrompts.value.map((item) => ({
+              label: item.name,
+              value: item.name,
+            }))}
+            selected={selectedPromptIndex.value}
+            class="absolute left-4 top-0 translate-y-[-100%]"
+          ></CommandPanel>
           <NScrollbar class="h-full">
             <textarea
               ref={inputRef}

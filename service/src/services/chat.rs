@@ -137,6 +137,12 @@ impl ChatService {
         Ok(())
     }
 
+    pub fn remove_prompt(&self, chat_id: Id) -> Result<()> {
+        self.chat_repo.remove_prompt(chat_id)?;
+
+        Ok(())
+    }
+
     pub fn set_chat_archive(&self, chat_id: Id) -> Result<()> {
         self.chat_repo.update(&PatchChat {
             id: chat_id,
