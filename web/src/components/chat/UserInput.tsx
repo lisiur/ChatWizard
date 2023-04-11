@@ -83,6 +83,10 @@ export default defineComponent({
         inputStatus.value = "command";
         filteredPrompts.value = fuzzySearchPrompts(userMessage.value.slice(1));
         selectedPromptIndex.value = 0;
+
+        if (filteredPrompts.value.length === 0) {
+          inputStatus.value = "normal";
+        }
       }
     });
 
@@ -148,8 +152,12 @@ export default defineComponent({
         } else if (e.key === "Enter") {
           if (filteredPrompts.value.length > 0) {
             inputStatus.value = "normal";
-            props.chat.changePrompt(
-              filteredPrompts.value[selectedPromptIndex.value]!.id
+            const prompt = filteredPrompts.value[selectedPromptIndex.value]!;
+            props.chat.changePrompt(prompt.id);
+            message.success(
+              t("chat.prompt.changed", {
+                name: prompt.name,
+              })
             );
             userMessage.value = "";
             e.preventDefault();

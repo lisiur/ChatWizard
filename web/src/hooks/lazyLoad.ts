@@ -76,6 +76,7 @@ export function useLazyLoad<T>(
   return {
     hasMore,
     loading,
+    cursor,
     records,
     loadNext,
     firstBatchLoad,

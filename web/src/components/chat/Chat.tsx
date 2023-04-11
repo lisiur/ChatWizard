@@ -5,7 +5,8 @@ import { Chat } from "../../models/chat";
 import Header from "./Header";
 import History from "./History";
 import UserInput from "./UserInput";
-import { save } from "../../utils/api";
+import { save, listen } from "../../utils/api";
+import { isTauri } from "../../utils/env";
 
 export default defineComponent({
   name: "Chat",
@@ -28,27 +29,35 @@ export default defineComponent({
     const historyRef = ref<InstanceType<typeof History>>();
     const userInputRef = ref<InstanceType<typeof UserInput>>();
 
+    if (isTauri) {
+      listen("tauri://focus", () => {
+        // TODO: sync latest chat logs
+        // reload();
+      });
+    }
+
     const publicExpose = {
       focusInput,
+      reload,
     };
     expose(publicExpose);
+
+    function reload() {
+      historyRef.value?.reload();
+    }
 
     function sendMessage(message: string) {
       props.chat.sendMessage(message, {
         onFinish: () => historyRef.value?.stopAutoScroll(),
       });
-      setTimeout(() => {
-        historyRef.value?.startAutoScroll();
-      }, 20);
+      historyRef.value?.startAutoScroll();
     }
 
     function resendMessage(id: string) {
       props.chat.resendMessage(id, {
         onFinish: () => historyRef.value?.stopAutoScroll(),
       });
-      setTimeout(() => {
-        historyRef.value?.startAutoScroll();
-      }, 20);
+      historyRef.value?.startAutoScroll();
     }
 
     function updateMessage(id: string, content: string) {

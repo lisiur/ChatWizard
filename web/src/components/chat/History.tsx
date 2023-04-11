@@ -100,6 +100,17 @@ export default defineComponent({
       loadingRef
     );
 
+    watch(
+      () => props.chat.busy.value,
+      (busy) => {
+        if (busy) {
+          disabledTransition.value = true;
+        } else {
+          disabledTransition.value = false;
+        }
+      }
+    );
+
     watch(() => props.chat, reset);
 
     const hijackLink = (message: Message) => {
@@ -148,12 +159,6 @@ export default defineComponent({
       }
     );
 
-    watch(
-      () => props.chat.messages,
-      () => {
-        nextTick(scrollToBottom);
-      }
-    );
     onMounted(() => {
       nextTick(scrollToBottom);
     });
@@ -164,9 +169,15 @@ export default defineComponent({
     const publicInstance = {
       startAutoScroll,
       stopAutoScroll,
+      reload,
     };
 
     expose(publicInstance);
+
+    function reload() {
+      props.chat.clear();
+      reset();
+    }
 
     function renderMessage(message: Message) {
       if (message instanceof AssistantMessage) {

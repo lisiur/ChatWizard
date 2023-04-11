@@ -35,6 +35,8 @@ const messages: Messages = {
   "chat.message.delete.hint": "确定要删除此消息吗？",
   "chat.message.stopReply": "停止回复",
 
+  "chat.prompt.changed": "提示词更换为: {name}",
+
   "chat.config.model": "模型",
   "chat.config.model.hint": "要使用的模型的ID。",
   "chat.config.maxBacktrack": "最大回溯",

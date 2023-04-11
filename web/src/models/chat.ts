@@ -80,6 +80,11 @@ export class Chat {
     }
   }
 
+  async clear() {
+    this.messages.length = 0;
+    this.prevCursor = undefined;
+  }
+
   async stopReply() {
     this.busy.value = false;
     let user_message_id = this.messages.findLast(

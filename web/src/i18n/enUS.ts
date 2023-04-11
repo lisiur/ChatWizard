@@ -33,6 +33,8 @@ export const messages = {
   "chat.message.delete.hint": 'Are you sure to delete this message?',
   "chat.message.stopReply": 'Stop replying',
 
+  "chat.prompt.changed": "Prompt changed to: {name}",
+
   "chat.config.model": "Model",
   "chat.config.model.hint": "ID of the model to use.",
   "chat.config.maxBacktrack": "Max Backtrack",

@@ -36,8 +36,8 @@ function setLocale(lang: string) {
 
 function useI18n() {
   const { t: _t } = _useI18n();
-  const t = (key: keyof Messages) => {
-    return _t(key);
+  const t = (key: keyof Messages, options?: any) => {
+    return _t(key, options);
   };
 
   return {
