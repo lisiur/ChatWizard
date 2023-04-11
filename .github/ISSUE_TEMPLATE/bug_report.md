@@ -23,7 +23,8 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**App Info:** (Copy from app about)
+**App Info:** 
+Copy from app about:
  - App Version: [e.g. 0.1.0]
  - Platform: [e.g. darwin]
  - OS Type: [e.g. Darwin]
