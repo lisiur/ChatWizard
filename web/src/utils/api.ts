@@ -13,6 +13,7 @@ import { message } from "./prompt";
 import { EventCallback, EventName } from "@tauri-apps/api/event";
 import { clientId, listen as wsListen } from "./websocket";
 import { isWeb } from "./env";
+
 const { t } = i18n.global;
 
 export async function getPlatform() {
@@ -20,6 +21,38 @@ export async function getPlatform() {
     return "web";
   }
   return await os.platform();
+}
+
+export async function appInfo() {
+  if (isWeb) {
+    throw new Error("appInfo not supported in web");
+  }
+  const [
+    appVersion,
+    appName,
+    tauriVersion,
+    osType,
+    osArch,
+    platform,
+    osVersion,
+  ] = await Promise.all([
+    app.getVersion(),
+    app.getName(),
+    app.getTauriVersion(),
+    os.type(),
+    os.arch(),
+    os.platform(),
+    os.version(),
+  ]);
+  return {
+    appVersion,
+    appName,
+    tauriVersion,
+    osType,
+    osArch,
+    platform,
+    osVersion,
+  };
 }
 
 export async function save(...params: Parameters<typeof dialog.save>) {
