@@ -1,6 +1,12 @@
+use std::time::Duration;
+
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
-use tauri::{AppHandle, Manager, Window, WindowBuilder, WindowUrl};
+use tauri::{
+    AppHandle, LogicalPosition, Manager, PhysicalPosition, PhysicalSize, Window, WindowBuilder,
+    WindowUrl,
+};
+use tokio::time::sleep;
 
 use crate::{result::Result, AppSetting};
 
@@ -61,9 +67,7 @@ pub fn show_or_create_window_in_background(
 ) -> Result<Window> {
     let window = match handle.get_window(label) {
         Some(win) => {
-            win.show()?;
-            win.unminimize()?;
-            win.set_focus()?;
+            focus_window(&win);
             log::debug!("show window {}", label);
             win
         }
@@ -73,7 +77,11 @@ pub fn show_or_create_window_in_background(
     Ok(window)
 }
 
-pub fn create_window_in_background(handle: &AppHandle, label: &str, options: WindowOptions) -> Result<Window> {
+pub fn create_window_in_background(
+    handle: &AppHandle,
+    label: &str,
+    options: WindowOptions,
+) -> Result<Window> {
     let min_size = options.min_size.unwrap_or([0.0, 0.0]);
     let max_size = options.max_size.unwrap_or([f64::MAX, f64::MAX]);
 
@@ -109,6 +117,7 @@ pub fn create_window_in_background(handle: &AppHandle, label: &str, options: Win
 }
 
 pub async fn show_or_create_main_window(handle: &AppHandle) -> Result<Window> {
+    log::debug!("show_or_create_main_window");
     let setting = handle.state::<AppSetting>();
     let hide_taskbar = setting.0.lock().await.hide_taskbar;
 
@@ -151,28 +160,40 @@ pub async fn show_or_create_main_window(handle: &AppHandle) -> Result<Window> {
     }
 }
 
-pub fn toggle_tray_window(handle: &AppHandle) -> Result<Window> {
-    let window = if let Some(window) = handle.get_window("casual-chat") {
-        if window.is_visible().unwrap() {
-            window.hide().unwrap();
-            window
-        } else {
-            window.show().unwrap();
-            window.unminimize().unwrap();
-            window.set_focus().unwrap();
-            window
-        }
+pub fn toggle_tray_window(
+    handle: &AppHandle,
+    tray_position: PhysicalPosition<f64>,
+    tray_size: PhysicalSize<f64>,
+) -> Result<()> {
+    let window = create_tray_window_in_background(handle).unwrap();
+    if window.is_visible().unwrap() {
+        window.hide().unwrap();
     } else {
-        let options = tray_window_options();
-        show_or_create_window_in_background(handle, "casual-chat", options).unwrap()
-    };
+        tokio::spawn(async move {
+            fixed_tray_window_position(&window, tray_position, tray_size)
+                .await
+                .unwrap();
+            focus_window(&window);
+        });
+    }
 
-    Ok(window)
+    Ok(())
+}
+
+pub fn focus_window(window: &Window) {
+    window.show().unwrap();
+    window.unminimize().unwrap();
+    window.set_focus().unwrap();
 }
 
 pub fn create_tray_window_in_background(handle: &AppHandle) -> Result<Window> {
-    let options = tray_window_options();
-    create_window_in_background(handle, "casual-chat", options)
+    match handle.get_window("casual-chat") {
+        Some(window) => Ok(window),
+        None => {
+            let options = tray_window_options();
+            create_window_in_background(handle, "casual-chat", options)
+        }
+    }
 }
 
 fn tray_window_options() -> WindowOptions {
@@ -185,6 +206,7 @@ fn tray_window_options() -> WindowOptions {
         decorations: Some(false),
         transparent: Some(true),
         skip_taskbar: Some(true),
+        visible: false,
         ..Default::default()
     };
     #[cfg(target_os = "macos")]
@@ -192,4 +214,69 @@ fn tray_window_options() -> WindowOptions {
         window_options.title_bar_style = Some(TitleBarStyle::Transparent);
     }
     window_options
+}
+
+async fn fixed_tray_window_position(
+    window: &Window,
+    tray_position: PhysicalPosition<f64>,
+    tray_size: PhysicalSize<f64>,
+) -> Result<()> {
+    let monitors = window.available_monitors()?;
+
+    let tray_pos_y = tray_position.y as i32;
+    let tray_pos_x = tray_position.x as i32;
+    let mut tray_monitor = &monitors[0];
+    for monitor in &monitors {
+        let position = monitor.position();
+        let size = monitor.size();
+        if tray_pos_x >= position.x && tray_pos_x <= position.x + size.width as i32 {
+            tray_monitor = monitor;
+            break;
+        }
+    }
+
+    // It's weird that we need to set the window position twice to make it work.
+    // The first time we set the window to the monitor's top left corner. (Because this operation will always do the right thing.)
+    // And then set the window to the top right corner. (Because this operation will encounter wrong display if we don't do the first movement.)
+    let window_pos_x = tray_monitor.position().x;
+    window
+        .set_position(LogicalPosition {
+            x: window_pos_x,
+            y: 0,
+        })
+        .unwrap();
+    // And we also need to wait for a while to make sure the window is moved to the right position.
+    sleep(Duration::from_micros(1)).await;
+
+    let window_right_pos_x = tray_monitor.position().x + tray_monitor.size().width as i32
+        - window.outer_size().unwrap().width as i32;
+    let mut window_tray_center_pos_x =
+        tray_pos_x + tray_size.width as i32 / 2 - (window.outer_size().unwrap().width / 2) as i32;
+
+    if window_tray_center_pos_x > window_right_pos_x {
+        window_tray_center_pos_x = window_right_pos_x;
+    }
+
+    let window_top_pos_y = tray_size.height as i32;
+
+    let window_bottom_pos_y =
+        tray_monitor.size().height as i32 - window.outer_size().unwrap().height as i32;
+
+    if tray_pos_y < tray_monitor.size().height as i32 / 2 {
+        window
+            .set_position(PhysicalPosition {
+                x: window_tray_center_pos_x,
+                y: window_top_pos_y,
+            })
+            .unwrap();
+    } else {
+        window
+            .set_position(PhysicalPosition {
+                x: window_tray_center_pos_x,
+                y: window_bottom_pos_y,
+            })
+            .unwrap();
+    }
+
+    Ok(())
 }

@@ -97,6 +97,23 @@ export async function listen<T>(
   return event.listen(eventName, eventHandler);
 }
 
+export async function once<T>(
+  eventName: EventName,
+  eventHandler: EventCallback<T>
+) {
+  if (isWeb) {
+    throw new Error("once not supported in web");
+  }
+  return event.once(eventName, eventHandler);
+}
+
+export async function hideWindow() {
+  if (isWeb) {
+    throw new Error("hideWindow not supported in web");
+  }
+  return currentWindow().hide();
+}
+
 export async function emit(eventName: string, payload?: unknown) {
   if (isWeb) {
     throw new Error("emit not supported in web");

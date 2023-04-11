@@ -1,10 +1,12 @@
-import './style.css'
+import "./style.css";
 import { computed, defineComponent } from "vue";
 import ChatComp from "../../components/chat/Chat";
 import { Chat } from "../../models/chat";
 import * as api from "../../api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
+import { hideWindow, currentWindow } from "../../utils/api";
+import { isTauri } from "../../utils/env";
 
 export default defineComponent({
   setup() {
@@ -13,12 +15,20 @@ export default defineComponent({
     const chatIndex = useAsyncData(async () => {
       return api.casualChat();
     });
+
     const chat = computed(() => {
       if (!chatIndex.value) {
         return undefined;
       }
       return new Chat(chatIndex.value);
     });
+
+    if (isTauri) {
+      currentWindow().listen("tauri://blur", () => {
+        hideWindow();
+      });
+    }
+
     return () => (
       <div class="h-full">
         {chat.value ? (

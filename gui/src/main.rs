@@ -62,12 +62,11 @@ async fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
-        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
-            if let Some(main_window) = app.get_window("main") {
-                main_window.show().unwrap();
-                main_window.unminimize().unwrap();
-                main_window.set_focus().unwrap();
-            }
+        .plugin(tauri_plugin_single_instance::init(|handle, _argv, _cwd| {
+            let handle = handle.clone();
+            tokio::spawn(async move {
+                show_or_create_main_window(&handle).await.unwrap();
+            });
         }))
         .system_tray(tray::system_tray())
         .on_system_tray_event(tray::on_system_tray_event)
@@ -110,18 +109,7 @@ async fn main() {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
                 let win = event.window();
                 if win.label() == "main" {
-                    #[cfg(target_os = "macos")]
-                    {
-                        // Since currently skip_taskbar is not supported on macOS,
-                        // and tauri doesn't support handle the click event of the dock icon
-                        // we need to minimize the window instead of hide it
-                        // otherwise we cannot show the window again from the dock icon, it will be very confusing
-                        win.minimize().unwrap();
-                    }
-                    #[cfg(not(target_os = "macos"))]
-                    {
-                        win.hide().unwrap();
-                    }
+                    win.hide().unwrap();
                     api.prevent_close();
                 } else {
                     win.close().unwrap();
