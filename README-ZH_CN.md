@@ -35,10 +35,11 @@
 
 ## 截图
 
-<img src="./assets/casual-chat.png" />
+<img src="./assets/slash-command.png" />
 
 <details>
 <summary>查看更多</summary>
+<img src="./assets/casual-chat.png" />
 <img src="./assets/chat.png" />
 <img src="./assets/prompt.png" />
 <img src="./assets/prompt-market.png" />

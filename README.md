@@ -39,10 +39,11 @@
 
 ## Screenshots
 
-<img src="./assets/casual-chat.png" />
+<img src="./assets/slash-command.png" />
 
 <details>
 <summary>View More</summary>
+<img src="./assets/casual-chat.png" />
 <img src="./assets/chat.png" />
 <img src="./assets/prompt.png" />
 <img src="./assets/prompt-market.png" />
