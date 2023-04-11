@@ -42,7 +42,11 @@ export default createRouter({
         {
           path: "casual-chat",
           component: () => import("./pages/casualChat/Index"),
-        }
+        },
+        {
+          path: "about",
+          component: () => import("./pages/about/Index"),
+        },
       ],
     },
   ],

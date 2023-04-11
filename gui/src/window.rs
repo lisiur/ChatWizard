@@ -280,3 +280,22 @@ async fn fixed_tray_window_position(
 
     Ok(())
 }
+
+pub fn show_or_create_about_window(handle: &AppHandle) -> Result<Window> {
+    let window = show_or_create_window_in_background(
+        handle,
+        "about",
+        WindowOptions {
+            title: "About".to_string(),
+            url: "index.html/#/about".to_string(),
+            width: 340.0,
+            height: 360.0,
+            skip_taskbar: Some(true),
+            resizable: false,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+
+    Ok(window)
+}

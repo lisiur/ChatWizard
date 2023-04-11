@@ -1,6 +1,7 @@
 const fs = require("fs");
 const changeLogVersionPackage = require("./package.json");
 const tauriConf = require("./gui/tauri.conf.json");
+const webPackage = require("./web/package.json");
 const { execSync } = require("child_process");
 
 const commands = {
@@ -116,6 +117,7 @@ function currentVersion() {
 function updateVersion(version) {
   updateChangelogVersion(version);
   updateTauriConfVersion(version);
+  updateWebVersion(version);
 }
 
 function updateTauriConfVersion(version) {
@@ -129,6 +131,11 @@ function updateChangelogVersion(version) {
     "./package.json",
     JSON.stringify(changeLogVersionPackage, null, 2)
   );
+}
+
+function updateWebVersion(version) {
+  webPackage.version = version;
+  fs.writeFileSync("./web/package.json", JSON.stringify(webPackage, null, 2));
 }
 
 main();
