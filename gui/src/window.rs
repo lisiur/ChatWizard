@@ -52,14 +52,6 @@ impl Default for WindowOptions {
     }
 }
 
-pub fn show_window(label: &str, window: Window) -> Result<()> {
-    if let Some(win) = window.get_window(label) {
-        win.show()?;
-        log::debug!("show window {}", label);
-    }
-    Ok(())
-}
-
 pub fn show_or_create_window_in_background(
     handle: &AppHandle,
     label: &str,
@@ -68,6 +60,8 @@ pub fn show_or_create_window_in_background(
     let window = match handle.get_window(label) {
         Some(win) => {
             focus_window(&win);
+            win.eval(&format!("window.location.href = '{}'", options.url))
+                .unwrap();
             log::debug!("show window {}", label);
             win
         }
@@ -116,7 +110,7 @@ pub fn create_window_in_background(
     Ok(window)
 }
 
-pub async fn show_or_create_main_window(handle: &AppHandle) -> Result<Window> {
+pub async fn show_or_create_main_window(handle: &AppHandle, url: &str) -> Result<Window> {
     log::debug!("show_or_create_main_window");
     let setting = handle.state::<AppSetting>();
     let hide_taskbar = setting.0.lock().await.hide_taskbar;
@@ -128,7 +122,7 @@ pub async fn show_or_create_main_window(handle: &AppHandle) -> Result<Window> {
             "main",
             WindowOptions {
                 title: "".to_string(),
-                url: "index.html".to_string(),
+                url: url.to_string(),
                 width: 860.0,
                 height: 720.0,
                 title_bar_style: Some(TitleBarStyle::Overlay),
@@ -290,6 +284,26 @@ pub fn show_or_create_about_window(handle: &AppHandle) -> Result<Window> {
             url: "index.html/#/about".to_string(),
             width: 340.0,
             height: 360.0,
+            skip_taskbar: Some(true),
+            resizable: false,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+
+    Ok(window)
+}
+
+#[allow(unused)]
+pub fn show_or_create_setting_window(handle: &AppHandle) -> Result<Window> {
+    let window = show_or_create_window_in_background(
+        handle,
+        "setting",
+        WindowOptions {
+            title: "Setting".to_string(),
+            url: "index.html/#/setting".to_string(),
+            width: 640.0,
+            height: 720.0,
             skip_taskbar: Some(true),
             resizable: false,
             ..Default::default()

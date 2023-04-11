@@ -30,7 +30,7 @@ pub async fn exec_command(
 #[tauri::command]
 pub async fn show_window(label: &str, window: Window) -> Result<()> {
     log::debug!("show_window: {}", label);
-    window::show_window(label, window)?;
+    window::focus_window(&window);
 
     Ok(())
 }

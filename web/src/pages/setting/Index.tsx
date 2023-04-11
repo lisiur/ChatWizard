@@ -9,16 +9,19 @@ import {
   NScrollbar,
   NSwitch,
 } from "naive-ui";
-import { defineComponent, nextTick } from "vue";
+import { computed, defineComponent, nextTick } from "vue";
 import { getSettings, updateSettings, Theme, Settings } from "../../api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
-import { openUrl } from "../../utils/api";
+import { openUrl, getPlatform } from "../../utils/api";
 import { isTauri } from "../../utils/env";
 
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+
+    const platform = useAsyncData(getPlatform);
+    const isMacos = computed(() => platform.value === "darwin");
 
     const model = useAsyncData(async () => {
       return getSettings();
@@ -38,7 +41,7 @@ export default defineComponent({
         class="h-full p-8 flex flex-col justify-center"
       >
         <NScrollbar>
-          <div class="mt-8 pr-12">
+          <div class="grid place-items-center pr-12 h-full">
             {model.value ? (
               <NForm
                 model={model.value}
@@ -110,7 +113,7 @@ export default defineComponent({
                     ></NSwitch>
                   </NFormItem>
                 ) : null}
-                {isTauri ? (
+                {isTauri && !isMacos ? (
                   <NFormItem label={t("setting.hideTaskbar") + " :"}>
                     <NSwitch
                       v-model:value={model.value.hideTaskbar}

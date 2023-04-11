@@ -65,7 +65,7 @@ async fn main() {
         .plugin(tauri_plugin_single_instance::init(|handle, _argv, _cwd| {
             let handle = handle.clone();
             tokio::spawn(async move {
-                show_or_create_main_window(&handle).await.unwrap();
+                show_or_create_main_window(&handle, "index.html").await.unwrap();
             });
         }))
         .system_tray(tray::system_tray())
@@ -89,7 +89,7 @@ async fn main() {
             if !hide_main_window {
                 let handle = app_handle.clone();
                 tokio::spawn(async move {
-                    show_or_create_main_window(&handle).await.unwrap();
+                    show_or_create_main_window(&handle, "index.html").await.unwrap();
                 });
             }
 

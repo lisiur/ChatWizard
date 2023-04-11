@@ -35,13 +35,17 @@ export default createRouter({
             {
               name: "setting",
               path: "setting",
-              component: () => import("./pages/main/Setting"),
+              component: () => import("./pages/setting/Index"),
             },
           ],
         },
         {
           path: "casual-chat",
           component: () => import("./pages/casualChat/Index"),
+        },
+        {
+          path: "setting",
+          component: () => import("./pages/setting/Index"),
         },
         {
           path: "about",
