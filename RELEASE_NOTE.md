@@ -1,6 +1,7 @@
-## [0.0.64](https://github.com/lisiur/ChatWizard/compare/v0.0.63...v0.0.64) (2023-04-10)
+## [0.0.65](https://github.com/lisiur/ChatWizard/compare/v0.0.64...v0.0.65) (2023-04-11)
 
 
 ### Features
 
-* support slash command ([c4b231f](https://github.com/lisiur/ChatWizard/commit/c4b231fbbc8da3c48e341532a4a20ef34899be2a))
+* optimized slash command ([0eb37c4](https://github.com/lisiur/ChatWizard/commit/0eb37c44c6c65c724d26ff27017bf02410d7d2e0))
+* optimized tray window ([aa32348](https://github.com/lisiur/ChatWizard/commit/aa3234869a10157af772434566f9645dab731a6f))
