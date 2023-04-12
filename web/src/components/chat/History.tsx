@@ -43,6 +43,7 @@ import {
 } from "@vicons/fluent";
 import { dialog } from "../../utils/prompt";
 import ListTransition from "../listTransition/listTransition";
+import { sleep } from "../../utils/sleep";
 
 export default defineComponent({
   props: {
@@ -100,8 +101,14 @@ export default defineComponent({
       loadingRef
     );
 
+    async function resetChat() {
+      disabledTransition.value = true;
+      await reset();
+      disabledTransition.value = false;
+    }
+
     watch(
-      () => props.chat.busy.value,
+      () => props.chat.busy,
       (busy) => {
         if (busy) {
           disabledTransition.value = true;
@@ -111,7 +118,7 @@ export default defineComponent({
       }
     );
 
-    watch(() => props.chat, reset);
+    watch(() => props.chat, resetChat);
 
     const hijackLink = (message: Message) => {
       if (message instanceof AssistantMessage) {
@@ -470,7 +477,7 @@ export default defineComponent({
         </NScrollbar>
         <div
           class="absolute bottom-2 flex w-full justify-center items-center"
-          v-show={props.chat.busy.value}
+          v-show={props.chat.busy}
         >
           <NButton
             type="error"

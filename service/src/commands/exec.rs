@@ -1,5 +1,5 @@
 use serde::Serialize;
-use serde_json::{from_value, to_value};
+use serde_json::{from_value, json, to_value};
 use std::collections::HashMap;
 use std::future::Future;
 use std::sync::Arc;
@@ -41,7 +41,7 @@ impl CommandExecutor {
         command: String,
         payload: serde_json::Value,
         conn: &DbConn,
-        send: impl Fn(CommandEvent) -> Fut + Send + 'static,
+        send: impl Fn(CommandEvent) -> Fut + Send + Sync + 'static,
     ) -> Result<Box<dyn erased_serde::Serialize>>
     where
         Fut: Future<Output = Result<()>> + Send,
@@ -179,17 +179,61 @@ impl CommandExecutor {
                 .exec(conn)
                 .into_result(),
 
-            "create_prompt" => from_value::<CreatePromptCommand>(payload)?
-                .exec(conn)
-                .into_result(),
+            "create_prompt" => {
+                let command = from_value::<CreatePromptCommand>(payload)?;
+                let result = command.exec(conn)?;
 
-            "update_prompt" => from_value::<UpdatePromptCommand>(payload)?
-                .exec(conn)
-                .into_result(),
+                tokio::spawn(async move {
+                    send(CommandEvent {
+                        name: "prompt-created".to_string(),
+                        payload: json!({
+                            "id": result,
+                        }),
+                    })
+                    .await
+                    .unwrap();
+                });
 
-            "delete_prompt" => from_value::<DeletePromptCommand>(payload)?
-                .exec(conn)
-                .into_result(),
+                Ok(Box::new(result))
+            }
+
+            "update_prompt" => {
+                let command = from_value::<UpdatePromptCommand>(payload)?;
+                let id = command.payload.id;
+                let result = command.exec(conn).into_result();
+
+                tokio::spawn(async move {
+                    send(CommandEvent {
+                        name: "prompt-updated".to_string(),
+                        payload: json!({
+                            "id": id,
+                        }),
+                    })
+                    .await
+                    .unwrap();
+                });
+
+                result
+            }
+
+            "delete_prompt" => {
+                let command = from_value::<DeletePromptCommand>(payload)?;
+                let id = command.id;
+                let result = command.exec(conn).into_result();
+
+                tokio::spawn(async move {
+                    send(CommandEvent {
+                        name: "prompt-deleted".to_string(),
+                        payload: json!({
+                            "id": id,
+                        }),
+                    })
+                    .await
+                    .unwrap();
+                });
+
+                result
+            }
 
             "get_prompt_sources" => from_value::<GetPromptSourcesCommand>(payload)?
                 .exec(conn)
@@ -200,14 +244,40 @@ impl CommandExecutor {
                 .await
                 .into_result(),
 
-            "install_market_prompt" => from_value::<InstallMarketPromptCommand>(payload)?
-                .exec(conn)
-                .into_result(),
+            "install_market_prompt" => {
+                let command = from_value::<InstallMarketPromptCommand>(payload)?;
+                let result = command.exec(conn)?;
+
+                tokio::spawn(async move {
+                    send(CommandEvent {
+                        name: "prompt-created".to_string(),
+                        payload: json!({
+                            "id": result,
+                        }),
+                    })
+                    .await
+                    .unwrap();
+                });
+
+                Ok(Box::new(result))
+            }
 
             "install_market_prompt_and_create_chat" => {
-                from_value::<InstallMarketPromptAndCreateChatCommand>(payload)?
-                    .exec(conn)
-                    .into_result()
+                let command = from_value::<InstallMarketPromptAndCreateChatCommand>(payload)?;
+                let (prompt_id, chat_id) = command.exec(conn)?;
+
+                tokio::spawn(async move {
+                    send(CommandEvent {
+                        name: "prompt-created".to_string(),
+                        payload: json!({
+                            "id": prompt_id,
+                        }),
+                    })
+                    .await
+                    .unwrap();
+                });
+
+                Ok(Box::new(chat_id))
             }
 
             "get_settings" => from_value::<GetSettingsCommand>(payload)?

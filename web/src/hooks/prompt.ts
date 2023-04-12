@@ -1,19 +1,36 @@
-import { Ref } from "vue";
+import { Ref, computed, isRef, ref, toRef, watch } from "vue";
 import { loadPrompt } from "../api";
-import { useAsyncData, useAsyncDataReactive } from "./asyncData";
+import { listen } from "../utils/api";
+import { useTask } from "./task";
 
-export function usePrompt(id: string | Ref<string | undefined>) {
-  if (typeof id === "string") {
-    const res = useAsyncData(async () => {
-      return loadPrompt(id);
-    });
-    return res;
-  } else {
-    const res = useAsyncDataReactive(async () => {
-      if (id.value) {
-        return loadPrompt(id.value);
-      }
-    }, [id]);
-    return res;
+export function usePrompt(id: string | Ref<string | null>) {
+  if (!isRef(id)) {
+    id = ref(id);
   }
+
+  const promptId = ref(id.value);
+  watch(id, () => {
+    promptId.value = (id as Ref<string>).value;
+  });
+
+  const loadPromptTask = useTask(async () => {
+    if (promptId.value) {
+      return loadPrompt(promptId.value!);
+    } else {
+      return null;
+    }
+  });
+
+  watch(() => promptId.value, loadPromptTask.exec, {
+    immediate: true,
+  });
+
+  listen("prompt-updated", (event) => {
+    const updatedId = (event.payload as any).id;
+    if (updatedId === promptId.value) {
+      loadPromptTask.exec();
+    }
+  });
+
+  return toRef(loadPromptTask, "result");
 }

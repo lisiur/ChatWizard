@@ -1,5 +1,7 @@
+import { toRef } from "vue";
 import * as api from "../api";
 import { useTask } from "../hooks/task";
+import { listen } from "../utils/api";
 
 function fuzzyMatch(text: string, keyword: string) {
   let regex = new RegExp(keyword, "gi");
@@ -17,6 +19,20 @@ export function usePromptService() {
     }
   );
 
+  const prompts = toRef(loadAllPromptsTask, "result");
+
+  listen("prompt-created", () => {
+    loadAllPromptsTask.exec();
+  });
+
+  listen("prompt-updated", () => {
+    loadAllPromptsTask.exec();
+  });
+
+  listen("prompt-deleted", () => {
+    loadAllPromptsTask.exec();
+  });
+
   function fuzzySearchPrompts(keyword: string) {
     return (
       loadAllPromptsTask.result?.filter((it) => fuzzyMatch(it.name, keyword)) ??
@@ -27,5 +43,7 @@ export function usePromptService() {
   return {
     loadAllPromptsTask,
     fuzzySearchPrompts,
+    prompts,
+    reload: loadAllPromptsTask.exec,
   };
 }

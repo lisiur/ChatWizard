@@ -119,10 +119,12 @@ export default defineComponent({
           !e.shiftKey &&
           !isComposition.value
         ) {
-          // Send message
+          if (!userMessage.value) {
+            return;
+          }
 
           // Check if the reply is finished
-          if (props.chat.busy.value) {
+          if (props.chat.busy) {
             message.warning(t("chat.busy"));
             e.preventDefault();
             return;

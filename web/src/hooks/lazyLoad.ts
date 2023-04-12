@@ -31,7 +31,7 @@ export function useLazyLoad<T>(
         condition: () => (isRef(indicator) ? indicator.value !== null : true),
       });
 
-      wait().then((done) => {
+      return wait().then((done) => {
         if (done) {
           const ele = isRef(indicator)
             ? (indicator.value as Element)

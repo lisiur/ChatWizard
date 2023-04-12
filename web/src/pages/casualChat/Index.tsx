@@ -1,9 +1,9 @@
 import "./style.css";
-import { computed, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import ChatComp from "../../components/chat/Chat";
 import { Chat } from "../../models/chat";
 import * as api from "../../api";
-import { useAsyncData } from "../../hooks/asyncData";
+import { useAsyncData, useAsyncDataReactive } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
 import { hideWindow, currentWindow } from "../../utils/api";
 import { isTauri } from "../../utils/env";
@@ -16,12 +16,12 @@ export default defineComponent({
       return api.casualChat();
     });
 
-    const chat = computed(() => {
+    const chat = useAsyncDataReactive(async () => {
       if (!chatIndex.value) {
         return undefined;
       }
       return new Chat(chatIndex.value);
-    });
+    }, chatIndex);
 
     if (isTauri) {
       currentWindow().listen("tauri://blur", () => {

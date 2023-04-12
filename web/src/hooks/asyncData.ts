@@ -1,4 +1,11 @@
-import { computed, ComputedRef, Ref, ref, UnwrapRef, watch } from "vue";
+import {
+  computed,
+  ComputedRef,
+  Ref,
+  ref,
+  UnwrapRef,
+  watch,
+} from "vue";
 
 export function useAsyncData<T>(
   asyncGetter: () => Promise<UnwrapRef<T>>,

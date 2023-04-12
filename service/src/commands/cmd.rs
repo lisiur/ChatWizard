@@ -294,7 +294,10 @@ pub struct SendMessageCommand {
 }
 
 impl SendMessageCommand {
-    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
+    pub async fn exec(
+        self,
+        conn: &DbConn,
+    ) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
         let chat_service = ChatService::new(conn.clone());
 
         let (sender, receiver) = mpsc::channel::<StreamContent>(20);
@@ -320,7 +323,10 @@ pub struct ResendMessageCommand {
 }
 
 impl ResendMessageCommand {
-    pub async fn exec(self, conn: &DbConn) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
+    pub async fn exec(
+        self,
+        conn: &DbConn,
+    ) -> Result<(Receiver<StreamContent>, Sender<()>, Id, Id)> {
         let chat_service = ChatService::new(conn.clone());
 
         let (sender, receiver) = mpsc::channel::<StreamContent>(20);
@@ -412,7 +418,7 @@ impl CreatePromptCommand {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatePromptCommand {
-    payload: UpdatePromptPayload,
+    pub payload: UpdatePromptPayload,
 }
 
 impl UpdatePromptCommand {
@@ -504,10 +510,10 @@ pub struct InstallMarketPromptAndCreateChatCommand {
 }
 
 impl InstallMarketPromptAndCreateChatCommand {
-    pub fn exec(self, conn: &DbConn) -> Result<Id> {
+    pub fn exec(self, conn: &DbConn) -> Result<(Id, Id)> {
         let prompt_market_service = PromptMarketService::new(conn.clone());
 
-        let chat_id = prompt_market_service.install_market_prompt_and_create_chat(
+        let (prompt_id, chat_id) = prompt_market_service.install_market_prompt_and_create_chat(
             InstallMarketPromptPayload {
                 prompt: MarketPrompt {
                     name: self.name,
@@ -517,7 +523,7 @@ impl InstallMarketPromptAndCreateChatCommand {
             },
         )?;
 
-        Ok(chat_id)
+        Ok((prompt_id, chat_id))
     }
 }
 

@@ -153,7 +153,7 @@ export default defineComponent({
     async function selectHandler(id: string) {
       const index = allChats.value.find((m) => m.id === id)!;
       const chat = new Chat(index);
-      currentChat.value = shallowReactive(chat);
+      currentChat.value = chat;
 
       setTimeout(() => {
         chatRef.value?.focusInput();

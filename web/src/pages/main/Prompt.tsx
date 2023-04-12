@@ -8,6 +8,7 @@ import { useI18n } from "../../hooks/i18n";
 import Explorer, { ExplorerItem } from "../../components/Explorer";
 import DragBar from "../../components/DragBar";
 import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
+import { usePromptService } from "../../services/prompt";
 
 export default defineComponent({
   setup() {
@@ -15,35 +16,36 @@ export default defineComponent({
 
     const router = useRouter();
 
+    const { prompts, reload } = usePromptService();
+
     const promptRef = ref<HTMLInputElement>();
 
-    const promptIndexList = ref<Array<api.PromptIndex>>([]);
     const explorerList = computed(() => {
-      return promptIndexList.value.map((m) => ({
+      return (prompts.value ?? []).map((m) => ({
         id: m.id,
         title: m.name,
         data: m,
       }));
     });
 
-    const prompts = new Map<string, api.PromptData>();
+    const promptsMap = new Map<string, api.PromptData>();
 
     const currentId = ref<string>();
 
     const currentPromptIndex = computed(() =>
-      promptIndexList.value.find((m) => m.id === currentId.value)
+      prompts.value?.find((m) => m.id === currentId.value)
     );
-    const currentPromptContent = ref<string>();
+    const currentPromptData = ref<api.PromptData>();
     watch(
       currentPromptIndex,
       (value) => {
         if (!value) {
-          currentPromptContent.value = "";
+          currentPromptData.value = undefined;
           return;
         }
 
-        if (prompts.has(value.id)) {
-          currentPromptContent.value = prompts.get(value.id)?.content ?? "";
+        if (promptsMap.has(value.id)) {
+          currentPromptData.value = promptsMap.get(value.id);
           return;
         }
       },
@@ -52,13 +54,6 @@ export default defineComponent({
       }
     );
     const currentPromptInitialContent = ref<string>();
-    refreshMetaList();
-
-    function refreshMetaList() {
-      api.allPrompts().then((list) => {
-        promptIndexList.value = list;
-      });
-    }
 
     async function createPrompt() {
       prompt(t("prompt.inputNameHint"), {
@@ -67,7 +62,7 @@ export default defineComponent({
             name: title,
             content: "",
           });
-          refreshMetaList();
+          reload();
           currentId.value = id;
           currentPromptInitialContent.value = "";
 
@@ -107,7 +102,7 @@ export default defineComponent({
             id: id,
             name: title,
           });
-          refreshMetaList();
+          reload();
         },
       });
     }
@@ -130,15 +125,18 @@ export default defineComponent({
         return;
       }
 
-      if (currentPromptInitialContent.value === currentPromptContent.value) {
+      if (
+        currentPromptInitialContent.value === currentPromptData.value?.content
+      ) {
         return;
       }
 
       await api.updatePrompt({
         id: currentPromptIndex.value!.id,
-        content: currentPromptContent.value ?? "",
+        content: currentPromptData.value?.content ?? "",
       });
-      currentPromptInitialContent.value = currentPromptContent.value;
+      currentPromptInitialContent.value =
+        currentPromptData.value?.content ?? "";
 
       message.success(t("prompt.update.success"));
     }
@@ -149,17 +147,17 @@ export default defineComponent({
         currentPromptInitialContent.value = undefined;
       }
       await api.deletePrompt(id);
-      prompts.delete(id);
-      refreshMetaList();
+      promptsMap.delete(id);
+      reload();
     }
 
     async function selectHandler(id: string) {
       const promptData = await api.loadPrompt(id);
-      prompts.set(id, promptData);
+      promptsMap.set(id, promptData);
       currentId.value = id;
       currentPromptInitialContent.value = promptData.content;
 
-      const promptMetaData = promptIndexList.value.find((m) => m.id === id)!;
+      const promptMetaData = prompts.value?.find((m) => m.id === id)!;
       currentId.value = promptMetaData.id;
 
       setTimeout(() => {
@@ -216,11 +214,11 @@ export default defineComponent({
             class="flex-1 overflow-hidden p-4"
             style="background-color: var(--body-color)"
           >
-            {currentId.value ? (
+            {currentPromptData.value ? (
               <NScrollbar class="h-full">
                 <textarea
                   ref={promptRef}
-                  v-model={currentPromptContent.value}
+                  v-model={currentPromptData.value.content}
                   class="p-4 h-full resize-none w-full rounded-lg outline-none placeholder-slate-500"
                   style="color: var(--input-msg-color); background-color: var(--input-bg-color)"
                   onFocusout={updateHandler}

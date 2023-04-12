@@ -1,4 +1,4 @@
-import { reactive, ref, Ref } from "vue";
+import { computed, reactive, ref, Ref, shallowReactive, watch } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -11,6 +11,7 @@ import {
   loadChatLogByCursor,
   stopReply,
   removeChatPrompt,
+  PromptData,
 } from "../api";
 import {
   AssistantMessage,
@@ -20,17 +21,45 @@ import {
   UserMessage,
 } from "./message";
 import { listen } from "../utils/api";
+import { usePrompt } from "../hooks/prompt";
 
 export class Chat {
-  busy: Ref<boolean>;
-  index: ChatIndex;
-  messages: Array<Message>;
+  busy: boolean = false;
+  index!: ChatIndex;
+  messages: Array<Message> = [];
   prevCursor?: string | null; // undefined meas not loaded, null means no more logs
   stopReplyHandler?: () => void;
+  destroyCallbacks: Array<() => void> = [];
+  prompt: PromptData | null = null;
+
   constructor(index: ChatIndex) {
-    this.busy = ref(false);
-    this.index = reactive(index);
-    this.messages = reactive([]);
+    const chat = shallowReactive(this);
+    chat.index = index;
+    chat.messages = reactive([]);
+
+    const prompt = usePrompt(computed(() => this.index.promptId ?? null));
+    watch(
+      prompt,
+      () => {
+        chat.prompt = prompt.value;
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    listen("prompt-deleted", (event) => {
+      const deletedId = (event.payload as any).id;
+      if (this.index.promptId === deletedId) {
+        this.index.promptId = undefined;
+      }
+    }).then((unlisten) => this.destroyCallbacks.push(unlisten));
+
+    return chat;
+  }
+
+  destroy() {
+    this.destroyCallbacks.forEach((cb) => cb());
   }
 
   async loadPrevLogs() {
@@ -86,7 +115,7 @@ export class Chat {
   }
 
   async stopReply() {
-    this.busy.value = false;
+    this.busy = false;
     let user_message_id = this.messages.findLast(
       (item) => item instanceof UserMessage
     )?.id;
@@ -224,7 +253,7 @@ export class Chat {
     startLoading();
     this.messages.push(assistantMessage);
 
-    this.busy.value = true;
+    this.busy = true;
     const unListen = await listen(userMessageId, (event) => {
       endLoading();
       const chunk = event.payload as MessageChunk;
@@ -234,7 +263,7 @@ export class Chat {
           this.messages.pop();
           this.messages.push(new ErrorMessage(chunk.data));
           userMessage.finished = false;
-          this.busy.value = false;
+          this.busy = false;
           params?.onFinish?.();
           break;
         }
@@ -245,7 +274,7 @@ export class Chat {
         }
         case "done": {
           assistantMessage.markHistory();
-          this.busy.value = false;
+          this.busy = false;
           userMessage.finished = true;
           params?.onFinish?.();
           unListen();
@@ -261,7 +290,7 @@ export class Chat {
     this.stopReplyHandler = () => {
       endLoading();
       unListen();
-      this.busy.value = false;
+      this.busy = false;
       if (!this.messages[this.messages.length - 1]?.content) {
         this.messages.pop();
       }

@@ -1,8 +1,8 @@
-import { computed, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import ChatComp from "../../components/chat/Chat";
 import { Chat } from "../../models/chat";
 import * as api from "../../api";
-import { useAsyncData } from "../../hooks/asyncData";
+import { useAsyncData, useAsyncDataReactive } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
 
 export default defineComponent({
@@ -12,12 +12,14 @@ export default defineComponent({
     const chatIndex = useAsyncData(async () => {
       return api.casualChat();
     });
-    const chat = computed(() => {
+
+    const chat = useAsyncDataReactive(async () => {
       if (!chatIndex.value) {
         return undefined;
       }
       return new Chat(chatIndex.value);
-    });
+    }, chatIndex);
+
     return () => (
       <div class="h-full">
         {chat.value ? (

@@ -103,7 +103,7 @@ impl PromptMarketService {
     pub fn install_market_prompt_and_create_chat(
         &self,
         payload: InstallMarketPromptPayload,
-    ) -> Result<Id> {
+    ) -> Result<(Id, Id)> {
         let name = payload.prompt.name.clone();
         let user_id = payload.user_id;
         let prompt_id = self.install_market_prompt(payload)?;
@@ -120,7 +120,7 @@ impl PromptMarketService {
             ..Default::default()
         };
         self.chat_repo.insert(&chat)?;
-        Ok(chat_id)
+        Ok((prompt_id, chat_id))
     }
 }
 

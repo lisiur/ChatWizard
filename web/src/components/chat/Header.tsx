@@ -1,7 +1,6 @@
 import { NTag, NTooltip } from "naive-ui";
-import { computed, defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from "vue";
 import { useI18n } from "../../hooks/i18n";
-import { usePrompt } from "../../hooks/prompt";
 import { Chat } from "../../models/chat";
 import DragBar from "../DragBar";
 import ChatConfig from "./ChatConfig";
@@ -22,7 +21,6 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
-    const prompt = usePrompt(computed(() => props.chat.index.promptId));
 
     return () => (
       <DragBar
@@ -36,7 +34,7 @@ export default defineComponent({
         {{
           "right-panel": () => (
             <>
-              {prompt.value?.name ? (
+              {props.chat.prompt?.name ? (
                 <NTooltip contentStyle="max-width: 30rem">
                   {{
                     trigger: () => (
@@ -49,10 +47,10 @@ export default defineComponent({
                           props.chat.removePrompt();
                         }}
                       >
-                        {prompt.value?.name}
+                        {props.chat.prompt?.name}
                       </NTag>
                     ),
-                    default: () => prompt.value?.content,
+                    default: () => props.chat.prompt?.content,
                   }}
                 </NTooltip>
               ) : null}

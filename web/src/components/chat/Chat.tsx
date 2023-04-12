@@ -1,11 +1,10 @@
-import { defineComponent, PropType, ref, DefineComponent } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import { Message } from "../../models/message";
-import { NIcon, NTooltip } from "naive-ui";
 import { Chat } from "../../models/chat";
 import Header from "./Header";
 import History from "./History";
 import UserInput from "./UserInput";
-import { save, listen } from "../../utils/api";
+import { listen } from "../../utils/api";
 import { isTauri } from "../../utils/env";
 
 export default defineComponent({
@@ -64,50 +63,8 @@ export default defineComponent({
       props.chat.updateLog(id, content);
     }
 
-    async function exportMarkdown() {
-      const filePath = await save({
-        title: props.chat.index.title,
-        filters: [
-          {
-            name: "Markdown",
-            extensions: ["md"],
-          },
-        ],
-      });
-      if (filePath) {
-        // TODO
-      }
-    }
-
     function focusInput() {
       userInputRef.value?.focus();
-    }
-
-    function renderButton(props: {
-      icon: DefineComponent<any, any, any>;
-      tooltip: string;
-      handler: () => void;
-    }) {
-      return (
-        <NTooltip trigger="hover" delay={500}>
-          {{
-            trigger: () => (
-              <button
-                class="bg-transparent rounded px-2 py-1"
-                onClick={props.handler}
-              >
-                <NIcon
-                  size="1rem"
-                  class="text-[var(--chat-btn-color)] hover:text-[var(--primary-color)]"
-                >
-                  <props.icon></props.icon>
-                </NIcon>
-              </button>
-            ),
-            default: () => props.tooltip,
-          }}
-        </NTooltip>
-      );
     }
 
     return (() => (
