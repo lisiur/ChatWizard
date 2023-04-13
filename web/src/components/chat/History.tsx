@@ -43,7 +43,6 @@ import {
 } from "@vicons/fluent";
 import { dialog } from "../../utils/prompt";
 import ListTransition from "../listTransition/listTransition";
-import { sleep } from "../../utils/sleep";
 
 export default defineComponent({
   props: {
@@ -243,7 +242,7 @@ export default defineComponent({
             {renderDeleteMessageButton(msg.id)}
             {renderEditMessageButton(msg)}
             {renderCopyMessageButton(msg.content)}
-            {msg.finished === false ? renderResendMessageButton(msg.id) : null}
+            {renderResendMessageButton(msg.id)}
           </div>
         </div>
       );

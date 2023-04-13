@@ -216,15 +216,20 @@ export class Chat {
 
     const userMessage = this.messages[index] as UserMessage;
 
-    this.messages.length = index + 1;
+    if (index === this.messages.length - 1) {
+      // We can reuse the message if it is the last message
 
-    userMessage.delivered = false;
-    userMessage.finished = null;
+      userMessage.delivered = false;
+      userMessage.finished = null;
 
-    const [newMessageId, replyId] = await resendMessage(userMessage.id);
-    userMessage.id = newMessageId;
+      const [newMessageId, replyId] = await resendMessage(userMessage.id);
+      userMessage.id = newMessageId;
 
-    this.__receiveAssistantMessage(this, userMessage, replyId, params);
+      this.__receiveAssistantMessage(this, userMessage, replyId, params);
+    } else {
+      // Otherwise, we need to create a new message
+      this.sendMessage(userMessage.content, params);
+    }
   }
 
   async updateBacktrack(backtrack: number) {

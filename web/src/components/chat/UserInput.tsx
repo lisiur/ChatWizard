@@ -13,7 +13,7 @@ import { Message, UserMessage } from "../../models/message";
 import { message } from "../../utils/prompt";
 import Backtrack from "./Backtrack";
 import Cost from "./Cost";
-import { NScrollbar, useMessage } from "naive-ui";
+import { NScrollbar } from "naive-ui";
 import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
 import { usePromptService } from "../../services/prompt";
 import { PromptIndex } from "../../api";
@@ -79,8 +79,7 @@ export default defineComponent({
       if (!msg) {
         inputStatus.value = "normal";
         filteredPrompts.value = [];
-      } else if (msg.startsWith("/")) {
-        inputStatus.value = "command";
+      } else if (inputStatus.value === "command") {
         filteredPrompts.value = fuzzySearchPrompts(userMessage.value.slice(1));
         selectedPromptIndex.value = 0;
 
@@ -92,7 +91,7 @@ export default defineComponent({
 
     async function keydownHandler(e: KeyboardEvent) {
       if (inputStatus.value === "normal") {
-        if (e.key === "/") {
+        if (e.key === "/" && userMessage.value === "") {
           inputStatus.value = "command";
           return;
         } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
@@ -136,8 +135,12 @@ export default defineComponent({
 
           e.preventDefault();
         }
-      } else if (inputStatus.value === "command") {
-        if (e.key === "ArrowUp") {
+      }
+
+      if (inputStatus.value === "command") {
+        if (e.key === "Escape") {
+          inputStatus.value = "normal";
+        } else if (e.key === "ArrowUp") {
           selectedPromptIndex.value = Math.max(
             0,
             selectedPromptIndex.value - 1
@@ -166,7 +169,9 @@ export default defineComponent({
             return;
           }
         }
-      } else if (inputStatus.value === "historyNavigation") {
+      }
+
+      if (inputStatus.value === "historyNavigation") {
         if (!["ArrowUp", "ArrowDown"].includes(e.key)) {
           inputStatus.value = "normal";
           historyNavigationMessageId = null;
@@ -226,7 +231,10 @@ export default defineComponent({
         </div>
         <div class="h-[8rem] px-4 pt-2 pb-6 relative">
           <CommandPanel
-            v-show={filteredPrompts.value.length > 0}
+            v-show={
+              inputStatus.value === "command" &&
+              filteredPrompts.value.length > 0
+            }
             list={filteredPrompts.value.map((item) => ({
               label: item.name,
               value: item.name,
