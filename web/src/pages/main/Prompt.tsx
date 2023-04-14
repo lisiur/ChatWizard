@@ -37,15 +37,15 @@ export default defineComponent({
     );
     const currentPromptData = ref<api.PromptData>();
     watch(
-      currentPromptIndex,
+      currentId,
       (value) => {
         if (!value) {
           currentPromptData.value = undefined;
           return;
         }
 
-        if (promptsMap.has(value.id)) {
-          currentPromptData.value = promptsMap.get(value.id);
+        if (promptsMap.has(value)) {
+          currentPromptData.value = promptsMap.get(value);
           return;
         }
       },
@@ -62,9 +62,8 @@ export default defineComponent({
             name: title,
             content: "",
           });
-          reload();
-          currentId.value = id;
-          currentPromptInitialContent.value = "";
+          await reload();
+          selectHandler(id)
 
           setTimeout(() => {
             promptRef.value?.focus();
