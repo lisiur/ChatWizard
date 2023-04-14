@@ -216,8 +216,15 @@ export class Chat {
 
     const userMessage = this.messages[index] as UserMessage;
 
-    if (index === this.messages.length - 1) {
+    if (
+      index === this.messages.length - 1 ||
+      (index === this.messages.length - 2 &&
+        this.messages[index + 1] instanceof ErrorMessage)
+    ) {
       // We can reuse the message if it is the last message
+      // or is the second last message and the last message is an error message
+
+      this.messages.length = index + 1;
 
       userMessage.delivered = false;
       userMessage.finished = null;
