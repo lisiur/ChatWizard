@@ -19,7 +19,7 @@ export default defineComponent({
       default: true,
     },
   },
-  setup(props) {
+  setup(props, { slots }) {
     const { t } = useI18n();
 
     return () => (
@@ -32,6 +32,7 @@ export default defineComponent({
         disabled={!props.draggable}
       >
         {{
+          "left-panel": slots.left,
           "right-panel": () => (
             <>
               {props.chat.prompt?.name ? (

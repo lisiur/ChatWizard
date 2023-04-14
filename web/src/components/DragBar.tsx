@@ -19,6 +19,9 @@ export default defineComponent({
     });
     return () => (
       <div class="border-b border-color flex items-center">
+        {slots['left-panel'] ? (
+          <span class="pl-4 flex items-center">{slots["left-panel"]?.()}</span>
+        ) : null}
         <span
           ref={dragRegion}
           class="px-4 py-3 text-lg flex-1 overflow-hidden text-ellipsis whitespace-nowrap cursor-default"

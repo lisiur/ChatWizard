@@ -24,7 +24,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
-  setup(props, { expose }) {
+  setup(props, { expose, slots }) {
     const historyRef = ref<InstanceType<typeof History>>();
     const userInputRef = ref<InstanceType<typeof UserInput>>();
 
@@ -76,7 +76,11 @@ export default defineComponent({
           chat={props.chat}
           defaultTitle={props.defaultTitle}
           draggable={props.draggable}
-        ></Header>
+        >
+          {{
+            left: slots.headerLeft,
+          }}
+        </Header>
 
         <History
           ref={historyRef}
