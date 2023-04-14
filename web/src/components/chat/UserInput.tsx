@@ -18,6 +18,7 @@ import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
 import { usePromptService } from "../../services/prompt";
 import { PromptIndex } from "../../api";
 import CommandPanel from "./commandPanel";
+import Export from "./Export";
 
 export default defineComponent({
   props: {
@@ -222,11 +223,7 @@ export default defineComponent({
           <Cost class="pl-2 text-xs" value={props.chat.index.cost}></Cost>
           <Backtrack class="ml-2" chat={props.chat}></Backtrack>
           <div class="flex-1 flex justify-end p-1">
-            {/* {renderButton({
-                handler: exportMarkdown,
-                icon: MarkdownIcon,
-                tooltip: t("chat.exportMarkdown"),
-              })} */}
+            <Export chat={props.chat}></Export>
           </div>
         </div>
         <div class="h-[8rem] px-4 pt-2 pb-6 relative">
