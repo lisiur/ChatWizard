@@ -7,14 +7,16 @@ import {
   NRadioButton,
   NRadioGroup,
   NScrollbar,
+  NSelect,
   NSwitch,
 } from "naive-ui";
 import { computed, defineComponent, nextTick } from "vue";
-import { getSettings, updateSettings, Theme, Settings } from "../../api";
+import { getSettings, updateSettings, Settings } from "../../api";
 import { useAsyncData } from "../../hooks/asyncData";
 import { useI18n } from "../../hooks/i18n";
 import { openUrl, getPlatform } from "../../utils/api";
 import { isTauri } from "../../utils/env";
+import { languages } from "../../i18n";
 
 export default defineComponent({
   setup() {
@@ -44,18 +46,20 @@ export default defineComponent({
           <div class="grid place-items-center pr-12 h-full">
             {model.value ? (
               <NForm
+                class="w-full"
                 model={model.value}
                 labelPlacement="left"
-                labelWidth="10rem"
+                labelWidth="auto"
               >
                 <NFormItem label={t("setting.locale") + " :"}>
-                  <NRadioGroup
+                  <NSelect
                     v-model:value={model.value.language}
                     onUpdateValue={() => updateSettingHandler("language")}
-                  >
-                    <NRadioButton value="enUS">English</NRadioButton>
-                    <NRadioButton value="zhCN">中文</NRadioButton>
-                  </NRadioGroup>
+                    options={languages.map((lang) => ({
+                      label: lang.messages.lang,
+                      value: lang.name,
+                    }))}
+                  ></NSelect>
                 </NFormItem>
                 <NFormItem label={t("setting.theme") + " :"}>
                   <NRadioGroup

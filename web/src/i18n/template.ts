@@ -1,4 +1,7 @@
-export const messages = {
+import { Messages } from "./enUS";
+
+// After you add a new language, you need to add it to the languages array in web/src/i18n/index.ts
+const messages: Messages = {
   lang: "English",
 
   "common.cancel": "Cancel",
@@ -107,5 +110,3 @@ export const messages = {
 };
 
 export default messages;
-
-export type Messages = typeof messages;
