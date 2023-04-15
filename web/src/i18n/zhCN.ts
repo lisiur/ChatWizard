@@ -1,6 +1,8 @@
 import { Messages } from "./enUS";
 
 const messages: Messages = {
+  lang: "中文",
+
   "common.cancel": "取消",
   "common.ok": "确定",
   "common.copy": "复制",
@@ -84,7 +86,6 @@ const messages: Messages = {
   "setting.upgrade.later": "稍后重启",
   "setting.upgrade.download.success": "下载成功",
   "setting.upgrade.restart.hint": "请重启应用以应用更新。",
-
 
   "setting.locale": "语言",
   "setting.apiKey": "密钥",
