@@ -48,6 +48,10 @@ export default createRouter({
           component: () => import("./pages/setting/Index"),
         },
         {
+          path: "export",
+          component: () => import("./pages/export/Index"),
+        },
+        {
           path: "about",
           component: () => import("./pages/about/Index"),
         },
