@@ -3,6 +3,8 @@ import { Share20Filled as ExportIcon } from "@vicons/fluent";
 import { NButton, NIcon } from "naive-ui";
 import { Chat } from "../../models/chat";
 import { showOrCreateWindow } from "../../api";
+import { useI18n } from "../../hooks/i18n";
+import { isWeb } from "../../utils/env";
 
 export default defineComponent({
   props: {
@@ -12,24 +14,31 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
+
     function exportHandler() {
-      showOrCreateWindow("export", {
-        alwaysOnTop: true,
-        width: 800,
-        height: 800,
-        resizable: false,
-        title: "Export",
-        url: "/#/export?chatId=" + props.chat.index.id,
-        visible: true,
-      });
+      const url = "index.html/#/export?chatId=" + props.chat.index.id;
+      if (isWeb) {
+        window.open(url);
+      } else {
+        showOrCreateWindow("export", {
+          width: 960,
+          height: 720,
+          resizable: true,
+          title: "Export",
+          url,
+          visible: false,
+          alwaysOnTop: false,
+        });
+      }
     }
 
     return () => (
       <NButton tertiary size="tiny" onClick={exportHandler}>
-        <NIcon size={10}>
+        <NIcon size={14}>
           <ExportIcon></ExportIcon>
         </NIcon>
-        <span class="ml-[.1rem]">Export</span>
+        <span class="ml-[.1rem]">{t("chat.export")}</span>
       </NButton>
     );
   },

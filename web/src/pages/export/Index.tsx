@@ -1,19 +1,31 @@
 import { computed, defineComponent, nextTick, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useAsyncData } from "../../hooks/asyncData";
-import { ChatLog, getChat } from "../../api";
+import { ChatLog, getChat, saveFile } from "../../api";
 import { Chat } from "../../models/chat";
-import { NCheckbox, NScrollbar, NSpin } from "naive-ui";
+import {
+  NButton,
+  NCheckbox,
+  NCheckboxGroup,
+  NScrollbar,
+  NSpin,
+} from "naive-ui";
 import { useAutoScroll, useScroll } from "../../hooks/scroll";
 import { useLazyLoad } from "../../hooks/lazyLoad";
 import { AssistantMessage, Message, UserMessage } from "../../models/message";
 import mdRender from "../../utils/mdRender";
+import { toBlob } from "html-to-image";
+import { useI18n } from "../../hooks/i18n";
+import dayjs from "dayjs";
+import { isWeb } from "../../utils/env";
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
+
     const route = useRoute();
 
-    const chatId = route.params.chatId as string;
+    const chatId = route.query.chatId as string;
 
     const chat = useAsyncData(async () => {
       const chatIndex = await getChat(chatId);
@@ -41,61 +53,149 @@ export default defineComponent({
       },
       loadingRef
     );
+    const selectedIds = ref<Array<string>>([]);
+    const selectedMsgs = computed(() => {
+      return (chat.value?.messages ?? []).filter((msg) =>
+        selectedIds.value.includes(msg.id)
+      );
+    });
 
     function renderMessage(msg: Message) {
-      if (msg instanceof UserMessage) {
-        return (
-          <div
-            key={msg.id}
-            class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
-          >
-            <NCheckbox>
-              <div
-                class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
-                style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
-              >
-                <div class="break-words whitespace-pre-line">{msg.content}</div>
-              </div>
-            </NCheckbox>
-          </div>
-        );
-      } else if (msg instanceof AssistantMessage) {
-        const content = msg.content;
-        const html = mdRender(content);
-        return (
-          <div key={msg.id} class="flex">
-            <NCheckbox>
-              <div
-                class="markdown-root inline-block px-3 py-2 ml-2 rounded-t-xl rounded-r-xl z-1"
-                style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
-                v-html={html}
-              ></div>
-            </NCheckbox>
-          </div>
-        );
-      }
+      const color =
+        msg instanceof UserMessage
+          ? "var(--user-msg-color)"
+          : "var(--assistant-msg-color)";
+      const bgColor =
+        msg instanceof UserMessage
+          ? "var(--user-msg-bg-color)"
+          : "var(--assistant-msg-bg-color)";
+
+      return (
+        <div class="flex items-center px-4 py-1">
+          <NCheckbox value={msg.id}>
+            <div
+              class="relative top-[-.4rem] px-4 max-h-[2.15rem] overflow-hidden inline-block rounded-t-xl rounded-r-xl"
+              style={{
+                color,
+                backgroundColor: bgColor,
+              }}
+            >
+              {(() => {
+                if (msg instanceof UserMessage) {
+                  return (
+                    <div class="markdown-root">
+                      <p>{msg.content}</p>
+                    </div>
+                  );
+                } else if (msg instanceof AssistantMessage) {
+                  const content = msg.content;
+                  const html = mdRender(content);
+                  return <div class="markdown-root" v-html={html}></div>;
+                }
+              })()}
+            </div>
+          </NCheckbox>
+        </div>
+      );
+    }
+
+    function renderPreviewMessage(msg: Message) {
+      const color =
+        msg instanceof UserMessage
+          ? "var(--user-msg-color)"
+          : "var(--assistant-msg-color)";
+      const bgColor =
+        msg instanceof UserMessage
+          ? "var(--user-msg-bg-color)"
+          : "var(--assistant-msg-bg-color)";
+      return (
+        <div
+          class="px-4 inline-block rounded-t-xl rounded-r-xl"
+          style={{
+            color,
+            backgroundColor: bgColor,
+          }}
+        >
+          {(() => {
+            if (msg instanceof UserMessage) {
+              return (
+                <div class="markdown-root">
+                  <p>{msg.content}</p>
+                </div>
+              );
+            } else if (msg instanceof AssistantMessage) {
+              const html = mdRender(msg.content);
+              return <div class="markdown-root" v-html={html}></div>;
+            }
+          })()}
+        </div>
+      );
+    }
+
+    async function exportHandler() {
+      const exportPreview = document.getElementById(
+        "export-preview"
+      ) as HTMLElement;
+
+      const fileName = `${chat.value?.index.title || "chat"}-${dayjs().format(
+        "YYYY-MM-DD_HH-mm-ss"
+      )}.png`;
+
+      toBlob(exportPreview).then((blob) => {
+        if (blob) {
+          if (isWeb) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+          } else {
+            saveFile(fileName, blob);
+          }
+        }
+      });
     }
 
     return () => (
-      <div>
-        <div>
-          <NScrollbar ref={scrollRef} class="py-4">
-            <div class="relative">
-              <div
-                ref={loadingRef}
-                class="absolute top-1 left-1/2 translate-x-[-50%] flex justify-center items-center"
-              >
-                <NSpin size={12} v-show={hasMore.value}></NSpin>
-              </div>
-              {chat.value.messages.map((message) => (
-                <div key={message.tmpId || message.id}>
-                  {renderMessage(message)}{" "}
+      <div class="h-full flex">
+        {chat.value ? (
+          <div class="h-full flex-[2] overflow-hidden">
+            <NScrollbar ref={scrollRef} class="py-4">
+              <div class="relative">
+                <div
+                  ref={loadingRef}
+                  class="absolute top-1 left-1/2 translate-x-[-50%] flex justify-center items-center"
+                >
+                  <NSpin size={12} v-show={hasMore.value}></NSpin>
                 </div>
-              ))}
-            </div>
-          </NScrollbar>
+                <NCheckboxGroup v-model:value={selectedIds.value}>
+                  {chat.value.messages.map((message) => (
+                    <div key={message.id}>{renderMessage(message)}</div>
+                  ))}
+                </NCheckboxGroup>
+              </div>
+            </NScrollbar>
+          </div>
+        ) : null}
+        <div class="h-full flex flex-col flex-[3] overflow-hidden border-l border-[var(--border-color)]">
+          <div class="flex-1 overflow-hidden">
+            <NScrollbar>
+              <div id="export-preview" class="p-4 bg-[var(--body-color)]">
+                {selectedMsgs.value.map((msg) => (
+                  <div key={msg.id} class="p-2">
+                    {renderPreviewMessage(msg)}
+                  </div>
+                ))}
+              </div>
+            </NScrollbar>
+          </div>
+          <div class="p-2 border-t border-[var(--border-color)] flex justify-end">
+            <NButton type="primary" secondary onClick={exportHandler}>
+              {t("chat.export")}
+            </NButton>
+          </div>
         </div>
-        <div></div>
       </div>
     );
   },

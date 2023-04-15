@@ -222,7 +222,7 @@ export default defineComponent({
         <div class="flex items-center h-8">
           <Cost class="pl-2 text-xs" value={props.chat.index.cost}></Cost>
           <Backtrack class="ml-2" chat={props.chat}></Backtrack>
-          <div class="flex-1 flex justify-end p-1">
+          <div class="flex-1 flex justify-end py-1 px-2">
             <Export chat={props.chat}></Export>
           </div>
         </div>

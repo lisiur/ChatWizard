@@ -2,7 +2,7 @@ import { defineComponent } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { getTheme, Theme, getLocale, showWindow } from "./api";
+import { getTheme, Theme, getLocale, showWindow, debugLog } from "./api";
 import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { setupLifeCycle } from "./utils/setupLifeCycle";
@@ -20,20 +20,18 @@ export default defineComponent({
         getTheme().then(async (theme) => {
           setTheme(theme ?? Theme.System);
 
-          if (isTauri) {
+          if (isTauri && windowLabel) {
             // show window after theme is set
             // to avoid flash of unstyled content
-            if (windowLabel) {
-              if (!("background" in route.query)) {
-                showWindow(windowLabel);
-              }
+            if (!("background" in route.query)) {
+              showWindow(windowLabel);
             }
-
-            const unListen = await listen("theme-changed", (e) => {
-              setTheme(e.payload as Theme);
-            });
-            ctx.onBeforeUnmount(unListen);
           }
+
+          const unListen = await listen("theme-changed", (e) => {
+            setTheme(e.payload as Theme);
+          });
+          ctx.onBeforeUnmount(unListen);
         });
       })
       .onMounted((ctx) => {
@@ -41,12 +39,10 @@ export default defineComponent({
           const locale = _locale || "enUS";
           setLocale(locale);
 
-          if (isTauri) {
-            const unListen = await listen("locale-changed", (e) => {
-              setLocale(e.payload as string);
-            });
-            ctx.onBeforeUnmount(unListen);
-          }
+          const unListen = await listen("locale-changed", (e) => {
+            setLocale(e.payload as string);
+          });
+          ctx.onBeforeUnmount(unListen);
         });
       })
       .setup();

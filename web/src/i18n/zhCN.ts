@@ -60,6 +60,8 @@ const messages: Messages = {
   "chat.config.frequencyPenalty.hint":
     "介于-2.0和2.0之间的数字。正值会根据新符号在文本中的现有频率来惩罚它们，从而降低模型逐字重复同一行的可能性。",
 
+  "chat.export": "导出",
+
   "prompt.new": "新建提示词",
   "prompt.prompts": "提示词列表",
   "prompt.inputNameHint": "请输入提示词标题",

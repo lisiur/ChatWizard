@@ -1,10 +1,11 @@
 use chat_wizard_service::commands::{CommandEvent, CommandExecutor};
 use chat_wizard_service::DbConn;
+use tauri::api::dialog::FileDialogBuilder;
 use tauri::{AppHandle, State, Window};
 
 use crate::result::Result;
 use crate::window::{self, WindowOptions};
-use crate::EventBus;
+use crate::{utils, EventBus};
 
 #[tauri::command]
 pub async fn exec_command(
@@ -59,6 +60,26 @@ pub async fn create_window(label: &str, options: WindowOptions, handle: AppHandl
 pub async fn open(url: String) -> Result<()> {
     log::debug!("open: {}", url);
     open::that(url)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn save_file(file_name: String, data: Vec<u8>) -> Result<()> {
+    log::debug!("export_image");
+    FileDialogBuilder::new()
+        .set_file_name(&file_name)
+        .save_file(move |file_path| {
+            if let Some(path) = file_path {
+                utils::save_file_sync(&path, &data).unwrap();
+            }
+        });
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn debug_log(message: String) -> Result<()> {
+    log::debug!("{}", message);
 
     Ok(())
 }

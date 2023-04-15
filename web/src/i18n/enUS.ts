@@ -54,6 +54,8 @@ export const messages = {
   "chat.config.frequencyPenalty": "Frequency Penalty",
   "chat.config.frequencyPenalty.hint": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
 
+  "chat.export": "Export",
+
   "prompt.new": "New Prompt",
   "prompt.prompts": "Prompts",
   "prompt.inputNameHint": "Please input prompt name",

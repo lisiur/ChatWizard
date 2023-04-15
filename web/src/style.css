@@ -25,13 +25,13 @@ html, body, #app {
   padding: 0;
 }
 
-.markdown-root * {
+.markdown-root p, pre, code {
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .markdown-root p {
-  margin: .5rem 0;
+  padding: .5rem 0;
 }
 
 .markdown-root a {
@@ -39,13 +39,14 @@ html, body, #app {
 }
 
 .markdown-root ul {
-  padding-left: 1rem;
+  padding: .5rem 0 .5rem 1rem;
   list-style: inside;
   list-style-type: circle;
 }
 
 .markdown-root ol {
-  padding-left: 1rem;
+  padding: .5rem 0 .5rem 1rem;
+  list-style: inside;
   list-style: inside;
   list-style-type: decimal;
 }

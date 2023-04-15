@@ -209,7 +209,7 @@ export default defineComponent({
           id={`assistant-${msg.id}`}
         >
           <div
-            class="markdown-root inline-block px-3 py-2 ml-2 rounded-t-xl rounded-r-xl z-1"
+            class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
             style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
             v-html={html}
           ></div>
@@ -233,10 +233,10 @@ export default defineComponent({
           class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
         >
           <div
-            class="inline-block py-2 px-3 mr-1 rounded-l-xl rounded-t-xl"
+            class="markdown-root inline-block px-3 mr-1 rounded-l-xl rounded-t-xl"
             style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
           >
-            <div class="break-words whitespace-pre-line">{msg.content}</div>
+            <p>{msg.content}</p>
           </div>
           <div class="group-hover:block hidden absolute bottom-[-.6rem] right-5 text-xs">
             {renderDeleteMessageButton(msg.id)}

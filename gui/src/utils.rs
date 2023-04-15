@@ -23,3 +23,16 @@ pub async fn ensure_file_exists(path: &Path, initial: impl Fn() -> String) -> Re
 
     Ok(())
 }
+
+#[allow(unused)]
+pub async fn save_file(path: &Path, data: &[u8]) -> Result<()> {
+    fs::write(path, data).await?;
+
+    Ok(())
+}
+
+pub fn save_file_sync(path: &Path, data: &[u8]) -> Result<()> {
+    std::fs::write(path, data)?;
+
+    Ok(())
+}

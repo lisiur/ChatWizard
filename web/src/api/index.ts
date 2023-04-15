@@ -270,3 +270,13 @@ export function createWindow(label: string, options: WindowOptions) {
 export function showOrCreateWindow(label: string, options: WindowOptions) {
   return invoke<void>("show_or_create_window", { label, options });
 }
+
+export async function saveFile(fileName: string, data: Blob) {
+  const arrayBuffer = await data.arrayBuffer();
+  const binaryArray = Array.from(new Uint8Array(arrayBuffer));
+  return invoke<void>("save_file", { fileName, data: binaryArray });
+}
+
+export function debugLog(message: string) {
+  return invoke<void>("debug_log", { message });
+}
