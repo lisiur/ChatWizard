@@ -53,13 +53,13 @@
 
 ## Features
 
-- local web server
 - stream response
 - stop replying
 - tray window
 - network proxy
 - forward api
 - lazy loading of chat records
+- export image
 - chat configuration
 - prompt market
 - local prompt
