@@ -134,3 +134,8 @@ ChatWizard has built-in upgrade support, and each time you restart the applicati
     pnpm run build
     ```
 
+## Contribute
+
+### i18n
+
+Language definitions are here: [web/src/i18n](./web/src/i18n/). Refer to the contents of [template.ts](./web/src/i18n/template.ts) to add a new language definition.

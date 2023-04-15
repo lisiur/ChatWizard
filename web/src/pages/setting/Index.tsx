@@ -57,7 +57,7 @@ export default defineComponent({
                     onUpdateValue={() => updateSettingHandler("language")}
                     options={languages.map((lang) => ({
                       label: lang.messages.lang,
-                      value: lang.name,
+                      value: lang.lang,
                     }))}
                   ></NSelect>
                 </NFormItem>
