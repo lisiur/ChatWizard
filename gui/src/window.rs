@@ -92,6 +92,7 @@ pub fn create_window_in_background(
         .decorations(options.decorations.unwrap_or(true))
         .transparent(options.transparent.unwrap_or(false))
         .skip_taskbar(options.skip_taskbar.unwrap_or(false))
+        .accept_first_mouse(true)
         .visible(false);
 
     #[cfg(target_os = "macos")]
