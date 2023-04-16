@@ -4,7 +4,8 @@ import { useTask } from "../hooks/task";
 import { listen } from "../utils/api";
 
 function fuzzyMatch(text: string, keyword: string) {
-  let regex = new RegExp(keyword, "gi");
+  const pattern = keyword.split("").join(".*?");
+  let regex = new RegExp(pattern, "gi");
   return text.match(regex) !== null;
 }
 
@@ -34,10 +35,9 @@ export function usePromptService() {
   });
 
   function fuzzySearchPrompts(keyword: string) {
-    return (
-      loadAllPromptsTask.result?.filter((it) => fuzzyMatch(it.name, keyword)) ??
-      []
-    );
+    return loadAllPromptsTask.result?.filter((it) => {
+      return fuzzyMatch(it.name, keyword) ?? [];
+    });
   }
 
   return {
