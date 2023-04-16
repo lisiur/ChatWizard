@@ -1,12 +1,4 @@
-import {
-  defineComponent,
-  nextTick,
-  onMounted,
-  PropType,
-  ref,
-  watch,
-} from "vue";
-import { useComposition } from "../../hooks/composition";
+import { defineComponent, nextTick, onMounted, PropType, Ref, ref } from "vue";
 import { useI18n } from "../../hooks/i18n";
 import { Chat } from "../../models/chat";
 import { Message, UserMessage } from "../../models/message";
@@ -19,6 +11,52 @@ import { usePromptService } from "../../services/prompt";
 import { PromptIndex } from "../../api";
 import CommandPanel from "./commandPanel";
 import Export from "./Export";
+import { useInput } from "../../hooks/input";
+
+function useHistoryNavigation(chat: Chat) {
+  let id = null as string | null;
+  const stack = [] as Message[];
+
+  async function getPrevious() {
+    let msg = await chat.getPreviousUserLog(id ?? undefined);
+    while (stack.find((item) => item.content === msg?.content)) {
+      msg = await chat.getPreviousUserLog(id ?? undefined);
+      if (msg) {
+        id = msg.id;
+      } else {
+        return;
+      }
+    }
+    if (msg) {
+      stack.push(msg);
+      return msg;
+    }
+  }
+
+  function getNext() {
+    stack.pop();
+    if (stack.length) {
+      const msg = stack[stack.length - 1];
+      id = msg.id;
+      return msg;
+    } else {
+      id = null;
+    }
+  }
+
+  function reset() {
+    id = null;
+    stack.length = 0;
+  }
+
+  return {
+    id: id,
+    stack: stack,
+    getPrevious,
+    getNext,
+    reset,
+  };
+}
 
 export default defineComponent({
   props: {
@@ -38,26 +76,163 @@ export default defineComponent({
     const { t } = useI18n();
 
     const inputRef = ref<HTMLTextAreaElement>();
-    const { isComposition } = useComposition(inputRef);
-    const userMessage = ref("");
-    const inputStatus = ref<"normal" | "command" | "historyNavigation">(
-      "normal"
-    );
-    let historyNavigationMessageId = null as string | null;
-    const historyNavigationStack = [] as Message[];
 
     const { fuzzySearchPrompts } = usePromptService();
     const filteredPrompts = ref<Array<PromptIndex>>([]);
     const selectedPromptIndex = ref(0);
+
+    const {
+      getPrevious: getPrevHistory,
+      getNext: getNextHistory,
+      reset: resetHistory,
+    } = useHistoryNavigation(props.chat);
+
+    const {
+      input: userMessage,
+      state,
+      setState,
+      focus,
+    } = useInput<"normal" | "command" | "historyNavigation">({
+      dom: inputRef,
+      defaultState: "normal",
+      async stateTransition(state, input) {
+        switch (state) {
+          case "normal": {
+            if (input.key === "/" && userMessage.value === "") {
+              return "command";
+            } else if (["ArrowUp", "ArrowDown"].includes(input.key)) {
+              handleHistoryKey(input.event);
+              return "historyNavigation";
+            } else if (input.key === "Tab") {
+              // Expand tab to 4 spaces
+              input.event.preventDefault();
+              const start = inputRef.value?.selectionStart;
+              const end = inputRef.value?.selectionEnd;
+              if (start !== undefined && end !== undefined) {
+                setUserMessage(
+                  userMessage.value.substring(0, start) +
+                    "  " +
+                    userMessage.value.substring(end)
+                );
+                nextTick(() => {
+                  inputRef.value?.setSelectionRange(start + 4, start + 4);
+                });
+              }
+            } else if (input.key === "Backspace") {
+              if (userMessage.value.startsWith("/")) {
+                return "command";
+              }
+            } else if (
+              input.key === "Enter" &&
+              !input.ctrl &&
+              !input.alt &&
+              !input.shift &&
+              !input.composition
+            ) {
+              if (!userMessage.value) {
+                return;
+              }
+
+              // Check if the reply is finished
+              if (props.chat.busy) {
+                message.warning(t("chat.busy"));
+                input.event.preventDefault();
+                return;
+              }
+
+              props.onMessage?.(new UserMessage(userMessage.value));
+              props.sendMessage(userMessage.value);
+              setUserMessage("");
+
+              input.event.preventDefault();
+            }
+            return;
+          }
+          case "command": {
+            if (input.key === "Escape") {
+              return "normal";
+            } else if (input.key === "ArrowUp") {
+              selectedPromptIndex.value = Math.max(
+                0,
+                selectedPromptIndex.value - 1
+              );
+              input.event.preventDefault();
+            } else if (input.key === "ArrowDown") {
+              selectedPromptIndex.value = Math.min(
+                filteredPrompts.value.length - 1,
+                selectedPromptIndex.value + 1
+              );
+              input.event.preventDefault();
+            } else if (input.key === "Enter") {
+              if (filteredPrompts.value.length > 0) {
+                const prompt =
+                  filteredPrompts.value[selectedPromptIndex.value]!;
+                props.chat.changePrompt(prompt.id);
+                message.success(
+                  t("chat.prompt.changed", {
+                    name: prompt.name,
+                  })
+                );
+                userMessage.value = "";
+                input.event.preventDefault();
+                return "normal";
+              }
+            }
+            return;
+          }
+          case "historyNavigation": {
+            if (!["ArrowUp", "ArrowDown"].includes(input.key)) {
+              resetHistory();
+              return "normal";
+            } else {
+              handleHistoryKey(input.event);
+            }
+            return;
+          }
+          default: {
+            return "normal";
+          }
+        }
+      },
+      inputWatcher(input) {
+        console.log(state.value);
+        if (!input) {
+          setState("normal");
+        } else if (state.value === "command") {
+          filteredPrompts.value =
+            fuzzySearchPrompts(userMessage.value.slice(1)) ?? [];
+          selectedPromptIndex.value = 0;
+
+          if (filteredPrompts.value.length === 0) {
+            setState("normal");
+          }
+        }
+      },
+    });
 
     const publicInstance = {
       focus,
     };
     expose(publicInstance);
 
-    onMounted(() => {
-      inputRef.value?.focus();
-    });
+    onMounted(focus);
+
+    async function handleHistoryKey(event: KeyboardEvent) {
+      if (event.key === "ArrowUp") {
+        const msg = await getPrevHistory();
+        if (msg) {
+          setUserMessage(msg.content);
+        }
+      } else if (event.key === "ArrowDown") {
+        const msg = getNextHistory();
+        if (msg) {
+          setUserMessage(msg.content);
+        } else {
+          setUserMessage("");
+        }
+      }
+      event.preventDefault();
+    }
 
     function setUserMessage(content: string) {
       userMessage.value = content;
@@ -66,152 +241,10 @@ export default defineComponent({
       });
     }
 
-    function focus() {
-      inputRef.value?.focus();
-    }
-
     function resizeInputHeight() {
       autoGrowTextarea(inputRef.value as HTMLTextAreaElement, {
         minHeight: 100,
       });
-    }
-
-    watch(userMessage, (msg) => {
-      if (!msg) {
-        inputStatus.value = "normal";
-        filteredPrompts.value = [];
-      } else if (inputStatus.value === "command") {
-        filteredPrompts.value = fuzzySearchPrompts(userMessage.value.slice(1));
-        selectedPromptIndex.value = 0;
-
-        if (filteredPrompts.value.length === 0) {
-          inputStatus.value = "normal";
-        }
-      }
-    });
-
-    async function keydownHandler(e: KeyboardEvent) {
-      if (inputStatus.value === "normal") {
-        if (e.key === "/" && userMessage.value === "") {
-          inputStatus.value = "command";
-          return;
-        } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
-          inputStatus.value = "historyNavigation";
-          historyNavigationStack.length = 0;
-        } else if (e.key === "Tab") {
-          // Expand tab to 4 spaces
-          e.preventDefault();
-          const start = inputRef.value?.selectionStart;
-          const end = inputRef.value?.selectionEnd;
-          if (start !== undefined && end !== undefined) {
-            userMessage.value =
-              userMessage.value.substring(0, start) +
-              "  " +
-              userMessage.value.substring(end);
-            nextTick(() => {
-              inputRef.value?.setSelectionRange(start + 4, start + 4);
-            });
-          }
-        } else if (
-          e.key === "Enter" &&
-          !e.ctrlKey &&
-          !e.altKey &&
-          !e.shiftKey &&
-          !isComposition.value
-        ) {
-          if (!userMessage.value) {
-            return;
-          }
-
-          // Check if the reply is finished
-          if (props.chat.busy) {
-            message.warning(t("chat.busy"));
-            e.preventDefault();
-            return;
-          }
-
-          props.onMessage?.(new UserMessage(userMessage.value));
-          props.sendMessage(userMessage.value);
-          userMessage.value = "";
-
-          e.preventDefault();
-        }
-      }
-
-      if (inputStatus.value === "command") {
-        if (e.key === "Escape") {
-          inputStatus.value = "normal";
-        } else if (e.key === "ArrowUp") {
-          selectedPromptIndex.value = Math.max(
-            0,
-            selectedPromptIndex.value - 1
-          );
-          e.preventDefault();
-          return;
-        } else if (e.key === "ArrowDown") {
-          selectedPromptIndex.value = Math.min(
-            filteredPrompts.value.length - 1,
-            selectedPromptIndex.value + 1
-          );
-          e.preventDefault();
-          return;
-        } else if (e.key === "Enter") {
-          if (filteredPrompts.value.length > 0) {
-            inputStatus.value = "normal";
-            const prompt = filteredPrompts.value[selectedPromptIndex.value]!;
-            props.chat.changePrompt(prompt.id);
-            message.success(
-              t("chat.prompt.changed", {
-                name: prompt.name,
-              })
-            );
-            userMessage.value = "";
-            e.preventDefault();
-            return;
-          }
-        }
-      }
-
-      if (inputStatus.value === "historyNavigation") {
-        if (!["ArrowUp", "ArrowDown"].includes(e.key)) {
-          inputStatus.value = "normal";
-          historyNavigationMessageId = null;
-          historyNavigationStack.length = 0;
-        } else if (e.key === "ArrowUp") {
-          let msg = await props.chat.getPreviousUserLog(
-            historyNavigationMessageId ?? undefined
-          );
-          while (
-            historyNavigationStack.find((item) => item.content === msg?.content)
-          ) {
-            msg = await props.chat.getPreviousUserLog(
-              historyNavigationMessageId ?? undefined
-            );
-            if (msg) {
-              historyNavigationMessageId = msg.id;
-            } else {
-              break;
-            }
-          }
-          if (msg) {
-            setUserMessage(msg.content);
-            historyNavigationStack.push(msg);
-          }
-          e.preventDefault();
-        } else if (e.key === "ArrowDown") {
-          historyNavigationStack.pop();
-          if (historyNavigationStack.length) {
-            const msg =
-              historyNavigationStack[historyNavigationStack.length - 1];
-            historyNavigationMessageId = msg.id;
-            setUserMessage(msg.content);
-          } else {
-            historyNavigationMessageId = null;
-            setUserMessage("");
-          }
-          e.preventDefault();
-        }
-      }
     }
 
     return (() => (
@@ -229,8 +262,7 @@ export default defineComponent({
         <div class="h-[8rem] px-4 pt-2 pb-6 relative">
           <CommandPanel
             v-show={
-              inputStatus.value === "command" &&
-              filteredPrompts.value.length > 0
+              state.value === "command" && filteredPrompts.value.length > 0
             }
             list={filteredPrompts.value.map((item) => ({
               label: item.name,
@@ -246,7 +278,6 @@ export default defineComponent({
               class="flex-1 resize-none w-full bg-transparent outline-none placeholder-slate-500"
               style="color: var(--input-msg-color)"
               rows="6"
-              onKeydown={keydownHandler}
               onInput={resizeInputHeight}
               onFocus={resizeInputHeight}
             ></textarea>
