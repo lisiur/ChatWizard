@@ -1,0 +1,51 @@
+diff --git a/gui/src/main.rs b/gui/src/main.rs
+index 12ea32ff..832d8e06 100644
+--- a/gui/src/main.rs
++++ b/gui/src/main.rs
+@@ -21,11 +21,13 @@ mod commands;
+ mod error;
+ mod project;
+ mod result;
++mod schema_server;
+ mod tray;
+ mod utils;
+ mod window;
+ 
+-pub struct Port(u16);
++pub struct SchemaPort(u16);
++
+ pub struct EventBus {
+     pub sender: Sender<CommandEvent>,
+ }
+@@ -48,6 +50,7 @@ impl EventBus {
+ #[tokio::main]
+ async fn main() {
+     env_logger::init();
++
+     let project = Project::init().await.unwrap();
+     let conn = chat_wizard_service::init(&project.db_url).unwrap();
+ 
+@@ -79,11 +82,21 @@ async fn main() {
+             let app_handle = app.handle();
+             app.manage(EventBus::new(app_handle.clone()));
+ 
++            // start gui server
++            let port = portpicker::pick_unused_port().unwrap();
++            println!("port: {}", port);
++
++            let schema_port = SchemaPort(port);
++            app_handle.manage(schema_port);
++
++            let handle = app_handle.clone();
++            tokio::spawn(async move {
++                schema_server::serve(port, handle).await;
++            });
++
+             // start web server
+             let port = 23333;
+-            app.manage(Port(port));
+             if enable_web_server {
+-                // let port = portpicker::pick_unused_port().unwrap();
+                 tokio::spawn(api_app(port, conn));
+             }
+ 
