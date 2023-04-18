@@ -1,0 +1,18 @@
+[package]
+name = "chat-wizard-plugin-commit-summary"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.70"
+tokio = { version = "1.27.0", features = ["rt", "macros"] }
+
+[dev-dependencies]
+wasmtime = "7.0.0"
+wasmtime-wasi = "7.0.0"
+
+[profile.release]
+lto = true
+opt-level = 's'

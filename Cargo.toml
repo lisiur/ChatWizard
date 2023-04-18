@@ -1,7 +1,3 @@
 [workspace]
-members = [
-	"api",
-	"gui",
-	"server",
-	"service",
-]
+members = ["api", "gui", "server", "service"]
+exclude = ["plugins/chat-wizard-plugin-commit-summary"]

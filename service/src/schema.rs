@@ -47,6 +47,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    plugins (id) {
+        id -> Binary,
+        name -> Text,
+        description -> Text,
+        version -> Text,
+        author -> Text,
+        code -> Binary,
+        config -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     prompt_sources (id) {
         id -> Binary,
         name -> Text,
@@ -101,6 +115,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     chat_logs,
     chat_models,
     chats,
+    plugins,
     prompt_sources,
     prompts,
     settings,

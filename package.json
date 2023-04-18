@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "install": "cd web && pnpm install",
-    "dev": "cd gui && RUST_LOG=debug cargo tauri dev --no-watch",
+    "dev": "cd gui && RUST_LOG=chat_wizard_service=debug cargo tauri dev --no-watch",
     "build:web": "cd web && pnpm build",
     "build:gui": "cd gui && cargo tauri build",
     "build:server": "pnpm run build:web && cd server && cargo build",

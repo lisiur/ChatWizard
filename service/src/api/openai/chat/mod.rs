@@ -70,20 +70,16 @@ impl OpenAIChatApi {
                             None
                         } else if line.starts_with("data: [DONE]") {
                             Some(StreamContent::Done)
-                        } else if line.starts_with("data: ") && line.ends_with("}]}") {
-                            handle_line(line)
-                        } else if line.ends_with('}') {
+                        } else {
                             let line = left_line.take().unwrap_or_default() + line;
                             match handle_line(&line) {
-                                Some(content) => Some(content),
+                                Some(Some(content)) => Some(content),
+                                Some(None) => None,
                                 None => {
                                     left_line = Some(line);
                                     None
                                 }
                             }
-                        } else {
-                            left_line = Some(left_line.take().unwrap_or_default() + line);
-                            None
                         }
                     })
                     .collect::<Vec<StreamContent>>();
@@ -126,7 +122,8 @@ pub struct OpenAIStreamChunkChoiceDelta {
     pub content: Option<String>,
 }
 
-fn handle_line(line: &str) -> Option<StreamContent> {
+fn handle_line(line: &str) -> Option<Option<StreamContent>> {
+    log::debug!("handle_line: {}", line);
     if !line.starts_with("data:") || !line.ends_with("}]}") {
         return None;
     }
@@ -138,11 +135,13 @@ fn handle_line(line: &str) -> Option<StreamContent> {
         return None;
     };
     let json = serde_json::from_str::<OpenAIStreamChunk>(json_data).unwrap();
-    json.choices.get(0).and_then(|choice| {
+    let stream_content = json.choices.get(0).and_then(|choice| {
         choice
             .delta
             .content
             .as_ref()
             .map(|content| StreamContent::Data(content.to_string()))
-    })
+    });
+
+    Some(stream_content)
 }
