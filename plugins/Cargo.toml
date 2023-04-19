@@ -1,0 +1,14 @@
+[package]
+name = "plugins"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "wiazrd_chat_plugin_commit_summary"
+path = "src/commit_summary.rs"
+
+[dependencies]
+anyhow = "1.0.70"
