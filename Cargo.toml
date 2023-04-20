@@ -1,2 +1,2 @@
 [workspace]
-members = ["api", "gui", "plugin", "plugins", "server", "service"]
+members = ["api", "gui", "plugins", "plugin", "server", "service"]

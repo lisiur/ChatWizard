@@ -20,6 +20,12 @@ pub enum Error {
     #[error(transparent)]
     ParseCsv(#[from] csv::Error),
 
+    #[error(transparent)]
+    Wasmtime(#[from] wasmtime::Error),
+
+    #[error("plugin error: {0}")]
+    Plugin(String),
+
     #[error("unknown error: {0}")]
     Unknown(String),
 }
@@ -56,6 +62,10 @@ impl serde::ser::Serialize for Error {
                 map.serialize_entry("message", &err.to_string())?;
                 map.end()
             }
+            Error::Wasmtime(err) => {
+                err.to_string().serialize(serializer)
+            }
+            Error::Plugin(err) => err.serialize(serializer),
             Error::Unknown(err) => err.serialize(serializer),
         }
     }

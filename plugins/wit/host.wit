@@ -1,0 +1,5 @@
+default world host {
+  import exec: func(cmd: string) -> (exit-code: u32, message: string)
+
+  export run: func()
+}

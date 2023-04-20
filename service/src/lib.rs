@@ -6,6 +6,7 @@ pub mod database;
 pub mod error;
 pub mod init;
 pub mod models;
+pub mod plugin;
 pub mod repositories;
 pub mod result;
 pub mod schema;
