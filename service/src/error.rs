@@ -26,7 +26,7 @@ pub enum Error {
     #[error("plugin error: {0}")]
     Plugin(String),
 
-    #[error("unknown error: {0}")]
+    #[error("error: {0}")]
     Unknown(String),
 }
 

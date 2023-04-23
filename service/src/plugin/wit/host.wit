@@ -1,5 +1,6 @@
 default world host {
   import exec: func(cmd: string) -> (exit-code: s32, message: string)
+  import openai: func(prompt: string) -> (exit-code: s32, message: string)
 
   export run: func()
 }

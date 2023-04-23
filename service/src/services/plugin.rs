@@ -1,9 +1,12 @@
 use crate::{
+    api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, OpenAIChatRole},
     models::plugin::{NewPlugin, PatchPlugin, Plugin, PluginConfig},
+    plugin::{RunningPlugin, RunningPluginState},
     repositories::{plugin::PluginRepo, setting::SettingRepo},
     result::Result,
-    DbConn, Id,
+    DbConn, Id, StreamContent, Error,
 };
+use futures::StreamExt;
 
 #[derive(Clone)]
 pub struct PluginService {
@@ -76,8 +79,58 @@ impl PluginService {
         Ok(())
     }
 
-    pub async fn execute(&self) -> Result<()> {
-        todo!()
+    pub async fn send_message(&self, prompt: &str) -> Result<String> {
+        let user_message = OpenAIChatMessage {
+            role: OpenAIChatRole::User,
+            content: prompt.to_string(),
+        };
+        let setting = self.setting_repo.select_by_user_id(Id::local())?;
+        let api = setting.create_openai_chat();
+        let api_params = OpenAIChatParams {
+            stream: true,
+            model: "gpt-3.5".to_string(),
+            messages: vec![user_message],
+            ..Default::default()
+        };
+
+        let mut reply = Some(String::new());
+        let mut error = Option::<String>::None;
+        let stream = api.send_message(api_params).await;
+        match stream {
+            Ok(mut stream) => {
+                while let Some(content) = stream.next().await {
+                    match &content {
+                        StreamContent::Data(data) => match &mut reply {
+                            Some(reply) => reply.push_str(data),
+                            None => unreachable!(),
+                        },
+                        StreamContent::Done => {
+                            break;
+                        }
+                        StreamContent::Error(err) => {
+                            error = Some(err.to_string());
+                            break;
+                        }
+                    }
+                }
+                drop(stream);
+            }
+            Err(err) => error = Some(err.to_string()),
+        }
+
+        match error {
+            Some(err) => return Err(Error::Unknown(err)),
+            None => Ok(reply.unwrap())
+        }
+    }
+
+    pub async fn execute(&self, id: Id) -> Result<()> {
+        let plugin = self.get_plugin(id)?;
+        let state = RunningPluginState::new(self.clone());
+        let mut running_plugin = RunningPlugin::init(&plugin.code, state).await?;
+        running_plugin.run().await?;
+
+        Ok(())
     }
 }
 
