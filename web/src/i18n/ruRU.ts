@@ -80,6 +80,8 @@ const messages: Messages = {
   "prompt.market.actions.newChat": "Новый чат",
   "prompt.market.install.success": "Запрос успешно установлен",
 
+  "plugin.market.plugins": "Рынок плагинов",
+
   "config.setting": "Настройка",
 
   "setting.upgrade.newVersion": "Доступна новая версия",

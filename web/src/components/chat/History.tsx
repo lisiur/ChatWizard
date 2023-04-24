@@ -205,7 +205,7 @@ export default defineComponent({
       return (
         <div
           key={msg.id}
-          class="relative flex justify-start items-start pl-4 pr-24 pb-4 group"
+          class="relative flex justify-start items-start px-4 pb-4 group"
           id={`assistant-${msg.id}`}
         >
           <div
@@ -214,11 +214,14 @@ export default defineComponent({
             v-html={html}
           ></div>
           {msg.done ? (
-            <div class="group-hover:block hidden gap-1 absolute bottom-[-.6rem] left-5 text-xs">
+            <div
+              class="group-hover:grid w-full gap-1 hidden absolute bottom-[-.6rem] left-5 text-xs"
+              style="grid-template-columns: repeat(auto-fit, minmax(0, 1rem));"
+            >
               <NButtonGroup>
-                {renderCopyMessageButton(msg.content)}
-                {renderEditMessageButton(msg)}
                 {renderDeleteMessageButton(msg.id)}
+                {renderEditMessageButton(msg)}
+                {renderCopyMessageButton(msg.content)}
               </NButtonGroup>
             </div>
           ) : null}
@@ -228,17 +231,17 @@ export default defineComponent({
 
     function renderUserMessage(msg: UserMessage) {
       return (
-        <div
-          key={msg.id}
-          class="flex justify-end items-start pr-4 pl-24 pb-4 group relative"
-        >
+        <div key={msg.id} class="flex items-start px-4 pb-4 group relative">
           <div
-            class="markdown-root inline-block px-3 mr-1 rounded-l-xl rounded-t-xl"
+            class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
             style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
           >
             <p>{msg.content}</p>
           </div>
-          <div class="group-hover:block hidden absolute bottom-[-.6rem] right-5 text-xs">
+          <div
+            class="group-hover:grid w-full gap-1 hidden absolute bottom-[-.6rem] left-5 text-xs"
+            style="grid-template-columns: repeat(auto-fit, minmax(0, 1rem));"
+          >
             {renderDeleteMessageButton(msg.id)}
             {renderEditMessageButton(msg)}
             {renderCopyMessageButton(msg.content)}

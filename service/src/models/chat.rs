@@ -83,13 +83,7 @@ impl Default for ChatConfig {
     fn default() -> Self {
         Self {
             backtrack: 2,
-            params: ChatParams {
-                model: "gpt-3.5-turbo".to_string(),
-                temperature: None,
-                stop: None,
-                presence_penalty: None,
-                frequency_penalty: None,
-            },
+            params: ChatParams::default(),
         }
     }
 }
@@ -110,4 +104,16 @@ pub struct ChatParams {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub frequency_penalty: Option<f32>,
+}
+
+impl Default for ChatParams {
+    fn default() -> Self {
+        Self {
+            model: "gpt-3.5-turbo".to_string(),
+            temperature: None,
+            stop: None,
+            presence_penalty: None,
+            frequency_penalty: None,
+        }
+    }
 }

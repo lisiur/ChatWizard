@@ -1,10 +1,10 @@
 use crate::{
     api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, OpenAIChatRole},
-    models::plugin::{NewPlugin, PatchPlugin, Plugin, PluginConfig},
+    models::plugin::{InstalledPlugin, NewPlugin, PatchPlugin, Plugin, PluginConfig},
     plugin::{RunningPlugin, RunningPluginState},
     repositories::{plugin::PluginRepo, setting::SettingRepo},
     result::Result,
-    DbConn, Id, StreamContent, Error,
+    DbConn, Error, Id, StreamContent,
 };
 use futures::StreamExt;
 
@@ -31,7 +31,7 @@ impl PluginService {
         }
     }
 
-    pub fn all_plugins(&self) -> Result<Vec<Plugin>> {
+    pub fn all_plugins(&self) -> Result<Vec<InstalledPlugin>> {
         self.plugin_repo.select_all()
     }
 
@@ -55,6 +55,10 @@ impl PluginService {
 
     pub fn get_plugin(&self, id: Id) -> Result<Plugin> {
         self.plugin_repo.select_by_id(id)
+    }
+
+    pub fn get_plugin_by_name(&self, name: &str) -> Result<Plugin> {
+        self.plugin_repo.select_by_name(name)
     }
 
     pub fn update_plugin(&self, payload: UpdatePluginPayload) -> Result<()> {
@@ -88,7 +92,7 @@ impl PluginService {
         let api = setting.create_openai_chat();
         let api_params = OpenAIChatParams {
             stream: true,
-            model: "gpt-3.5".to_string(),
+            model: "gpt-3.5-turbo".to_string(),
             messages: vec![user_message],
             ..Default::default()
         };
@@ -119,13 +123,18 @@ impl PluginService {
         }
 
         match error {
-            Some(err) => return Err(Error::Unknown(err)),
-            None => Ok(reply.unwrap())
+            Some(err) => Err(Error::Unknown(err)),
+            None => Ok(reply.unwrap()),
         }
     }
 
-    pub async fn execute(&self, id: Id) -> Result<()> {
-        let plugin = self.get_plugin(id)?;
+    pub async fn execute_by_name(&self, name: &str) -> Result<()> {
+        let plugin = self.get_plugin_by_name(name)?;
+
+        self.execute(plugin).await
+    }
+
+    pub async fn execute(&self, plugin: Plugin) -> Result<()> {
         let state = RunningPluginState::new(self.clone());
         let mut running_plugin = RunningPlugin::init(&plugin.code, state).await?;
         running_plugin.run().await?;
@@ -136,21 +145,21 @@ impl PluginService {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct CreatePluginPayload {
-    name: String,
-    description: String,
-    version: String,
-    author: String,
-    code: Vec<u8>,
-    config: PluginConfig,
+    pub name: String,
+    pub description: String,
+    pub version: String,
+    pub author: String,
+    pub code: Vec<u8>,
+    pub config: PluginConfig,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct UpdatePluginPayload {
-    id: Id,
-    name: Option<String>,
-    description: Option<String>,
-    version: Option<String>,
-    author: Option<String>,
-    code: Option<Vec<u8>>,
-    config: Option<PluginConfig>,
+    pub id: Id,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub version: Option<String>,
+    pub author: Option<String>,
+    pub code: Option<Vec<u8>>,
+    pub config: Option<PluginConfig>,
 }

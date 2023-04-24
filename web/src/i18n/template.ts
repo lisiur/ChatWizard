@@ -80,6 +80,8 @@ const messages: Messages = {
   "prompt.market.actions.newChat": "New Chat",
   "prompt.market.install.success": "Prompt installed successfully",
 
+  "plugin.market.plugins": "Plugins Market",
+
   "config.setting": "Setting",
 
   "setting.upgrade.newVersion": "New version is available",

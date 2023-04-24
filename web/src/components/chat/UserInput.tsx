@@ -9,7 +9,7 @@ import { NScrollbar } from "naive-ui";
 import { autoGrowTextarea } from "../../utils/autoGrowTextarea";
 import { usePromptService } from "../../services/prompt";
 import { PromptIndex } from "../../api";
-import CommandPanel from "./commandPanel";
+import CommandPanel from "./CommandPanel";
 import Export from "./Export";
 import { useInput } from "../../hooks/input";
 

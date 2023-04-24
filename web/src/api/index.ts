@@ -119,6 +119,29 @@ export interface WindowOptions {
   maxSize?: [number, number];
 }
 
+export interface InstalledPlugin {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  url: string;
+  readme: string;
+  homepage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketPlugin {
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  url: string;
+  readme: string;
+  homepage: string;
+}
+
 export async function getChat(id: string) {
   return execCommand<ChatIndex>("get_chat", { id });
 }
@@ -241,6 +264,24 @@ export function installMarketPromptAndCreateChat(prompt: MarketPrompt) {
   return execCommand<string>("install_market_prompt_and_create_chat", {
     ...prompt,
   });
+}
+
+export function getAllMarketPlugins() {
+  return execCommand<Array<MarketPlugin>>("get_all_market_plugins");
+}
+
+export function getAllPlugins() {
+  return execCommand<Array<InstalledPlugin>>("get_all_plugins");
+}
+
+export function installPlugin(params: MarketPlugin) {
+  return execCommand<void>("install_plugin", {
+    marketPlugin: params,
+  });
+}
+
+export function uninstallPlugin(id: string) {
+  return execCommand<void>("delete_plugin", { id });
 }
 
 export function getSettings() {

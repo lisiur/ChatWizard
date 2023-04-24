@@ -3,8 +3,12 @@
     windows_subsystem = "windows"
 )]
 
+use std::process::exit;
 use std::sync::Arc;
 
+use chat_wizard_service::project::Project;
+use chat_wizard_service::services::plugin::PluginService;
+use tauri::api::cli::SubcommandMatches;
 use tokio::sync::mpsc::{channel, Sender};
 use tokio::sync::Mutex;
 
@@ -13,18 +17,21 @@ use chat_wizard_service::{
     commands::{CommandEvent, CommandExecutor},
     Id, Setting, SettingService,
 };
-use project::Project;
 use tauri::{AppHandle, Manager};
 use window::{create_tray_window_in_background, show_or_create_main_window};
 
+use crate::utils::is_free_tcp;
+
 mod commands;
 mod error;
-mod project;
 mod result;
 mod schema_server;
 mod tray;
 mod utils;
 mod window;
+
+static WEB_SERVER_PORT: u16 = 23333;
+static GUI_SERVER_PORT: u16 = 23334;
 
 pub struct SchemaPort(u16);
 
@@ -51,7 +58,7 @@ impl EventBus {
 async fn main() {
     env_logger::init();
 
-    let project = Project::init().await.unwrap();
+    let project = Project::init().unwrap();
     let conn = chat_wizard_service::init(&project.db_url).unwrap();
 
     let setting = SettingService::new(conn.clone())
@@ -66,6 +73,7 @@ async fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_single_instance::init(|handle, _argv, _cwd| {
+            println!("argv: {:?}", _argv);
             let handle = handle.clone();
             tokio::spawn(async move {
                 show_or_create_main_window(&handle, "index.html")
@@ -82,22 +90,65 @@ async fn main() {
             let app_handle = app.handle();
             app.manage(EventBus::new(app_handle.clone()));
 
-            // start gui server
-            let port = portpicker::pick_unused_port().unwrap();
-            println!("port: {}", port);
+            // cli handler
+            let instance_exist = !is_free_tcp(GUI_SERVER_PORT);
+            if !instance_exist {
+                // start gui server
+                // let port = portpicker::pick_unused_port().unwrap();
+                let gui_server_port = GUI_SERVER_PORT;
+                let schema_port = SchemaPort(gui_server_port);
+                app_handle.manage(schema_port);
 
-            let schema_port = SchemaPort(port);
-            app_handle.manage(schema_port);
+                let handle = app_handle.clone();
+                tokio::spawn(async move {
+                    schema_server::serve(gui_server_port, handle).await;
+                });
+            }
 
-            let handle = app_handle.clone();
-            tokio::spawn(async move {
-                schema_server::serve(port, handle).await;
-            });
+            match app.get_cli_matches() {
+                Ok(matches) => {
+                    if matches.args.contains_key("help") {
+                        let output = matches.args.get("help").unwrap().value.as_str().unwrap();
+                        println!("{output}");
+                        exit(0);
+                    } else if let Some(SubcommandMatches { name, matches, .. }) =
+                        matches.subcommand.as_deref()
+                    {
+                        app_handle.tray_handle().destroy().unwrap();
+                        if name == "exec" {
+                            let command = matches
+                                .args
+                                .get("command")
+                                .unwrap()
+                                .value
+                                .as_str()
+                                .unwrap()
+                                .to_string();
+
+                            let conn = conn.clone();
+                            tokio::spawn(async move {
+                                let plugin_service = PluginService::new(conn);
+                                plugin_service.execute_by_name(&command).await.unwrap();
+                                exit(0);
+                            });
+                        } else {
+                            exit(0);
+                        }
+                    }
+                }
+                Err(err) => {
+                    println!("{}", err);
+                    exit(1);
+                }
+            };
+            if instance_exist {
+                return Ok(());
+            }
 
             // start web server
-            let port = 23333;
+            let web_server_port = WEB_SERVER_PORT;
             if enable_web_server {
-                tokio::spawn(api_app(port, conn));
+                tokio::spawn(api_app(web_server_port, conn));
             }
 
             // show main window

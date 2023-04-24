@@ -33,6 +33,9 @@ wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", rev = "299131
 ] }
 host = { git = "https://github.com/bytecodealliance/preview2-prototyping", rev = "a152445e5091ca0ecb3487f512b61935c9828c78" }
 wasi-cap-std-sync = { git = "https://github.com/bytecodealliance/preview2-prototyping", rev = "a152445e5091ca0ecb3487f512b61935c9828c78" }
+indicatif = "0.17.3"
+inquire = "0.6.1"
+directories = "5.0.0"
 
 [dev-dependencies]
 dotenvy = "0.15.7"

@@ -1,6 +1,9 @@
+use std::time::Duration;
+
 use crate::result::Result;
 use crate::services::plugin::PluginService;
 use host::WasiCtx;
+use indicatif::{ProgressBar, ProgressStyle};
 use wasi_cap_std_sync::WasiCtxBuilder;
 use wasmtime::component::*;
 use wasmtime::{Config, Engine, Store};
@@ -13,6 +16,7 @@ bindgen!({
 pub struct RunningPluginState {
     wasi_ctx: WasiCtx,
     plugin_service: PluginService,
+    loading_bar: Option<ProgressBar>,
 }
 
 impl RunningPluginState {
@@ -21,31 +25,77 @@ impl RunningPluginState {
         Self {
             wasi_ctx,
             plugin_service,
+            loading_bar: None,
+        }
+    }
+
+    pub fn show_loading(&mut self) {
+        self.stop_loading();
+        let lb = ProgressBar::new_spinner();
+        lb.enable_steady_tick(Duration::from_millis(500));
+        lb.set_style(
+            ProgressStyle::with_template("{msg}{spinner:.blue}")
+                .unwrap()
+                .tick_strings(&["   ", ".  ", ".. ", "...", ""]),
+        );
+        lb.set_message("Thinking");
+        self.loading_bar = Some(lb);
+    }
+
+    pub fn stop_loading(&mut self) {
+        if let Some(loading_bar) = self.loading_bar.take() {
+            loading_bar.finish_and_clear();
+        }
+    }
+
+    pub fn select(&mut self, options: Vec<&str>) -> Option<String> {
+        match inquire::Select::new("Select an option: ", options).prompt() {
+            Ok(choice) => Some(choice.to_string()),
+            Err(_) => None,
         }
     }
 }
 
 #[async_trait::async_trait]
 impl Host_Imports for RunningPluginState {
-    async fn exec(&mut self, cmd: String) -> wasmtime::Result<(i32, String)> {
-        let cmd_and_args = cmd.split_whitespace().collect::<Vec<_>>();
-        let cmd = cmd_and_args[0];
-        let args = &cmd_and_args[1..];
+    async fn host_exec(&mut self, cmd: String, args: Vec<String>) -> wasmtime::Result<(i32, String)> {
         let output = std::process::Command::new(cmd)
             .current_dir(".")
             .args(args)
             .output()
             .unwrap();
+        let success = output.status.success();
         let status = output.status.code().unwrap_or_default();
-        let output = String::from_utf8_lossy(&output.stdout);
-        Ok((status, output.to_string()))
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Ok((
+            status,
+            if success {
+                stdout.to_string()
+            } else {
+                stderr.to_string()
+            },
+        ))
     }
 
-    async fn openai(&mut self, prompt: String) -> wasmtime::Result<(i32, String)> {
+    async fn host_openai(&mut self, prompt: String) -> wasmtime::Result<(i32, String)> {
         match self.plugin_service.send_message(&prompt).await {
             Ok(reply) => Ok((0, reply)),
             Err(err) => Ok((1, err.to_string())),
         }
+    }
+
+    async fn host_loading(&mut self, loading: bool) -> wasmtime::Result<()> {
+        if loading {
+            self.show_loading();
+        } else {
+            self.stop_loading();
+        }
+        Ok(())
+    }
+
+    async fn host_select(&mut self, options: Vec<String>) -> wasmtime::Result<Option<String>> {
+        Ok(self.select(options.iter().map(|x| x.as_str()).collect()))
     }
 }
 
@@ -86,7 +136,20 @@ impl RunningPlugin {
 
 #[cfg(test)]
 mod tests {
+    use std::thread;
+
     use crate::{services::plugin::PluginService, test::establish_connection};
+
+    #[test]
+    fn test_loading() {
+        let conn = establish_connection();
+        let plugin_service = PluginService::new(conn);
+        let mut state = super::RunningPluginState::new(plugin_service);
+
+        state.show_loading();
+        thread::sleep(std::time::Duration::from_secs(3));
+        state.stop_loading();
+    }
 
     #[tokio::test]
     async fn it_works() {
@@ -94,8 +157,10 @@ mod tests {
         let plugin_service = PluginService::new(conn);
         let state = super::RunningPluginState::new(plugin_service);
 
-        let binary =
-            std::fs::read("../plugins/built/chat_wizard_plugin_commit_summary.wasm").unwrap();
+        let binary = std::fs::read(
+            "../../chat-wizard-plugins/plugins/commit-summary/built/commit_summary.wasm",
+        )
+        .unwrap();
         let plugin = super::RunningPlugin::init(&binary, state).await.unwrap();
         plugin.bindings.call_run(plugin.store).await.unwrap();
     }

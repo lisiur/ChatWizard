@@ -280,6 +280,24 @@ impl CommandExecutor {
                 Ok(Box::new(chat_id))
             }
 
+            "get_all_plugins" => from_value::<GetAllInstalledPluginsCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
+            "get_all_market_plugins" => from_value::<GetAllMarketPluginsCommand>(payload)?
+                .exec(conn)
+                .await
+                .into_result(),
+
+            "install_plugin" => from_value::<InstallPluginCommand>(payload)?
+                .exec(conn)
+                .await
+                .into_result(),
+
+            "delete_plugin" => from_value::<UninstallPluginCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
             "get_settings" => from_value::<GetSettingsCommand>(payload)?
                 .exec(conn)
                 .into_result(),

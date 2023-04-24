@@ -10,6 +10,10 @@ import {
   Lightbulb20Regular as CasualChatIcon,
   LightbulbFilament20Filled as CasualActiveIcon,
 } from "@vicons/fluent";
+import {
+  ExtensionPuzzle as PluginActiveIcon,
+  ExtensionPuzzleOutline as PluginIcon,
+} from "@vicons/ionicons5";
 
 import { SettingsAdjust as SettingIcon } from "@vicons/carbon";
 import { NBadge, NDropdown, NIcon } from "naive-ui";
@@ -50,6 +54,12 @@ export default defineComponent({
         icon: StoreIcon,
         activeIcon: StoreActiveIcon,
         size: "1.8rem",
+      },
+      {
+        routeName: "plugin",
+        icon: PluginIcon,
+        activeIcon: PluginActiveIcon,
+        size: "1.6rem",
       },
     ];
 

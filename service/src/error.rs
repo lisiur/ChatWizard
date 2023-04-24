@@ -15,6 +15,9 @@ pub enum Error {
     Network(NetworkError),
 
     #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
     Serde(#[from] serde_json::Error),
 
     #[error(transparent)]
@@ -50,6 +53,7 @@ impl serde::ser::Serialize for Error {
                 map.end()
             }
             Error::Network(err) => err.serialize(serializer),
+            Error::Io(err) => err.to_string().serialize(serializer),
             Error::Serde(err) => {
                 let mut map = serializer.serialize_map(Some(2))?;
                 map.serialize_entry("type", "serde")?;
@@ -62,9 +66,7 @@ impl serde::ser::Serialize for Error {
                 map.serialize_entry("message", &err.to_string())?;
                 map.end()
             }
-            Error::Wasmtime(err) => {
-                err.to_string().serialize(serializer)
-            }
+            Error::Wasmtime(err) => err.to_string().serialize(serializer),
             Error::Plugin(err) => err.serialize(serializer),
             Error::Unknown(err) => err.serialize(serializer),
         }

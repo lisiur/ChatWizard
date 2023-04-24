@@ -99,14 +99,26 @@
         "timestampUrl": ""
       }
     },
+    "cli": {
+      "subcommands": {
+        "exec": {
+          "args": [
+            {
+              "name": "command",
+              "index": 1,
+              "takesValue": true,
+              "required": true
+            }
+          ]
+        }
+      }
+    },
     "security": {
       "csp": null
     },
     "updater": {
       "active": true,
-      "endpoints": [
-        "https://lisiur.github.io/ChatWizard/latest.json"
-      ],
+      "endpoints": ["https://lisiur.github.io/ChatWizard/latest.json"],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZEMTAwM0ZCOTE5M0NBODIKUldTQ3lwT1Ird01RL2RQLzkxWlN3eFV6MG1WQm9COWpqOHcrNk9lb3NHU2VDNm1XZ0E0RzBsK2EK"
     }

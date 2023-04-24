@@ -1,7 +1,7 @@
 use diesel::query_builder::AsQuery;
 use diesel::QueryDsl;
 
-use crate::models::plugin::{NewPlugin, PatchPlugin};
+use crate::models::plugin::{InstalledPlugin, NewPlugin, PatchPlugin};
 use crate::result::Result;
 use crate::schema::plugins;
 use crate::Id;
@@ -24,10 +24,31 @@ impl PluginRepo {
             .map_err(Into::into)
     }
 
-    pub fn select_all(&self) -> Result<Vec<Plugin>> {
+    pub fn select_by_name(&self, name: &str) -> Result<Plugin> {
+        plugins::table
+            .as_query()
+            .filter(plugins::name.eq(name))
+            .first::<Plugin>(&mut *self.0.conn())
+            .map_err(Into::into)
+    }
+
+    pub fn select_all(&self) -> Result<Vec<InstalledPlugin>> {
         plugins::table
             .as_query()
             .load::<Plugin>(&mut *self.0.conn())
+            .map(|plugins| {
+                plugins.into_iter().map(|plugin| InstalledPlugin {
+                    id: plugin.id,
+                    name: plugin.name,
+                    version: plugin.version,
+                    description: plugin.description,
+                    author: plugin.author,
+                    config: plugin.config,
+                    created_at: plugin.created_at,
+                    updated_at: plugin.updated_at,
+                })
+                .collect()
+            })
             .map_err(Into::into)
     }
 

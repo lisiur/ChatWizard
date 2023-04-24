@@ -1,8 +1,8 @@
 [package]
 name = "chat-wizard"
 version = "0.0.1"
-description = "A Tauri App"
-authors = ["you"]
+description = "OpenAI Chat Client"
+authors = ["Lisiur Day<lisiurday@gmail.com>"]
 license = ""
 repository = ""
 edition = "2021"
@@ -17,7 +17,7 @@ chat-wizard-api = { path = "../api" }
 chat-wizard-service = { path = "../service" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive", "rc"] }
-tauri = { version = "1.2", features = ["clipboard-write-text", "dialog-save", "macos-private-api", "os-all", "process-relaunch", "shell-open", "system-tray", "updater", "window-create", "window-hide", "window-start-dragging"] }
+tauri = { version = "1.2", features = ["cli", "clipboard-write-text", "dialog-save", "macos-private-api", "os-all", "process-relaunch", "shell-open", "system-tray", "updater", "window-create", "window-hide", "window-start-dragging"] }
 uuid = { version = "1.3.0", features = ["v4", "serde"] }
 tokio = { version = "1.26.0", features = ["full"] }
 reqwest = { version = "0.11.14", features = ["json", "stream"] }

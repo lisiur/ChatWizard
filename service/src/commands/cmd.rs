@@ -1,10 +1,13 @@
 use crate::{
-    models::{chat_log::ChatLog, chat_model::ChatModel, prompt_source::PromptSource},
+    models::{
+        chat_log::ChatLog, chat_model::ChatModel, plugin::InstalledPlugin,
+        prompt_source::PromptSource,
+    },
     result::Result,
-    services::chat::*,
-    services::prompt::*,
-    services::prompt_market::*,
-    services::setting::*,
+    services::{chat::*, plugin::PluginService},
+    services::{plugin_market::InstallMarketPluginPayload, setting::*},
+    services::{plugin_market::MarketPlugin, prompt_market::*},
+    services::{plugin_market::PluginMarketService, prompt::*},
     Chat, ChatConfig, CursorQueryResult, DbConn, Id, Prompt, PromptIndex, Setting, StreamContent,
     Theme,
 };
@@ -524,6 +527,85 @@ impl InstallMarketPromptAndCreateChatCommand {
         )?;
 
         Ok((prompt_id, chat_id))
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetMarketPluginsCommand;
+
+impl GetMarketPluginsCommand {
+    pub async fn exec(self, conn: &DbConn) -> Result<Vec<MarketPlugin>> {
+        let plugin_market_service = PluginMarketService::new(conn.clone());
+
+        let result = plugin_market_service.get_market_plugins().await?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetAllMarketPluginsCommand;
+
+impl GetAllMarketPluginsCommand {
+    pub async fn exec(self, conn: &DbConn) -> Result<Vec<MarketPlugin>> {
+        let plugin_service = PluginMarketService::new(conn.clone());
+
+        let result = plugin_service.get_market_plugins().await?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetAllInstalledPluginsCommand;
+
+impl GetAllInstalledPluginsCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<Vec<InstalledPlugin>> {
+        let plugin_service = PluginService::new(conn.clone());
+
+        let result = plugin_service.all_plugins()?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstallPluginCommand {
+    pub market_plugin: MarketPlugin,
+}
+
+impl InstallPluginCommand {
+    pub async fn exec(self, conn: &DbConn) -> Result<Id> {
+        let plugin_market_service = PluginMarketService::new(conn.clone());
+
+        let plugin_id = plugin_market_service
+            .install_market_plugin(InstallMarketPluginPayload {
+                plugin: self.market_plugin,
+                user_id: Id::local(),
+            })
+            .await?;
+
+        Ok(plugin_id)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UninstallPluginCommand {
+    pub id: Id,
+}
+
+impl UninstallPluginCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<()> {
+        let plugin_service = PluginService::new(conn.clone());
+
+        plugin_service.delete_plugin(self.id)?;
+
+        Ok(())
     }
 }
 

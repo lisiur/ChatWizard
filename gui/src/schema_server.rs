@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use axum::{Router, routing::post, Json};
+use axum::{extract::State, routing::get, Json, Router};
 use tauri::AppHandle;
 
 use crate::window::show_or_create_main_window;
@@ -13,7 +13,9 @@ pub struct SchemaState {
 pub async fn serve(port: u16, app_handle: AppHandle) {
     let state = SchemaState { app_handle };
 
-    let app = Router::new().route("/", post(handler)).with_state(state);
+    let app = Router::new()
+        .route("/open", get(open_handler))
+        .with_state(state);
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     axum::Server::bind(&addr)
@@ -22,7 +24,7 @@ pub async fn serve(port: u16, app_handle: AppHandle) {
         .unwrap();
 }
 
-async fn handler(axum::extract::State(state): axum::extract::State<SchemaState>) -> Json<()> {
+async fn open_handler(State(state): State<SchemaState>) -> Json<()> {
     let app_handle = state.app_handle;
     show_or_create_main_window(&app_handle, "index.html")
         .await

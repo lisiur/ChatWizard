@@ -76,6 +76,8 @@ const messages: Messages = {
   "prompt.market.actions.newChat": "新建对话",
   "prompt.market.install.success": "提示词安装成功",
 
+  "plugin.market.plugins": "插件市场",
+
   "config.setting": "设置",
 
   "setting.upgrade.newVersion": "有新版本可用",
