@@ -135,10 +135,10 @@ You need to install chat-wizard-cli to use plugin.
 
 ### Install chat-wizard-cli
 
-- [Apple Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_v0.1.0_x86_64-apple-darwin)
-- [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_v0.1.0_aarch64-apple-darwin)
-- [Windows](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_v0.1.0_x86_64-pc-windows-msvc.exe)
-- [Linux](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_v0.1.0_x86_64-unknown-linux-gnu)
+- [Apple Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_x86_64-apple-darwin)
+- [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_aarch64-apple-darwin)
+- [Windows](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_x86_64-pc-windows-msvc.exe)
+- [Linux](https://github.com/lisiur/ChatWizard/releases/download/v0.1.0/chat-wizard-cli_x86_64-unknown-linux-gnu)
 
 ### How to use
 
