@@ -53,6 +53,7 @@
 
 ## Features
 
+- plugin
 - stream response
 - stop replying
 - tray window
