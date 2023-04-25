@@ -122,7 +122,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}.exe`,
+              name: `chat-wizard-cli_${process.env.target}.exe`,
               data: file,
             })
       - name: upload cli asset
@@ -139,7 +139,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}`,
+              name: `chat-wizard-cli_${process.env.target}`,
               data: file,
             })
 

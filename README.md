@@ -39,17 +39,28 @@
 
 ## Screenshots
 
+
+### Casual Chat
+<img src="./assets/casual-chat.png" />
 <img src="./assets/slash-command.png" />
 
-<details>
-<summary>View More</summary>
-<img src="./assets/casual-chat.png" />
+### Topic Chat
 <img src="./assets/chat.png" />
+
+### Local Prompt
 <img src="./assets/prompt.png" />
+
+### Prompt Market
 <img src="./assets/prompt-market.png" />
+
+### Plugins
+<img src="./assets/plugins.png" />
+
+### Setting
 <img src="./assets/setting.png" />
+
+### Tray Window
 <img src="./assets/tray-window.png" />
-</details>
 
 ## Features
 
@@ -117,6 +128,36 @@
 ## Upgrade
 
 ChatWizard has built-in upgrade support, and each time you restart the application, it automatically checks for any new releases. If a new version is available, a small red dot will be displayed in the lower left corner.
+
+## Plugin
+
+You need to install chat-wizard-cli to use plugin.
+
+### Install chat-wizard-cli
+
+- [Apple Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.0.77/chat-wizard-cli_v0.0.77_x86_64-apple-darwin)
+- [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.0.77/chat-wizard-cli_v0.0.77_aarch64-apple-darwin)
+- [Windows](https://github.com/lisiur/ChatWizard/releases/download/v0.0.77/chat-wizard-cli_v0.0.77_x86_64-pc-windows-msvc.exe)
+- [Linux](https://github.com/lisiur/ChatWizard/releases/download/v0.0.77/chat-wizard-cli_v0.0.77_x86_64-unknown-linux-gnu)
+
+### How to use
+
+1. You need to rename the downloaded binary file to a more user-friendly name and add it to your environment variables. Let us assume that the binary file is named chat-wizard-cli.
+2. Then you need to install plugin in ChatWizard App. For instance, assuming the plugin named `commit-summary` has already been installed.
+3. And finally you can execute: `chat-wizard-cli exec commit-summary` in terminal.
+
+<img src="./assets/plugin.png" />
+<img src="./assets/plugin2.png" />
+
+### Q&A
+
+**1. Why chat-wizard-cli is so large, almost more then 10 MB**
+
+    As CLI and GUI programs are completely separate, you can easily install and use plugins with just CLI. However, the current configuration of CLI is still dependent on GUI, which will gradually be improved in the future.
+
+**2. Where is the plugin source code**
+
+    Check this [repo](https://github.com/ChatWizard/plugins)
 
 ## Development
 
