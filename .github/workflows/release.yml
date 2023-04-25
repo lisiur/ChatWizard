@@ -133,12 +133,12 @@ jobs:
           target: ${{ matrix.target }}
         with:
           script: |
-            const file = require('fs').readFileSync(`target/release/${process.env.target}/chat-wizard-cli.exe`)
+            const file = require('fs').readFileSync(`target/release/${process.env.target}/chat-wizard-cli`)
             github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}.exe`,
+              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}`,
               data: file,
             })
 
