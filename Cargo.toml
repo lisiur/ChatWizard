@@ -1,2 +1,6 @@
 [workspace]
 members = ["api", "cli", "gui", "server", "service"]
+
+[profile.release]
+lto = true
+opt-level = 'z'
