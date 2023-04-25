@@ -153,11 +153,11 @@ You need to install chat-wizard-cli to use plugin.
 
 **1. Why chat-wizard-cli is so large, almost more then 10 MB**
 
-    As CLI and GUI programs are completely separate, you can easily install and use plugins with just CLI. However, the current configuration of CLI is still dependent on GUI, which will gradually be improved in the future.
+As CLI and GUI programs are completely separate, you can easily install and use plugins with just CLI. However, the current configuration of CLI is still dependent on GUI, which will gradually be improved in the future.
 
 **2. Where is the plugin source code**
 
-    Check this [repo](https://github.com/ChatWizard/plugins)
+Check this [repo](https://github.com/ChatWizard/plugins)
 
 ## Development
 
