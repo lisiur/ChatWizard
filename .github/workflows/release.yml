@@ -116,7 +116,7 @@ jobs:
           target: ${{ matrix.target }}
         with:
           script: |
-            const file = require('fs').readFileSync('target/release/chat-wizard.exe')
+            const file = require('fs').readFileSync('target/release/chat-wizard-cli.exe')
             github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -133,7 +133,7 @@ jobs:
           target: ${{ matrix.target }}
         with:
           script: |
-            const file = require('fs').readFileSync('target/release/chat-wizard')
+            const file = require('fs').readFileSync('target/release/chat-wizard-cli')
             github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
