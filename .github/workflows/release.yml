@@ -13,6 +13,7 @@ jobs:
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
       release_note: ${{ steps.release-note.outputs.release_note }}
+      version: ${{ steps.create-release.outputs.version }}
 
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +22,9 @@ jobs:
         with:
           node-version: 16
       - name: get version
-        run: echo "PACKAGE_VERSION=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_ENV
+        run: |
+          echo "PACKAGE_VERSION=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_ENV
+          echo "version=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_OUTPUT
       - name: get release note
         id: release-note
         run: |
@@ -76,8 +79,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: get version
-        run: echo "PACKAGE_VERSION=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_ENV
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: install dependencies (ubuntu only)
@@ -111,6 +112,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
+          version: ${{ needs.create-release.outputs.version }}
           target: ${{ matrix.target }}
         with:
           script: |
@@ -119,7 +121,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              name: `chat-wizard-cli_${process.env.PACKAGE_VERSION}_${process.env.target}.exe`,
+              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}.exe`,
               data: file,
             })
       - name: upload cli asset
@@ -127,6 +129,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
+          version: ${{ needs.create-release.outputs.version }}
           target: ${{ matrix.target }}
         with:
           script: |
@@ -135,7 +138,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              name: `chat-wizard-cli_${process.env.PACKAGE_VERSION}_${process.env.target}.exe`,
+              name: `chat-wizard-cli_v${process.env.version}_${process.env.target}.exe`,
               data: file,
             })
 
