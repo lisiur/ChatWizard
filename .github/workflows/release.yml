@@ -13,7 +13,7 @@ jobs:
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
       release_note: ${{ steps.release-note.outputs.release_note }}
-      version: ${{ steps.create-release.outputs.version }}
+      version: ${{ steps.get-version.outputs.version }}
 
     steps:
       - uses: actions/checkout@v3
@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 16
       - name: get version
+        id: get-version
         run: |
           echo "PACKAGE_VERSION=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_ENV
           echo "version=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_OUTPUT
