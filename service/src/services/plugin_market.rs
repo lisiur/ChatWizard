@@ -54,7 +54,6 @@ impl PluginMarketService {
         let setting = self.setting_repo.select_by_user_id(Id::local())?;
         let client = setting.create_client(Some(Duration::from_secs(10)));
 
-        println!("{:?}", &payload.plugin.url);
         let res = client.get(&payload.plugin.url).await?;
 
         let code = res.bytes().await?.to_vec();
@@ -71,6 +70,17 @@ impl PluginMarketService {
         self.plugin_repo.insert(plugin)?;
 
         Ok(id)
+    }
+
+    pub async fn get_market_plugin_readme(&self, url: String) -> Result<String> {
+        let setting = self.setting_repo.select_by_user_id(Id::local())?;
+        let client = setting.create_client(Some(Duration::from_secs(10)));
+
+        let res = client.get(&url).await?;
+
+        let readme = res.text().await?;
+
+        Ok(readme)
     }
 }
 

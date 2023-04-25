@@ -77,6 +77,9 @@ const messages: Messages = {
   "prompt.market.install.success": "提示词安装成功",
 
   "plugin.market.plugins": "插件市场",
+  "plugin.market.actions.install": "安装",
+  "plugin.market.actions.update": "更新",
+  "plugin.market.actions.uninstall": "卸载",
 
   "config.setting": "设置",
 

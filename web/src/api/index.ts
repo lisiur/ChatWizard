@@ -284,6 +284,10 @@ export function uninstallPlugin(id: string) {
   return execCommand<void>("delete_plugin", { id });
 }
 
+export function getMarketPluginReadme(url: string) {
+  return execCommand<string>("get_market_plugin_readme", { url });
+}
+
 export function getSettings() {
   return execCommand<Settings>("get_settings");
 }

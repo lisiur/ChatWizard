@@ -298,6 +298,11 @@ impl CommandExecutor {
                 .exec(conn)
                 .into_result(),
 
+            "get_market_plugin_readme" => from_value::<GetMarketPluginReadme>(payload)?
+                .exec(conn)
+                .await
+                .into_result(),
+
             "get_settings" => from_value::<GetSettingsCommand>(payload)?
                 .exec(conn)
                 .into_result(),

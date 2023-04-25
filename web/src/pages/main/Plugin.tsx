@@ -1,4 +1,4 @@
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import * as api from "../../api";
 import { NButton, NScrollbar, NSpace, NSpin } from "naive-ui";
 import { useI18n } from "../../hooks/i18n";
@@ -7,6 +7,8 @@ import DragBar from "../../components/DragBar";
 import { useRouter } from "vue-router";
 import { usePluginService, Plugin } from "../../services/plugin";
 import { useTask } from "../../hooks/task";
+import { useAsyncDataReactive } from "../../hooks/asyncData";
+import mdRender from "../../utils/mdRender";
 
 export default defineComponent({
   setup() {
@@ -35,6 +37,17 @@ export default defineComponent({
     const currentPlugin = computed(() =>
       plugins.value?.find((m) => m.name === currentPluginName.value)
     );
+
+    const queryReadmeTask = useTask(async () => {
+      if (currentPlugin.value) {
+        return await api.getMarketPluginReadme(currentPlugin.value?.readme);
+      } else {
+        return "";
+      }
+    });
+    watch(currentPluginName, queryReadmeTask.exec, {
+      immediate: true,
+    });
 
     const explorerList = computed(() => {
       return (
@@ -97,7 +110,7 @@ export default defineComponent({
                           loading={installLoading.value}
                           onClick={() => installTask.exec(currentPlugin.value!)}
                         >
-                          Install
+                          {t("plugin.market.actions.install")}
                         </NButton>
                       ) : null}
                       {currentPlugin.value?.hasNewVersion ? (
@@ -108,7 +121,7 @@ export default defineComponent({
                           loading={updateLoading.value}
                           onClick={() => updateTask.exec(currentPlugin.value!)}
                         >
-                          Update
+                          {t("plugin.market.actions.update")}
                         </NButton>
                       ) : null}
                       {currentPlugin.value?.installed ? (
@@ -121,7 +134,7 @@ export default defineComponent({
                             uninstallTask.exec(currentPlugin.value!)
                           }
                         >
-                          Uninstall
+                          {t("plugin.market.actions.uninstall")}
                         </NButton>
                       ) : null}
                     </NSpace>
@@ -134,9 +147,15 @@ export default defineComponent({
             style="background-color: var(--body-color)"
           >
             {currentPluginName.value ? (
-              <NScrollbar class="h-full">
-                {currentPlugin.value?.description}
-              </NScrollbar>
+              queryReadmeTask.running ? (
+                <div class="flex justify-center">
+                  <NSpin></NSpin>
+                </div>
+              ) : (
+                <NScrollbar class="h-full">
+                  <div class="markdown-root" v-html={mdRender(queryReadmeTask.result ?? "")}></div>
+                </NScrollbar>
+              )
             ) : (
               <div class="h-full" data-tauri-drag-region></div>
             )}

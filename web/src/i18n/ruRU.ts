@@ -81,6 +81,9 @@ const messages: Messages = {
   "prompt.market.install.success": "Запрос успешно установлен",
 
   "plugin.market.plugins": "Рынок плагинов",
+  "plugin.market.actions.install": "Установить",
+  "plugin.market.actions.update": "Обновить",
+  "plugin.market.actions.uninstall": "Удалить",
 
   "config.setting": "Настройка",
 

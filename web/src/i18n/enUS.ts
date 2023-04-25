@@ -78,6 +78,9 @@ export const messages = {
   "prompt.market.install.success": "Prompt installed successfully",
 
   "plugin.market.plugins": "Plugins Market",
+  "plugin.market.actions.install": "Install",
+  "plugin.market.actions.update": "Update",
+  "plugin.market.actions.uninstall": "Uninstall",
 
   "config.setting": "Setting",
 

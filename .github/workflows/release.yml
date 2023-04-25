@@ -52,7 +52,7 @@ jobs:
             })
             return data.id
 
-  build-tauri:
+  build:
     needs: create-release
     permissions:
       contents: write
@@ -76,6 +76,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: get version
+        run: echo "PACKAGE_VERSION=$(node -p "\"${{ github.ref_name }}\".slice(1)")" >> $GITHUB_ENV
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: install dependencies (ubuntu only)
@@ -99,13 +101,49 @@ jobs:
           args: --target ${{ matrix.target }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           releaseBody: '${{ needs.create-release.outputs.release_note }}'
-
+      - name: build cli
+        run: |
+          cd cli
+          cargo build --release --target ${{ matrix.target }}
+          cd ..
+      - name: upload cli asset
+        if: matrix.platform == 'windows-latest'
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+          target: ${{ matrix.target }}
+        with:
+          script: |
+            const file = require('fs').readFileSync('target/release/chat-wizard.exe')
+            github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              name: `chat-wizard-cli_${process.env.PACKAGE_VERSION}_${process.env.target}.exe`,
+              data: file,
+            })
+      - name: upload cli asset
+        if: matrix.platform != 'windows-latest'
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+          target: ${{ matrix.target }}
+        with:
+          script: |
+            const file = require('fs').readFileSync('target/release/chat-wizard')
+            github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              name: `chat-wizard-cli_${process.env.PACKAGE_VERSION}_${process.env.target}.exe`,
+              data: file,
+            })
 
   publish-release:
     permissions:
       contents: write
     runs-on: ubuntu-20.04
-    needs: [create-release, build-tauri]
+    needs: [create-release, build]
 
     steps:
       - name: publish release
@@ -124,7 +162,7 @@ jobs:
             })
   updater:
     runs-on: ubuntu-latest
-    needs: [build-tauri, publish-release]
+    needs: [build, publish-release]
 
     steps:
       - uses: actions/checkout@v3

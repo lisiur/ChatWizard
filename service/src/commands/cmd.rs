@@ -611,6 +611,24 @@ impl UninstallPluginCommand {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct GetMarketPluginReadme {
+    pub url: String,
+}
+
+impl GetMarketPluginReadme {
+    pub async fn exec(self, conn: &DbConn) -> Result<String> {
+        let plugin_market_service = PluginMarketService::new(conn.clone());
+
+        let result = plugin_market_service
+            .get_market_plugin_readme(self.url)
+            .await?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GetSettingsCommand;
 
 impl GetSettingsCommand {

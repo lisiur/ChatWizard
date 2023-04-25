@@ -114,7 +114,6 @@ async fn main() {
                     } else if let Some(SubcommandMatches { name, matches, .. }) =
                         matches.subcommand.as_deref()
                     {
-                        app_handle.tray_handle().destroy().unwrap();
                         if name == "exec" {
                             let command = matches
                                 .args
@@ -142,6 +141,7 @@ async fn main() {
                 }
             };
             if instance_exist {
+                app_handle.tray_handle().destroy().unwrap();
                 return Ok(());
             }
 

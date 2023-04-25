@@ -19,6 +19,7 @@ pub mod utils;
 
 pub use database::DbConn;
 pub use error::Error;
+pub use diesel::result::Error as DatabaseError;
 pub use init::init;
 pub use models::chat::*;
 pub use models::prompt::*;
