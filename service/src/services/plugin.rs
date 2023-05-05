@@ -1,5 +1,8 @@
+use std::{collections::HashMap, sync::Arc};
+
 use crate::{
     api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, OpenAIChatRole},
+    error::StreamError,
     models::plugin::{InstalledPlugin, NewPlugin, PatchPlugin, Plugin, PluginConfig},
     plugin::{RunningPlugin, RunningPluginState},
     repositories::{plugin::PluginRepo, setting::SettingRepo},
@@ -7,6 +10,7 @@ use crate::{
     DbConn, Error, Id, StreamContent,
 };
 use futures::StreamExt;
+use tokio::sync::{mpsc::Receiver, Mutex};
 
 #[derive(Clone)]
 pub struct PluginService {
@@ -14,6 +18,7 @@ pub struct PluginService {
     conn: DbConn,
     plugin_repo: PluginRepo,
     setting_repo: SettingRepo,
+    chat_stream_map: Arc<Mutex<HashMap<Id, Receiver<StreamContent>>>>,
 }
 
 impl From<DbConn> for PluginService {
@@ -27,6 +32,7 @@ impl PluginService {
         Self {
             plugin_repo: PluginRepo::new(conn.clone()),
             setting_repo: SettingRepo::new(conn.clone()),
+            chat_stream_map: Arc::new(Mutex::new(HashMap::new())),
             conn,
         }
     }
@@ -126,6 +132,49 @@ impl PluginService {
             Some(err) => Err(Error::Unknown(err)),
             None => Ok(reply.unwrap()),
         }
+    }
+
+    pub async fn send_message_stream(&self, prompt: &str) -> Result<Id> {
+        let user_message = OpenAIChatMessage {
+            role: OpenAIChatRole::User,
+            content: prompt.to_string(),
+        };
+        let setting = self.setting_repo.select_by_user_id(Id::local())?;
+        let api = setting.create_openai_chat();
+        let api_params = OpenAIChatParams {
+            stream: true,
+            model: "gpt-3.5-turbo".to_string(),
+            messages: vec![user_message],
+            ..Default::default()
+        };
+
+        let id = Id::random();
+        let (sender, receiver) = tokio::sync::mpsc::channel::<StreamContent>(10);
+        self.chat_stream_map.lock().await.insert(id, receiver);
+
+        tokio::spawn(async move {
+            let stream = api.send_message(api_params).await;
+            match stream {
+                Ok(mut stream) => {
+                    while let Some(content) = stream.next().await {
+                        sender.send(content).await.unwrap();
+                    }
+                    drop(stream);
+                }
+                Err(err) => sender
+                    .send(StreamContent::Error(StreamError::Unknown(err.to_string())))
+                    .await
+                    .unwrap(),
+            }
+        });
+
+        Ok(id)
+    }
+
+    pub async fn receive_message(&self, id: Id) -> Option<StreamContent> {
+        let mut map = self.chat_stream_map.lock().await;
+        let receiver = map.get_mut(&id)?;
+        receiver.recv().await
     }
 
     pub async fn execute_by_name(&self, name: &str) -> Result<()> {

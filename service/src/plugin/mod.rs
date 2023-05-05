@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use crate::result::Result;
 use crate::services::plugin::PluginService;
+use crate::{Id, StreamContent};
 use host::WasiCtx;
 use indicatif::{ProgressBar, ProgressStyle};
 use wasi_cap_std_sync::WasiCtxBuilder;
@@ -58,7 +58,11 @@ impl RunningPluginState {
 
 #[async_trait::async_trait]
 impl Host_Imports for RunningPluginState {
-    async fn host_exec(&mut self, cmd: String, args: Vec<String>) -> wasmtime::Result<(i32, String)> {
+    async fn host_exec(
+        &mut self,
+        cmd: String,
+        args: Vec<String>,
+    ) -> wasmtime::Result<(i32, String)> {
         let output = std::process::Command::new(cmd)
             .current_dir(".")
             .args(args)
@@ -85,6 +89,28 @@ impl Host_Imports for RunningPluginState {
         }
     }
 
+    async fn host_openai_stream(&mut self, prompt: String) -> wasmtime::Result<String> {
+        let id = self.plugin_service.send_message_stream(&prompt).await?;
+
+        Ok(id.to_string())
+    }
+
+    async fn host_receive(
+        &mut self,
+        id: String,
+    ) -> wasmtime::Result<Option<Result<String, String>>> {
+        let id = Id::from(id.as_str());
+        let message = self.plugin_service.receive_message(id).await;
+
+        let message = message.and_then(|content| match content {
+            StreamContent::Error(err) => Some(Err(err.to_string())),
+            StreamContent::Data(data) => Some(Ok(data)),
+            StreamContent::Done => None,
+        });
+
+        Ok(message)
+    }
+
     async fn host_loading(&mut self, loading: bool) -> wasmtime::Result<()> {
         if loading {
             self.show_loading();
@@ -92,6 +118,10 @@ impl Host_Imports for RunningPluginState {
             self.stop_loading();
         }
         Ok(())
+    }
+
+    async fn host_input(&mut self, prompt: String) -> wasmtime::Result<Option<String>> {
+        Ok(inquire::Text::new(&prompt).prompt().ok())
     }
 
     async fn host_select(&mut self, options: Vec<String>) -> wasmtime::Result<Option<String>> {
@@ -105,7 +135,7 @@ pub struct RunningPlugin {
 }
 
 impl RunningPlugin {
-    pub async fn init(code: &[u8], state: RunningPluginState) -> Result<Self> {
+    pub async fn init(code: &[u8], state: RunningPluginState) -> crate::result::Result<Self> {
         let mut config = Config::new();
         config.wasm_component_model(true).async_support(true);
         let engine = Engine::new(&config)?;
@@ -128,7 +158,7 @@ impl RunningPlugin {
         Ok(RunningPlugin { bindings, store })
     }
 
-    pub async fn run(&mut self) -> Result<()> {
+    pub async fn run(&mut self) -> crate::result::Result<()> {
         self.bindings.call_run(&mut self.store).await?;
         Ok(())
     }
@@ -152,15 +182,23 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn it_works() {
+    async fn test_commit_summary() {
         let conn = establish_connection();
         let plugin_service = PluginService::new(conn);
         let state = super::RunningPluginState::new(plugin_service);
 
-        let binary = std::fs::read(
-            "../../chat-wizard-plugins/plugins/commit-summary/built/commit_summary.wasm",
-        )
-        .unwrap();
+        let binary = std::fs::read("../../chat-wizard-plugins/built/commit_summary.wasm").unwrap();
+        let plugin = super::RunningPlugin::init(&binary, state).await.unwrap();
+        plugin.bindings.call_run(plugin.store).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_chat() {
+        let conn = establish_connection();
+        let plugin_service = PluginService::new(conn);
+        let state = super::RunningPluginState::new(plugin_service);
+
+        let binary = std::fs::read("../../chat-wizard-plugins/built/chat.wasm").unwrap();
         let plugin = super::RunningPlugin::init(&binary, state).await.unwrap();
         plugin.bindings.call_run(plugin.store).await.unwrap();
     }

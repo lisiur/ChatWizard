@@ -1,7 +1,10 @@
 default world host {
   import host-exec: func(cmd: string, args: list<string>) -> (exit-code: s32, message: string)
   import host-openai: func(prompt: string) -> (exit-code: s32, message: string)
+  import host-openai-stream: func(prompt: string) -> string
+  import host-receive: func(id: string) -> option<result<string, string>>
   import host-loading: func(loading: bool)
+  import host-input: func(prompt: string) -> option<string>
   import host-select: func(options: list<string>) -> option<string>
 
   export run: func()
