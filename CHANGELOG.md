@@ -3,8 +3,8 @@
 
 ### Features
 
-plugin now can use host_openai_stream to send request and use host_receive to receive response from openai server.
-plugin now can use host_input to get user input from terminal. 
+- plugin now can use host_openai_stream to send request and use host_receive to receive response from openai server.
+- plugin now can use host_input to get user input from terminal. 
 
 
 
