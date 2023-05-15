@@ -94,16 +94,16 @@ pub struct ChatParams {
     pub model: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub temperature: Option<f32>,
+    pub temperature: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stop: Option<Vec<String>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub presence_penalty: Option<f32>,
+    pub presence_penalty: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub frequency_penalty: Option<f32>,
+    pub frequency_penalty: Option<f64>,
 }
 
 impl Default for ChatParams {
