@@ -6,6 +6,7 @@ default world host {
   import host-loading: func(loading: bool)
   import host-input: func(prompt: string) -> option<string>
   import host-select: func(options: list<string>) -> option<string>
+  import host-print: func(message: string)
 
   export run: func()
 }

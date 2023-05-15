@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::time::Duration;
 
 use crate::services::plugin::PluginService;
@@ -126,6 +127,12 @@ impl Host_Imports for RunningPluginState {
 
     async fn host_select(&mut self, options: Vec<String>) -> wasmtime::Result<Option<String>> {
         Ok(self.select(options.iter().map(|x| x.as_str()).collect()))
+    }
+
+    async fn host_print(&mut self, message: String) -> wasmtime::Result<()> {
+        print!("{}", message);
+        std::io::stdout().flush().unwrap();
+        Ok(())
     }
 }
 
