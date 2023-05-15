@@ -100,7 +100,10 @@ export default defineComponent({
           case "normal": {
             if (input.key === "/" && userMessage.value === "") {
               return "command";
-            } else if (["ArrowUp", "ArrowDown"].includes(input.key)) {
+            } else if (
+              !userMessage.value &&
+              ["ArrowUp", "ArrowDown"].includes(input.key)
+            ) {
               handleHistoryKey(input.event);
               return "historyNavigation";
             } else if (input.key === "Tab") {
