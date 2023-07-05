@@ -64,6 +64,12 @@ const messages: Messages = {
 
   "chat.export": "导出",
 
+  "chatModel.new": "新建模型",
+  "chatModel.models": "模型列表",
+  "chatModel.inputNameHint": "请输入模型名称",
+  "chatModel.rename": "重命名",
+  "chatModel.update.success": "更新成功",
+
   "prompt.new": "新建提示词",
   "prompt.prompts": "提示词列表",
   "prompt.inputNameHint": "请输入提示词标题",

@@ -8,7 +8,7 @@ use crate::api::openai::chat::params::{OpenAIChatMessage, OpenAIChatParams, Open
 use crate::database::pagination::PaginatedRecords;
 use crate::models::chat::{Chat, NewChat, PatchChat};
 use crate::models::chat_log::{ChatLog, NewChatLog, PatchChatLog, Role};
-use crate::models::chat_model::ChatModel;
+use crate::models::chat_model::{ChatModel, NewChatModel, PatchChatModel};
 use crate::repositories::chat::ChatRepo;
 use crate::repositories::chat_log::{ChatLogQueryParams, ChatLogRepo};
 use crate::repositories::chat_model::ChatModelRepo;
@@ -432,6 +432,39 @@ impl ChatService {
     pub fn get_chat_models(&self) -> Result<Vec<ChatModel>> {
         self.chat_model_repo.select()
     }
+
+    pub fn create_chat_model(&self, payload: CreateChatModelPayload) -> Result<Id> {
+        let id = Id::random();
+        self.chat_model_repo.insert(&NewChatModel {
+            id,
+            name: payload.name,
+            description: payload.description,
+            price: payload.price,
+            unit: payload.unit,
+            vendor: payload.vendor,
+        })?;
+
+        Ok(id)
+    }
+
+    pub fn update_chat_model(&self, payload: UpdateChatModelPayload) -> Result<()> {
+        self.chat_model_repo.update(&PatchChatModel {
+            id: payload.id,
+            name: payload.name,
+            description: payload.description,
+            price: payload.price,
+            unit: payload.unit,
+            vendor: payload.vendor,
+        })?;
+
+        Ok(())
+    }
+
+    pub fn delete_chat_model(&self, payload: DeleteChatModelPayload) -> Result<()> {
+        self.chat_model_repo.delete(payload.id)?;
+
+        Ok(())
+    }
 }
 
 #[derive(serde::Deserialize)]
@@ -527,6 +560,33 @@ pub struct UpdateChatLogPayload {
 }
 
 pub struct ResendMessagePayload {
+    pub id: Id,
+}
+
+#[derive(serde::Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateChatModelPayload {
+    pub name: String,
+    pub description: String,
+    pub price: f32,
+    pub unit: String,
+    pub vendor: String,
+}
+
+#[derive(serde::Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateChatModelPayload {
+    pub id: Id,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub price: Option<f32>,
+    pub unit: Option<String>,
+    pub vendor: Option<String>,
+}
+
+#[derive(serde::Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteChatModelPayload {
     pub id: Id,
 }
 

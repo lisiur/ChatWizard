@@ -9,6 +9,8 @@ import {
   Apps20Filled as StoreActiveIcon,
   Lightbulb20Regular as CasualChatIcon,
   LightbulbFilament20Filled as CasualActiveIcon,
+  BoxMultiple20Regular as ModelIcon,
+  BoxMultiple20Filled as ModelActiveIcon,
 } from "@vicons/fluent";
 import {
   ExtensionPuzzle as PluginActiveIcon,
@@ -53,6 +55,12 @@ export default defineComponent({
         routeName: "promptMarket",
         icon: StoreIcon,
         activeIcon: StoreActiveIcon,
+        size: "1.8rem",
+      },
+      {
+        routeName: "model",
+        icon: ModelIcon,
+        activeIcon: ModelActiveIcon,
         size: "1.8rem",
       },
       {

@@ -369,6 +369,69 @@ impl GetChatModelsCommand {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct CreateChatModelCommand {
+    pub name: String,
+    pub price: f32,
+}
+
+impl CreateChatModelCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<Id> {
+        let chat_service = ChatService::new(conn.clone());
+
+        let id = chat_service.create_chat_model(CreateChatModelPayload {
+            name: self.name,
+            description: "".to_string(),
+            price: self.price,
+            unit: "USD".to_string(),
+            vendor: "custom".to_string(),
+        })?;
+
+        Ok(id)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateChatModelCommand {
+    pub id: Id,
+    pub name: Option<String>,
+    pub price: Option<f32>,
+}
+
+impl UpdateChatModelCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<()> {
+        let chat_service = ChatService::new(conn.clone());
+
+        chat_service.update_chat_model(UpdateChatModelPayload {
+            id: self.id,
+            name: self.name,
+            description: None,
+            price: self.price,
+            unit: None,
+            vendor: None,
+        })?;
+
+        Ok(())
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteChatModelCommand {
+    pub id: Id,
+}
+impl DeleteChatModelCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<()> {
+        let chat_service = ChatService::new(conn.clone());
+
+        chat_service.delete_chat_model(DeleteChatModelPayload { id: self.id })?;
+
+        Ok(())
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AllPromptsCommand;
 
 impl AllPromptsCommand {

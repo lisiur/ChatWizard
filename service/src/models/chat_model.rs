@@ -35,3 +35,14 @@ pub struct NewChatModel {
     pub unit: String,
     pub vendor: String,
 }
+
+#[derive(AsChangeset)]
+#[diesel(table_name = chat_models)]
+pub struct PatchChatModel {
+    pub id: Id,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub price: Option<f32>,
+    pub unit: Option<String>,
+    pub vendor: Option<String>,
+}

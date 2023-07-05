@@ -171,6 +171,18 @@ impl CommandExecutor {
                 .exec(conn)
                 .into_result(),
 
+            "create_chat_model" => from_value::<CreateChatModelCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
+            "update_chat_model" => from_value::<UpdateChatModelCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
+            "delete_chat_model" => from_value::<DeleteChatModelCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
             "all_prompts" => from_value::<AllPromptsCommand>(payload)?
                 .exec(conn)
                 .into_result(),
@@ -339,7 +351,7 @@ impl CommandExecutor {
                 .exec(conn)
                 .into_result(),
 
-            _ => Err(Error::Unknown(command)),
+            _ => Err(Error::Unknown(format!("unknown command: {}", command))),
         }
     }
 }

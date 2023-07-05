@@ -226,6 +226,22 @@ export function getChatModels() {
   return execCommand<Array<ChatModel>>("get_chat_models");
 }
 
+export function createChatModel(params: { name: string; price: number }) {
+  return execCommand<string>("create_chat_model", params);
+}
+
+export function updateChatModel(params: {
+  id: string;
+  name?: string;
+  price?: number;
+}) {
+  return execCommand("update_chat_model", params);
+}
+
+export function deleteChatModel(id: string) {
+  return execCommand("delete_chat_model", { id });
+}
+
 export function allPrompts() {
   return execCommand<Array<PromptIndex>>("all_prompts");
 }

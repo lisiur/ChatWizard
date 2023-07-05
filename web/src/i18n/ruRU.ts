@@ -68,6 +68,15 @@ const messages: Messages = {
 
   "chat.export": "Экспорт",
 
+  "chatModel.new": "Новая модель",
+  "chatModel.models": "Модели",
+  "chatModel.inputNameHint": "Введите название модели",
+  "chatModel.rename": "Переименовать",
+  "chatModel.update.success": "Модель успешно обновлена",
+  "chatModel.price": "Цена",
+  "chatModel.tokens": "Токены",
+  "chatModel.unit": "ед.",
+
   "prompt.new": "Новая подсказка",
   "prompt.prompts": "Подсказки",
   "prompt.inputNameHint": "Введите название подсказки",

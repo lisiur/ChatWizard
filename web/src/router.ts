@@ -33,6 +33,11 @@ export default createRouter({
               component: () => import("./pages/main/PromptMarket"),
             },
             {
+              name: "model",
+              path: "model",
+              component: () => import("./pages/main/Model"),
+            },
+            {
               name: "plugin",
               path: "plugin",
               component: () => import("./pages/main/Plugin"),
