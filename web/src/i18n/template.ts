@@ -68,6 +68,15 @@ const messages: Messages = {
 
   "chat.export": "Export",
 
+  "chatModel.new": "New Model",
+  "chatModel.models": "Models",
+  "chatModel.inputNameHint": "Please input model name",
+  "chatModel.rename": "Rename",
+  "chatModel.update.success": "Model updated successfully",
+  "chatModel.price": "Price",
+  "chatModel.tokens": "tokens",
+  "chatModel.unit": "Unit",
+
   "prompt.new": "New Prompt",
   "prompt.prompts": "Prompts",
   "prompt.inputNameHint": "Please input prompt name",

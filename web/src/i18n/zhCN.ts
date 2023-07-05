@@ -69,6 +69,9 @@ const messages: Messages = {
   "chatModel.inputNameHint": "请输入模型名称",
   "chatModel.rename": "重命名",
   "chatModel.update.success": "更新成功",
+  "chatModel.price": "价格",
+  "chatModel.tokens": "字数",
+  "chatModel.unit": "单位",
 
   "prompt.new": "新建提示词",
   "prompt.prompts": "提示词列表",

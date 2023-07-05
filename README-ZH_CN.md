@@ -73,8 +73,8 @@
 
 - **Mac**
 
-    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.2.1/ChatWizard_0.2.1_x64.dmg)
-    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.2.1/ChatWizard_0.2.1_aarch64.dmg)
+    - [Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.3.0/ChatWizard_0.3.0_x64.dmg)
+    - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.3.0/ChatWizard_0.3.0_aarch64.dmg)
 
     > MacOS 可能会遇到这个问题: `"ChatWizard.app" 已损坏，无法打开。 您应该将它移到废纸篓。`
     > 
@@ -86,11 +86,11 @@
 
 - **Windows**: 
 
-    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.2.1/ChatWizard_0.2.1_x64_en-US.msi)
+    - [msi](https://github.com/lisiur/ChatWizard/releases/download/v0.3.0/ChatWizard_0.3.0_x64_en-US.msi)
 
 - **Linux**
-    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.2.1/chat-wizard_0.2.1_amd64.deb)
-    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.2.1/chat-wizard_0.2.1_amd64.AppImage)
+    - [deb](https://github.com/lisiur/ChatWizard/releases/download/v0.3.0/chat-wizard_0.3.0_amd64.deb)
+    - [AppImage](https://github.com/lisiur/ChatWizard/releases/download/v0.3.0/chat-wizard_0.3.0_amd64.AppImage)
 
     > 如果 linux 版的应用无法启动并不奇怪。这是因为这两个包都是在 ubuntu20 上构建的。或许你可以尝试在自己本地构建。
 
