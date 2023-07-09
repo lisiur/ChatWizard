@@ -30,6 +30,16 @@ html, body, #app {
   word-break: break-word;
 }
 
+.markdown-root.assistant-msg {
+  color: var(--assistant-msg-color);
+  background-color: var(--assistant-msg-bg-color);
+}
+
+.markdown-root.user-msg {
+  color: var(--user-msg-color);
+  background-color: var(--user-msg-bg-color);
+}
+
 .markdown-root p {
   padding: .5rem 0;
 }

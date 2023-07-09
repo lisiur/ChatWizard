@@ -6,6 +6,9 @@ export interface ThemeVars extends GlobalThemeOverrides {
     switcherColor: string;
     assistantMsgBgColor: string;
     assistantMsgColor: string;
+    codeBlockColor: string;
+    codeBlockLangBgColor: string;
+    codeBlockLangColor: string;
     userMsgBgColor: string;
     userMsgColor: string;
     activeMenuBgColor: string;

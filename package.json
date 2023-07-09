@@ -6,6 +6,7 @@
   "scripts": {
     "install": "cd web && pnpm install",
     "dev": "cd gui && RUST_LOG=chat_wizard_service=debug cargo tauri dev --no-watch",
+    "build": "pnpm run build:gui",
     "build:web": "cd web && pnpm build",
     "build:gui": "cd gui && cargo tauri build",
     "build:server": "pnpm run build:web && cd server && cargo build",

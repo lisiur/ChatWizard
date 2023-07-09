@@ -31,7 +31,7 @@ import {
   UserMessage,
 } from "../../models/message";
 import { interceptLink } from "../../utils/interceptLink";
-import mdRender from "../../utils/mdRender";
+import { renderMarkdown } from "../../utils/mdRender";
 import { writeToClipboard } from "../../utils/api";
 import {
   Clipboard20Regular as CopyIcon,
@@ -201,7 +201,7 @@ export default defineComponent({
       if (codeBlockAssignNum % 2 === 1) {
         content += "\n```";
       }
-      const html = mdRender(content);
+      const html = renderMarkdown(content);
       return (
         <div
           key={msg.id}
@@ -209,8 +209,7 @@ export default defineComponent({
           id={`assistant-${msg.id}`}
         >
           <div
-            class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
-            style="background-color: var(--assistant-msg-bg-color); color: var(--assistant-msg-color)"
+            class="markdown-root assistant-msg inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
             v-html={html}
           ></div>
           {msg.done ? (
@@ -230,14 +229,13 @@ export default defineComponent({
     }
 
     function renderUserMessage(msg: UserMessage) {
+      const html = renderMarkdown(msg.content);
       return (
         <div key={msg.id} class="flex items-start px-4 pb-4 group relative">
           <div
-            class="markdown-root inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
-            style="background-color: var(--user-msg-bg-color); color: var(--user-msg-color)"
-          >
-            <p>{msg.content}</p>
-          </div>
+            class="markdown-root user-msg inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
+            v-html={html}
+          ></div>
           <div
             class="group-hover:grid w-full gap-1 hidden absolute bottom-[-.6rem] left-5 text-xs"
             style="grid-template-columns: repeat(auto-fit, minmax(0, 1rem));"
