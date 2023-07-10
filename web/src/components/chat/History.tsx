@@ -139,6 +139,17 @@ export default defineComponent({
             immediate: true,
           }
         );
+      } else if (message instanceof UserMessage) {
+        const dom = document.querySelector(
+          `#user-${message.id}`
+        ) as HTMLElement;
+        if (dom && dom.dataset.intercepted) {
+          return false;
+        }
+        setTimeout(() => {
+          interceptLink(dom);
+          dom.dataset.intercepted = "true";
+        }, 200);
       }
     };
     watch(
@@ -231,7 +242,11 @@ export default defineComponent({
     function renderUserMessage(msg: UserMessage) {
       const html = renderMarkdown(msg.content);
       return (
-        <div key={msg.id} class="flex items-start px-4 pb-4 group relative">
+        <div
+          key={msg.id}
+          class="flex items-start px-4 pb-4 group relative"
+          id={`user-${msg.id}`}
+        >
           <div
             class="markdown-root user-msg inline-block px-3 ml-2 rounded-t-xl rounded-r-xl z-1"
             v-html={html}
