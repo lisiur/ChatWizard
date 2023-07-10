@@ -94,9 +94,7 @@ impl OpenAIChatApi {
 
 #[derive(serde::Deserialize, Debug)]
 pub struct OpenAIStreamChunk {
-    pub id: String,
     pub object: String,
-    pub created: u32,
     pub model: String,
     pub choices: Vec<OpenAIStreamChunkChoice>,
 }
@@ -104,7 +102,7 @@ pub struct OpenAIStreamChunk {
 #[derive(serde::Deserialize, Debug)]
 pub struct OpenAIStreamChunkChoice {
     pub delta: OpenAIStreamChunkChoiceDelta,
-    pub index: usize,
+    pub index: Option<usize>,
     pub finish_reason: Option<OpenAIFinishReason>,
 }
 
@@ -124,7 +122,7 @@ pub struct OpenAIStreamChunkChoiceDelta {
 
 fn handle_line(line: &str) -> Option<Option<StreamContent>> {
     log::debug!("handle_line: {}", line);
-    if !line.starts_with("data:") || !line.ends_with("}]}") {
+    if !line.starts_with("data:") {
         return None;
     }
     let json_data = if line.starts_with("data: {") {
@@ -134,14 +132,18 @@ fn handle_line(line: &str) -> Option<Option<StreamContent>> {
     } else {
         return None;
     };
-    let json = serde_json::from_str::<OpenAIStreamChunk>(json_data).unwrap();
-    let stream_content = json.choices.get(0).and_then(|choice| {
-        choice
-            .delta
-            .content
-            .as_ref()
-            .map(|content| StreamContent::Data(content.to_string()))
-    });
+    match serde_json::from_str::<OpenAIStreamChunk>(json_data) {
+        Ok(json) => {
+            let stream_content = json.choices.get(0).and_then(|choice| {
+                choice
+                    .delta
+                    .content
+                    .as_ref()
+                    .map(|content| StreamContent::Data(content.to_string()))
+            });
 
-    Some(stream_content)
+            Some(stream_content)
+        }
+        Err(_err) => None,
+    }
 }
