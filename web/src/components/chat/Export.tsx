@@ -17,7 +17,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     function exportHandler() {
-      const url = "index.html/#/export?chatId=" + props.chat.index.id;
+      const url = "/#/export?chatId=" + props.chat.index.id;
       if (isWeb) {
         window.open(url);
       } else {

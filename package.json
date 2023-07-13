@@ -9,7 +9,7 @@
     "build": "pnpm run build:gui",
     "build:web": "cd web && pnpm build",
     "build:gui": "cd gui && cargo tauri build",
-    "build:server": "pnpm run build:web && cd server && cargo build",
+    "build:server": "pnpm run build:web && cd server && cargo build --release",
     "icon": "cd gui && cargo tauri icon icons/macos/app-icon.png -o icons/macos && cargo tauri icon icons/windows/app-icon.png -o icons/windows && cargo tauri icon icons/linux/app-icon.png -o icons/linux",
     "version:patch": "node version.js patch",
     "version:minor": "node version.js minor",
@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@iarna/toml": "^2.2.5",
     "@types/node": "^18.15.0",
     "commitizen": "^4.3.0",
     "conventional-changelog-cli": "^2.2.2",

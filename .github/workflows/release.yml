@@ -142,6 +142,45 @@ jobs:
               name: `chat-wizard-cli_${process.env.target}`,
               data: file,
             })
+      - name: build server
+        run: |
+          cd server
+          cargo build --release --target ${{ matrix.target }}
+          cd ..
+      - name: upload server asset
+        if: matrix.platform == 'windows-latest'
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+          version: ${{ needs.create-release.outputs.version }}
+          target: ${{ matrix.target }}
+        with:
+          script: |
+            const file = require('fs').readFileSync(`target/${process.env.target}/release/chat-wizard-server.exe`)
+            github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              name: `chat-wizard-server_${process.env.target}.exe`,
+              data: file,
+            })
+      - name: upload server asset
+        if: matrix.platform != 'windows-latest'
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
+          version: ${{ needs.create-release.outputs.version }}
+          target: ${{ matrix.target }}
+        with:
+          script: |
+            const file = require('fs').readFileSync(`target/${process.env.target}/release/chat-wizard-server`)
+            github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              name: `chat-wizard-server_${process.env.target}`,
+              data: file,
+            })
 
   publish-release:
     permissions:

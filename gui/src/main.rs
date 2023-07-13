@@ -73,7 +73,6 @@ async fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_single_instance::init(|handle, _argv, _cwd| {
-            println!("argv: {:?}", _argv);
             let handle = handle.clone();
             tokio::spawn(async move {
                 show_or_create_main_window(&handle, "index.html")
@@ -109,7 +108,7 @@ async fn main() {
                 Ok(matches) => {
                     if matches.args.contains_key("help") {
                         let output = matches.args.get("help").unwrap().value.as_str().unwrap();
-                        println!("{output}");
+                        println!("{}", output);
                         exit(0);
                     } else if let Some(SubcommandMatches { name, matches, .. }) =
                         matches.subcommand.as_deref()

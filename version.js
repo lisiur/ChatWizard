@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const toml = require("@iarna/toml");
 const changeLogVersionPackage = require("./package.json");
 const tauriConf = require("./gui/tauri.conf.json");
 const webPackage = require("./web/package.json");
@@ -117,12 +119,21 @@ function currentVersion() {
 function updateVersion(version) {
   updateChangelogVersion(version);
   updateTauriConfVersion(version);
+  updateTomlVersion(path.resolve(__dirname, "./server/Cargo.toml"), version);
   updateWebVersion(version);
 }
 
 function updateTauriConfVersion(version) {
   tauriConf.package.version = version;
   fs.writeFileSync("./gui/tauri.conf.json", JSON.stringify(tauriConf, null, 2));
+}
+
+function updateTomlVersion(path, version) {
+  let content = fs.readFileSync(path, "utf8");
+  const data = toml.parse(content);
+  data.package.version = version;
+  content = toml.stringify(data);
+  fs.writeFileSync(path, content);
 }
 
 function updateChangelogVersion(version) {

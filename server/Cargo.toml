@@ -1,6 +1,6 @@
 [package]
-name = "server"
-version = "0.1.0"
+name = "chat-wizard-server"
+version = "0.4.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.70"
 chat-wizard-api = { path = "../api" }
 chat-wizard-service = { path = "../service" }
+clap = "4.3.11"
 directories = "5.0.0"
 env_logger = "0.10.0"
 tokio = { version = "1.27.0", features = ["full"] }

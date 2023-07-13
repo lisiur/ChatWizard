@@ -129,9 +129,9 @@ ChatWizard has built-in upgrade support, and each time you restart the applicati
 
 ## Plugin
 
-You need to install chat-wizard-cli to use plugin.
+You need to download `chat-wizard-cli` to use plugin.
 
-### Install chat-wizard-cli
+### Download chat-wizard-cli
 
 - [Apple Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-cli_x86_64-apple-darwin)
 - [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-cli_aarch64-apple-darwin)
@@ -156,6 +156,30 @@ As CLI and GUI programs are completely separate, you can easily install and use 
 **2. Where is the plugin source code**
 
 Check this [repo](https://github.com/ChatWizard/plugins)
+
+## Server
+
+You can start a web version of ChatWizard by `chat-wizard-server`.
+
+### Download chat-wizard-server
+
+- [Apple Intel](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-server_x86_64-apple-darwin)
+- [Apple Silicon](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-server_aarch64-apple-darwin)
+- [Windows](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-server_x86_64-pc-windows-msvc.exe)
+- [Linux](https://github.com/lisiur/ChatWizard/releases/download/v0.4.1/chat-wizard-server_x86_64-unknown-linux-gnu)
+
+### Usage
+
+```
+Chat Wizard Server
+
+Usage: chat-wizard-server  [OPTIONS]
+
+Options:
+  -p, --port <PORT>  [default: 23333]
+  -h, --help         Print help
+  -V, --version      Print version
+```
 
 ## Development
 

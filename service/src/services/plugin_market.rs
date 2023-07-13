@@ -38,12 +38,8 @@ impl PluginMarketService {
         let setting = self.setting_repo.select_by_user_id(Id::local())?;
         let client = setting.create_client(Some(Duration::from_secs(10)));
 
-        println!("{:?}", url);
-
         let res = client.get(url).await?;
         let plugins: Vec<MarketPlugin> = res.json().await?;
-
-        println!("{:?}", plugins);
 
         Ok(plugins)
     }

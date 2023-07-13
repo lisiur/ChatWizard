@@ -58,6 +58,8 @@ pub async fn app(port: u16, conn: DbConn) {
         ]));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
+
+    println!("Listening on http://127.0.0.1:{}", port);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await

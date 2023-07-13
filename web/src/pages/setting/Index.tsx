@@ -106,7 +106,9 @@ export default defineComponent({
                     onUpdateValue={() => updateSettingHandler("forwardApiKey")}
                   ></NSwitch>
                 </NFormItem>
-                <NDivider>{t("setting.needRestart.hint")}</NDivider>
+                {isTauri ? (
+                  <NDivider>{t("setting.needRestart.hint")}</NDivider>
+                ) : null}
                 {isTauri ? (
                   <NFormItem label={t("setting.hideMainWindow") + " :"}>
                     <NSwitch
