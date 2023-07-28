@@ -1,0 +1,97 @@
+name: Bug Report
+description: Create a report to help us improve
+title: '[Bug]: '
+labels:
+  - bug
+assignees: []
+
+body:
+  - type: input
+    id: Bug-describe
+    attributes:
+      label: Describe the bug
+      placeholder: 'A clear and concise description of the error in one sentence.'
+    validations:
+      required: true
+        
+  - type: textarea
+    id: Reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        If applicable, add screenshots to help explain your problem.
+
+        Provide steps to reproduce the behavior. eg:
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+        
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      placeholder: 'A clear and concise description of what you expected to happen.'
+
+  - type: dropdown
+    id: App-Version
+    attributes:
+      label: Please select the app version
+      description: 'If there is no matching option, please provide the specific version number in the description'
+      options:
+        - 0.5.0
+        - 0.4.1
+        - 0.4.0
+        - 0.3.0
+        - 0.2.1
+        - 0.2.0
+        - 0.1.0
+        - Older version
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: Platform-or-OS-Type
+    attributes:
+      label: Please select the Platform / OS Type
+      options:
+        - Darwin(macOS)
+        - Windows
+        - Linux
+        - Other
+      multiple: true
+    validations:
+      required: true
+  
+  - type: input
+    id: OS-Version
+    attributes:
+      label: Please provide your OS version, eg 13.3.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: OS-Arch
+    attributes:
+      label: Please select the OS Arch you are using when encounter the problem
+      multiple: true
+      options:
+        - x86
+        - x86_64
+        - arm
+        - arm64(aarch64)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      placeholder: 'Add any other context about the problem here.'
+
+  - type: markdown
+    attributes:
+      value: "Thanks for taking the time to fill out this bug report."
