@@ -38,6 +38,7 @@ pub struct SchemaPort(u16);
 pub struct EventBus {
     pub sender: Sender<CommandEvent>,
 }
+#[derive(Clone)]
 pub struct AppSetting(Arc<Mutex<Setting>>);
 
 impl EventBus {
@@ -71,20 +72,22 @@ async fn main() {
     let app_setting = AppSetting(Arc::new(Mutex::new(setting)));
 
     tauri::Builder::default()
+        .manage(conn.clone())
+        .manage(CommandExecutor::new())
+        .manage(app_setting.clone())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_single_instance::init(|handle, _argv, _cwd| {
-            let handle = handle.clone();
+            let app_handle = handle.clone();
             tokio::spawn(async move {
-                show_or_create_main_window(&handle, "index.html")
+                let app_setting = app_handle.state::<AppSetting>();
+                let home_page_url = app_setting.0.lock().await.home_page_url();
+                show_or_create_main_window(&app_handle, &home_page_url)
                     .await
                     .unwrap();
             });
         }))
         .system_tray(tray::system_tray())
         .on_system_tray_event(tray::on_system_tray_event)
-        .manage(conn.clone())
-        .manage(CommandExecutor::new())
-        .manage(app_setting)
         .setup(move |app| {
             let app_handle = app.handle();
             app.manage(EventBus::new(app_handle.clone()));
@@ -154,7 +157,9 @@ async fn main() {
             if !hide_main_window {
                 let handle = app_handle.clone();
                 tokio::spawn(async move {
-                    show_or_create_main_window(&handle, "index.html")
+                    let app_setting = handle.state::<AppSetting>();
+                    let home_page_url = app_setting.0.lock().await.home_page_url();
+                    show_or_create_main_window(&handle, &home_page_url)
                         .await
                         .unwrap();
                 });

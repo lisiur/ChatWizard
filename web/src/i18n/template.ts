@@ -121,6 +121,7 @@ const messages: Messages = {
   "setting.hideMainWindow": "Hide Main Window",
   "setting.needRestart.hint":
     "The following settings will take effect after restarting the app",
+  "setting.homePage": "Home Page",
 };
 
 export default messages;

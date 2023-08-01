@@ -22,6 +22,7 @@ pub struct Setting {
     pub enable_web_server: bool,
     pub hide_main_window: bool,
     pub hide_taskbar: bool,
+    pub home_page: TextWrapper<HomePage>,
 }
 
 impl Setting {
@@ -74,6 +75,47 @@ impl Setting {
         let host = self.forward_url().unwrap_or("https://api.openai.com");
 
         OpenAIChatApi::new(client, host)
+    }
+
+    pub fn home_page_url(&self) -> String {
+        self.home_page.as_ref().url().to_string()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub enum HomePage {
+    Casual,
+    Chats,
+}
+
+impl AsRef<str> for HomePage {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::Casual => "casual",
+            Self::Chats => "chats",
+        }
+    }
+}
+
+impl FromStr for HomePage {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "casual" => Ok(Self::Casual),
+            "chats" => Ok(Self::Chats),
+            _ => Err("Invalid home page".into()),
+        }
+    }
+}
+
+impl HomePage {
+    pub fn url(&self) -> &str {
+        match self {
+            Self::Casual => "index.html",
+            Self::Chats => "index.html#/main/chat",
+        }
     }
 }
 
@@ -135,4 +177,5 @@ pub struct PatchSetting {
     pub hide_main_window: Option<bool>,
     pub hide_taskbar: Option<bool>,
     pub enable_web_server: Option<bool>,
+    pub home_page: Option<TextWrapper<HomePage>>,
 }

@@ -116,6 +116,7 @@ const messages: Messages = {
   "setting.hideTaskbar": "隐藏任务栏图标",
   "setting.hideMainWindow": "隐藏主窗口",
   "setting.needRestart.hint": "下面的设置需要重启应用才能生效",
+  "setting.homePage": "主页",
 };
 
 export default messages;

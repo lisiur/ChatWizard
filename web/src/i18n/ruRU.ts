@@ -122,6 +122,7 @@ const messages: Messages = {
   "setting.hideMainWindow": "Скрыть главное окно",
   "setting.needRestart.hint":
     "Следующие настройки вступят в силу после перезапуска приложения",
+  "setting.homePage": "Домашняя страница",
 };
 
 export default messages;

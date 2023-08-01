@@ -107,6 +107,24 @@ export default defineComponent({
                   ></NSwitch>
                 </NFormItem>
                 {isTauri ? (
+                  <NFormItem label={t("setting.homePage") + " :"}>
+                    <NSelect
+                      v-model:value={model.value.homePage}
+                      onUpdateValue={() => updateSettingHandler("homePage")}
+                      options={[
+                        {
+                          label: t("chat.casual.title"),
+                          value: "casual",
+                        },
+                        {
+                          label: t("chat.conversations"),
+                          value: "chats",
+                        },
+                      ]}
+                    ></NSelect>
+                  </NFormItem>
+                ) : null}
+                {isTauri ? (
                   <NDivider>{t("setting.needRestart.hint")}</NDivider>
                 ) : null}
                 {isTauri ? (

@@ -99,6 +99,12 @@ export interface Settings {
   enableWebServer?: boolean;
   hideMainWindow?: boolean;
   hideTaskbar?: boolean;
+  homePage?: HomePage;
+}
+
+export enum HomePage {
+  Casual = "casual",
+  Chats = "chats",
 }
 
 export enum Theme {

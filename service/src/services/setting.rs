@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::result::Result;
 use crate::{models::setting::Setting, repositories::setting::SettingRepo, DbConn, Id};
-use crate::{PatchSetting, Theme};
+use crate::{HomePage, PatchSetting, Theme};
 
 #[derive(Clone)]
 pub struct SettingService {
@@ -43,6 +43,7 @@ impl SettingService {
             hide_main_window: payload.hide_main_window,
             hide_taskbar: payload.hide_taskbar,
             enable_web_server: payload.enable_web_server,
+            home_page: payload.home_page.map(|h| h.into()),
         })?;
 
         Ok(())
@@ -62,4 +63,5 @@ pub struct UpdateSettingPayload {
     pub hide_main_window: Option<bool>,
     pub hide_taskbar: Option<bool>,
     pub enable_web_server: Option<bool>,
+    pub home_page: Option<HomePage>,
 }
