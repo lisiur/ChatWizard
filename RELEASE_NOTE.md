@@ -1,6 +1,6 @@
-# [0.5.0](https://github.com/lisiur/ChatWizard/compare/v0.4.1...v0.5.0) (2023-07-13)
+# [0.6.0](https://github.com/lisiur/ChatWizard/compare/v0.5.0...v0.6.0) (2023-08-01)
 
 
 ### Features
 
-* support web server ([e295622](https://github.com/lisiur/ChatWizard/commit/e2956222797697b3eea89b4bd7d30863e4bbc765))
+* support config home page ([34cbb72](https://github.com/lisiur/ChatWizard/commit/34cbb728a0ef76142aaeb02c8ccc2bfd40ffe9ff)), closes [#60](https://github.com/lisiur/ChatWizard/issues/60)
