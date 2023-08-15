@@ -3,11 +3,10 @@ description: Create a report to help us improve
 title: '[Bug]: '
 labels:
   - bug
-assignees: []
 
 body:
   - type: input
-    id: Bug-describe
+    id: Bug-Describe
     attributes:
       label: Describe the bug
       placeholder: 'A clear and concise description of the error in one sentence.'
@@ -30,64 +29,23 @@ body:
       required: true
         
   - type: textarea
-    id: expected-behavior
+    id: Expected-Behavior
     attributes:
       label: Expected behavior
       placeholder: 'A clear and concise description of what you expected to happen.'
-
-  - type: dropdown
-    id: App-Version
-    attributes:
-      label: Please select the app version
-      description: 'If there is no matching option, please provide the specific version number in the description'
-      options:
-        - 0.5.0
-        - 0.4.1
-        - 0.4.0
-        - 0.3.0
-        - 0.2.1
-        - 0.2.0
-        - 0.1.0
-        - Older version
-    validations:
-      required: true
-  
-  - type: dropdown
-    id: Platform-or-OS-Type
-    attributes:
-      label: Please select the Platform / OS Type
-      options:
-        - Darwin(macOS)
-        - Windows
-        - Linux
-        - Other
-      multiple: true
-    validations:
-      required: true
-  
-  - type: input
-    id: OS-Version
-    attributes:
-      label: Please provide your OS version, eg 13.3.1
-    validations:
-      required: true
-
-  - type: dropdown
-    id: OS-Arch
-    attributes:
-      label: Please select the OS Arch you are using when encounter the problem
-      multiple: true
-      options:
-        - x86
-        - x86_64
-        - arm
-        - arm64(aarch64)
-        - Other
     validations:
       required: true
 
   - type: textarea
-    id: additional-context
+    id: App-Info
+    attributes:
+      label: App Info 
+      placeholder: 'You can copy app info from the "About" page in the app.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: Additional-Context
     attributes:
       label: Additional context
       placeholder: 'Add any other context about the problem here.'
