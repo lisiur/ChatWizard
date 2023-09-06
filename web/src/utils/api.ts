@@ -157,10 +157,27 @@ export async function emit(eventName: string, payload?: unknown) {
 
 export async function writeToClipboard(content: string) {
   if (isWeb) {
-    throw new Error("writeToClipboard not supported in web");
+    await copyToClipboardOnWeb(content);
   }
 
   await clipboard.writeText(content);
+}
+
+async function copyToClipboardOnWeb(text: string) {
+  if (navigator.clipboard) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.textContent = text;
+  textarea.style.position = "fixed"; // Prevent scrolling to bottom of page.
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    return document.execCommand("copy"); // Security exception may be thrown by some browsers.
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 export async function getSystemTheme() {
