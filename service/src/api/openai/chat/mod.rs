@@ -94,8 +94,8 @@ impl OpenAIChatApi {
 
 #[derive(serde::Deserialize, Debug)]
 pub struct OpenAIStreamChunk {
-    pub object: String,
-    pub model: String,
+    pub object: Option<String>,
+    pub model: Option<String>,
     pub choices: Vec<OpenAIStreamChunkChoice>,
 }
 
