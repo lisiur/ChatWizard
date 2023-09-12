@@ -1,4 +1,4 @@
-import { Ref, ref, isRef, computed } from "vue";
+import { Ref, ref, isRef, computed, nextTick } from "vue";
 import { useWait } from "./wait";
 
 export function useLazyLoad<T>(
@@ -43,7 +43,9 @@ export function useLazyLoad<T>(
             }
           });
 
-          observer.observe(ele);
+          setTimeout(() => {
+            observer.observe(ele);
+          })
           destroy = () => observer.unobserve(ele);
         }
       });
