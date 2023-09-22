@@ -1,4 +1,4 @@
-import { computed, reactive, ref, Ref, shallowReactive, watch } from "vue";
+import { computed, reactive, shallowReactive, watch } from "vue";
 import {
   resendMessage,
   sendMessage,
@@ -305,6 +305,9 @@ export class Chat {
       this.busy = false;
       if (!this.messages[this.messages.length - 1]?.content) {
         this.messages.pop();
+      }
+      if (this.messages[this.messages.length - 1]?.content) {
+        (this.messages[this.messages.length - 1] as AssistantMessage).markHistory()
       }
       this.stopReplyHandler = undefined;
     };
