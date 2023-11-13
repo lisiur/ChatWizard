@@ -1,6 +1,6 @@
-# [0.8.0](https://github.com/lisiur/ChatWizard/compare/v0.7.0...v0.8.0) (2023-09-22)
+# [0.9.0](https://github.com/lisiur/ChatWizard/compare/v0.8.0...v0.9.0) (2023-11-13)
 
 
-### Performance Improvements
+### Features
 
-* improve performance ([0ac7324](https://github.com/lisiur/ChatWizard/commit/0ac732408061c5a2fb138b7de011c067915e876f))
+* support scale ([e37905b](https://github.com/lisiur/ChatWizard/commit/e37905b534275383f5fe006c7b2e0ceb848eac53)), closes [#66](https://github.com/lisiur/ChatWizard/issues/66)
