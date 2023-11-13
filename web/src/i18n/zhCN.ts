@@ -108,6 +108,7 @@ const messages: Messages = {
   "setting.theme.system": "跟随系统",
   "setting.theme.dark": "暗色",
   "setting.theme.light": "亮色",
+  "setting.scale": "缩放",
   "setting.forwardUrl": "转发地址",
   "setting.forwardApiKey": "转发密钥",
   "setting.port": "端口",

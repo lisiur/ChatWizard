@@ -344,10 +344,23 @@ impl CommandExecutor {
                     .unwrap();
                 }
 
+                if let Some(scale) = &command.payload.scale {
+                    send(CommandEvent {
+                        name: "scale-changed".to_string(),
+                        payload: to_value(scale).unwrap()
+                    })
+                    .await
+                    .unwrap();
+                }
+
                 command.exec(conn).into_result()
             }
 
             "get_locale" => from_value::<GetLocaleCommand>(payload)?
+                .exec(conn)
+                .into_result(),
+
+            "get_scale" => from_value::<GetScaleCommand>(payload)?
                 .exec(conn)
                 .into_result(),
 

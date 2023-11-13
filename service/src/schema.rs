@@ -98,6 +98,7 @@ diesel::table! {
         hide_main_window -> Bool,
         hide_taskbar -> Bool,
         home_page -> Text,
+        scale -> Integer,
     }
 }
 

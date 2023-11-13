@@ -93,6 +93,7 @@ export interface Settings {
   apiKey?: string;
   proxy?: string;
   theme?: Theme;
+  scale?: number;
   language?: string;
   forwardUrl?: string;
   forwardApiKey?: boolean;
@@ -324,6 +325,10 @@ export function getTheme() {
 
 export function getLocale() {
   return execCommand<string>("get_locale");
+}
+
+export function getScale() {
+  return execCommand<string>("get_scale");
 }
 
 export function showWindow(label: string) {

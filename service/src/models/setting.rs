@@ -23,6 +23,7 @@ pub struct Setting {
     pub hide_main_window: bool,
     pub hide_taskbar: bool,
     pub home_page: TextWrapper<HomePage>,
+    pub scale: i32,
 }
 
 impl Setting {
@@ -178,4 +179,5 @@ pub struct PatchSetting {
     pub hide_taskbar: Option<bool>,
     pub enable_web_server: Option<bool>,
     pub home_page: Option<TextWrapper<HomePage>>,
+    pub scale: Option<i32>,
 }

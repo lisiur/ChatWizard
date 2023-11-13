@@ -8,6 +8,7 @@ import {
   NRadioGroup,
   NScrollbar,
   NSelect,
+  NSlider,
   NSwitch,
 } from "naive-ui";
 import { computed, defineComponent, nextTick } from "vue";
@@ -76,6 +77,16 @@ export default defineComponent({
                       {t("setting.theme.dark")}
                     </NRadioButton>
                   </NRadioGroup>
+                </NFormItem>
+                <NFormItem label={t("setting.scale") + " :"}>
+                  <NSlider
+                    v-model:value={model.value.scale}
+                    step={1}
+                    tooltip={false}
+                    min={12}
+                    max={24}
+                    onUpdateValue={() => updateSettingHandler("scale")}
+                  ></NSlider>
                 </NFormItem>
                 <NFormItem label={t("setting.apiKey") + " :"}>
                   <NInput

@@ -747,3 +747,17 @@ impl GetLocaleCommand {
         Ok(result.language)
     }
 }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetScaleCommand;
+
+impl GetScaleCommand {
+    pub fn exec(self, conn: &DbConn) -> Result<i32> {
+        let setting_service = SettingService::new(conn.clone());
+
+        let result = setting_service.get_setting(Id::local())?;
+
+        Ok(result.scale)
+    }
+}

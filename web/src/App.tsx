@@ -2,7 +2,7 @@ import { defineComponent } from "vue";
 import { RouterView } from "vue-router";
 import { NConfigProvider } from "naive-ui";
 import { configProviderProps } from "./config";
-import { getTheme, Theme, getLocale, showWindow, debugLog } from "./api";
+import { getTheme, Theme, getLocale, showWindow, debugLog, getScale } from "./api";
 import { setTheme } from "./utils/theme";
 import { useRoute } from "vue-router";
 import { setupLifeCycle } from "./utils/setupLifeCycle";
@@ -44,6 +44,16 @@ export default defineComponent({
           });
           ctx.onBeforeUnmount(unListen);
         });
+      })
+      .onMounted((ctx) => {
+        getScale().then(async (scale) => {
+          document.documentElement.style.fontSize = `${scale}px`;
+
+          const unListen = await listen("scale-changed", (e) => {
+            document.documentElement.style.fontSize = `${e.payload}px`;
+          });
+          ctx.onBeforeUnmount(unListen);
+        })
       })
       .setup();
 

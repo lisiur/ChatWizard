@@ -113,6 +113,7 @@ const messages: Messages = {
   "setting.theme.system": "Система",
   "setting.theme.dark": "Темный",
   "setting.theme.light": "Светлый",
+  "setting.scale": "масштабирование",
   "setting.forwardUrl": "URL-адрес пересылки",
   "setting.forwardApiKey": "Переадресовать ключ API",
   "setting.port": "Порт",

@@ -109,6 +109,7 @@ export const messages = {
   "setting.theme.system": "System",
   "setting.theme.dark": "Dark",
   "setting.theme.light": "Light",
+  "setting.scale": "Scale",
   "setting.forwardUrl": "Forward Url",
   "setting.forwardApiKey": "Forward Api Key",
   "setting.port": "Port",
