@@ -124,16 +124,19 @@ ChatWizard 支持内置升级，每当你重新启动应用时都会自动查询
 
 ## 开发
 
-- 启动
+### 全局依赖
+
+本项目依赖 `tauri-cli`，请确保系统中已经安装了 `tauri-cli`，如果没有安装，请使用 `cargo install tauri-cli` 进行安装。
+
+### 启动
 
     ```bash
-    # root
-    pnpm install
     pnpm run install
+    pnpm run build:web
     pnpm run dev
     ```
 
-- 打包
+### 打包
 
     ```bash
     pnpm run build
