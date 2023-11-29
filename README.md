@@ -183,16 +183,22 @@ Options:
 
 ## Development
 
-- dev
+### Prerequirements
+
+This project depends on `tauri-cli`. Please ensure that `tauri-cli` is already installed on your system.
+If it is not installed, please use `cargo install tauri-cli` to install it.
+
+
+### Dev
 
     ```bash
-    # root
-    pnpm install
     pnpm run install
+    pnpm run build:web
     pnpm run dev
     ```
 
-- build
+
+### Build
 
     ```bash
     pnpm run build
