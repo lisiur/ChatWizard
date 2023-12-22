@@ -1,0 +1,11 @@
+version: '3'
+services:
+  chat-wizard-server:
+    container_name: chat-wizard-server
+    build: .
+    volumes:
+      - data:/root/.local/share/chat-wizard
+    ports:
+      - "23333:23333"
+volumes:
+  data:
